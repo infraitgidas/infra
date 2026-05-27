@@ -1,0 +1,11 @@
+# Secrets
+docs/auth.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
