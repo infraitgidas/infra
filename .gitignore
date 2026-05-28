@@ -1,5 +1,7 @@
-# Secrets
+# Secrets — archivos encriptados con SOPS + age
+# Editar con: sops secrets/<archivo>.yaml
 docs/auth.md
+secrets/*.plain.yaml
 
 # OS
 .DS_Store
