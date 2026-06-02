@@ -38,13 +38,13 @@ Chain strategy: pending → feature-branch-chain
 
 ## Fase 2: Storage ZFS (P1)
 
-- [ ] 2.1 Mover VMs a nodo vecino vía live migration, nodo por nodo
-- [ ] 2.2 Destruir VG LVM y crear pool: `zpool create -o ashift=12 <pool> /dev/sdX`
-- [ ] 2.3 Activar `compression=zstd`, `atime=off` en cada pool ZFS
-- [ ] 2.4 Configurar `zfs_arc_max` (50% RAM) en `/etc/modprobe.d/zfs.conf`
-- [ ] 2.5 Mover VMs de vuelta al nodo original sobre ZFS
-- [ ] 2.6 Configurar replicación asíncrona pares fijos (RPO 15min/1h, bwlimit 500M)
-- [ ] 2.7 Verificar: `zpool status`, `pvesr list`, `cat /sys/module/zfs/parameters/zfs_arc_max`
+- [x] 2.1 Mover VMs a nodo vecino vía live migration, nodo por nodo — `scripts/f2-storage-zfs/02-migrate-to-neighbor.sh`
+- [x] 2.2 Destruir VG LVM y crear pool: `zpool create -o ashift=12 <pool> /dev/sdX` — `scripts/f2-storage-zfs/03-create-zpool.sh`
+- [x] 2.3 Activar `compression=zstd`, `atime=off` en cada pool ZFS — `scripts/f2-storage-zfs/04-configure-zfs.sh`
+- [x] 2.4 Configurar `zfs_arc_max` (50% RAM) en `/etc/modprobe.d/zfs.conf` — `scripts/f2-storage-zfs/04-configure-zfs.sh`
+- [x] 2.5 Mover VMs de vuelta al nodo original sobre ZFS — `scripts/f2-storage-zfs/05-migrate-back.sh`
+- [x] 2.6 Configurar replicación asíncrona pares fijos (RPO 15min/1h, bwlimit 500M) — `scripts/f2-storage-zfs/06-replication.sh`
+- [x] 2.7 Verificar: `zpool status`, `pvesr list`, `cat /sys/module/zfs/parameters/zfs_arc_max` — `scripts/f2-storage-zfs/07-verify.sh`
 
 ## Fase 3: Red (P2)
 
