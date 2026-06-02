@@ -4,10 +4,10 @@
 
 | # | Feature | Herramienta | Directorio | Rama | Estado SDD |
 |---|---------|-------------|-----------|------|------------|
-| 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | ⏳ Pendiente |
-| 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | ⏳ Pendiente |
-| 3 | Gestor CMDB | — | `cmdb/` | `feature/cmdb` | ⏳ Pendiente |
-| 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación |
+| 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 🛠️ Implementación ✅ |
+| 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
+| 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
+| 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 
 ## Leyenda de Estados SDD
 
@@ -28,20 +28,21 @@
 ### Feature 1: Gestor de Proyecto — Redmine
 
 - **Objetivo**: Instalar y configurar Redmine como gestor de proyectos open source
-- **Componentes**: Redmine + base de datos (PostgreSQL/MySQL) + Ruby stack
-- **Estado SDD**: ⏳ Pendiente
-- **Tareas**: —
-- **Tareas Completadas**: —
+- **Componentes**: redmine:6.1 + postgres:16 + nginx en Docker Compose, CT en pve-ad
+- **Estado SDD**: 🛠️ Implementación ✅ — 14/14 tareas
+- **Tareas Completadas**: Scripts de deploy (00-env, 01-create-ct, 02-deploy-stack, 03-configure-ssl, 04-backup, 05-verify), docker-compose.yml, nginx config, .gitignore
+- **Archivos**: `redmine/`
 
 ---
 
 ### Feature 2: VCS On-Premise — GitLab
 
 - **Objetivo**: Instalar y configurar GitLab como sistema de control de versiones on-premise
-- **Componentes**: GitLab CE + PostgreSQL + Redis + storage
-- **Estado SDD**: ⏳ Pendiente
-- **Tareas**: —
-- **Tareas Completadas**: —
+- **Componentes**: GitLab CE Omnibus en VM dedicada (Ubuntu 22.04)
+- **Estado SDD**: 📦 Archivado ✅ — 19/19 tareas, PASS verify (12/15 COMPLIANT, 3 PARTIAL)
+- **Tareas Completadas**: Scripts de provision VM, instalación, HTTPS, SSH, firewall, backups, snapshot PVE, restore, runbook, verification
+- **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/docs/`
+- **Archivo SDD**: `openspec/changes/archive/2026-06-02-gitlab/`
 
 ---
 

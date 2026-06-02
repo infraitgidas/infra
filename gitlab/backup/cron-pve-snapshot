@@ -1,0 +1,3 @@
+# Weekly PVE snapshot every Sunday at 03:00
+# Path: /etc/cron.d/gitlab-pve-snapshot or root crontab
+0 3 * * 0 root /root/gitlab/backup/02-pve-snapshot.sh >> /var/log/gitlab-pve-snapshot.log 2>&1
