@@ -74,7 +74,7 @@ Chain strategy: pending → feature-branch-chain
 
 ## Fase 6: Documentación y Cierre
 
-- [ ] 6.1 Escribir runbook de restauración de backups desde PBS
-- [ ] 6.2 Escribir runbook de recuperación ZFS (pool corrupto, ARC tuning)
-- [ ] 6.3 Actualizar `openspec/secrets/proxmox.yaml` con endpoints PBS
-- [ ] 6.4 Verificación cruzada contra criterios de éxito del diseño
+- [x] 6.1 Escribir runbook de restauración de backups desde PBS — `docs/runbooks/restore-from-pbs.md`
+- [x] 6.2 Escribir runbook de recuperación ZFS (pool corrupto, ARC tuning) — `docs/runbooks/zfs-recovery.md`
+- [x] 6.3 Actualizar `secrets/proxmox.yaml` con endpoints PBS (host 192.168.1.31:8007, datastore pve-gidas)
+- [x] 6.4 Verificación cruzada contra criterios de éxito del diseño — 12/14 criterios cubiertos via scripts, 2/14 vía runbooks nuevos. Sin gaps críticos.
