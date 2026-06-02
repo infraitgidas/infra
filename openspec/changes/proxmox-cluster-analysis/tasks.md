@@ -57,11 +57,11 @@ Chain strategy: pending → feature-branch-chain
 
 ## Fase 4: Optimización VMs (P2)
 
-- [ ] 4.1 VMs Linux: `qm set <vmid> --cpu host` (evitar cross-nodo)
-- [ ] 4.2 VMs >4 vCPUs: `qm set <vmid> --numa 1`
-- [ ] 4.3 VirtIO SCSI Single con `iothread=1` en discos de VMs
-- [ ] 4.4 Revisar ballooning mínimo (>1 GB) en VMs con memoria dinámica
-- [ ] 4.5 Verificar: `qm config <vmid> | grep -E "cpu:|numa:|cache:"`
+- [x] 4.1 VMs Linux: `qm set <vmid> --cpu host` (evitar cross-nodo) — `scripts/f4-vm-optimization/01-cpu-host.sh`
+- [x] 4.2 VMs >4 vCPUs: `qm set <vmid> --numa 1` — `scripts/f4-vm-optimization/02-numa.sh`
+- [x] 4.3 VirtIO SCSI Single con `iothread=1` en discos de VMs — `scripts/f4-vm-optimization/03-virtio-scsi.sh`
+- [x] 4.4 Revisar ballooning mínimo (>1 GB) en VMs con memoria dinámica — `scripts/f4-vm-optimization/04-ballooning.sh`
+- [x] 4.5 Verificar: `qm config <vmid> | grep -E "cpu:|numa:|cache:"` — `scripts/f4-vm-optimization/05-verify.sh`
 
 ## Fase 5: Monitoreo (P2)
 
