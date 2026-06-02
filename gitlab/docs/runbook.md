@@ -3,7 +3,7 @@
 > **VM**: `gitlab` (ID 201) en `pve-desa01`
 > **Dominio**: `https://gitlab.gidas.local`
 > **SSH Git**: `ssh://git@pve-desa01:2222/grupo/repo.git`
-> **OS**: Ubuntu 22.04 LTS — GitLab CE (Omnibus)
+> **OS**: Rocky Linux 10 — GitLab CE (Omnibus)
 
 ## Índice
 
@@ -20,7 +20,7 @@
 
 ### Prerequisitos
 
-- Cloud-init template `ubuntu-22.04-standard` en storage `local-zfs`
+- Cloud-init template `rocky-10-standard` en storage `local-zfs`
 - IP `192.168.1.41/24` disponible
 - DNS: `gitlab.gidas.local` → `192.168.1.41`
 
@@ -160,8 +160,8 @@ ssh root@192.168.1.41
 gitlab-backup create
 
 # 2. Actualizar paquete
-apt-get update
-apt-get install --only-upgrade gitlab-ce
+dnf check-update
+dnf install -y gitlab-ce
 
 # 3. Reconfigurar
 gitlab-ctl reconfigure
@@ -170,7 +170,7 @@ gitlab-ctl reconfigure
 gitlab-ctl status
 ```
 
-### Upgrade de sistema (Ubuntu)
+### Upgrade de sistema (Rocky Linux)
 
 ```bash
 ssh root@192.168.1.41
@@ -179,7 +179,7 @@ ssh root@192.168.1.41
 gitlab-backup create
 
 # 2. Actualizar paquetes del sistema
-apt-get update && apt-get upgrade -y
+dnf upgrade -y
 
 # 3. Reboot si kernel se actualizó
 reboot
@@ -259,9 +259,10 @@ cd gitlab/install
 ### Reglas firewall (PVE host)
 
 ```bash
-ufw allow from 192.168.1.0/24 to any port 80 proto tcp
-ufw allow from 192.168.1.0/24 to any port 443 proto tcp
-ufw allow from 192.168.1.0/24 to any port 2222 proto tcp
+firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=192.168.1.0/24 port port=80 protocol=tcp accept'
+firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=192.168.1.0/24 port port=443 protocol=tcp accept'
+firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=192.168.1.0/24 port port=2222 protocol=tcp accept'
+firewall-cmd --reload
 ```
 
 ## Referencias

@@ -7,7 +7,7 @@
 #
 # Prerequisites:
 #   - VM provisioned (01-provision-vm.sh) with SSH access
-#   - Internet access on VM for apt repo
+#   - Internet access on VM for dnf repos (Rocky Linux mirrors + GitLab RPM)
 # ================================================================
 set -euo pipefail
 
@@ -25,18 +25,18 @@ echo ""
 echo "[0/6] Verificando conectividad a Internet desde la VM..."
 
 VM_CONNECTED=$(${VM_SSH} "curl -sf --connect-timeout 10 -o /dev/null -w '%{http_code}' https://packages.gitlab.com 2>/dev/null || echo 'FAIL'")
-VM_APT_REACHABLE=$(${VM_SSH} "curl -sf --connect-timeout 10 -o /dev/null -w '%{http_code}' https://archive.ubuntu.com 2>/dev/null || echo 'FAIL'")
+VM_REPO_REACHABLE=$(${VM_SSH} "curl -sf --connect-timeout 10 -o /dev/null -w '%{http_code}' https://mirror.rockylinux.org 2>/dev/null || echo 'FAIL'")
 VM_DNS_OK=$(${VM_SSH} "nslookup google.com 2>/dev/null | grep -q 'Address' && echo 'OK' || echo 'FAIL'")
 
 CONNECT_ERRORS=""
 [ "${VM_DNS_OK}" = "FAIL" ] && CONNECT_ERRORS="${CONNECT_ERRORS} DNS_FAIL"
-[ "${VM_APT_REACHABLE}" = "FAIL" ] && CONNECT_ERRORS="${CONNECT_ERRORS} APT_REPO_UNREACHABLE"
+[ "${VM_REPO_REACHABLE}" = "FAIL" ] && CONNECT_ERRORS="${CONNECT_ERRORS} ROCKY_REPO_UNREACHABLE"
 [ "${VM_CONNECTED}" = "FAIL" ] && CONNECT_ERRORS="${CONNECT_ERRORS} GITLAB_REPO_UNREACHABLE"
 
 if [ -n "${CONNECT_ERRORS}" ]; then
     echo "❌ La VM no tiene conectividad a Internet:"
     echo "${VM_DNS_OK}" | grep -q "FAIL" && echo "   - DNS: no resuelve google.com" || echo "   - DNS: OK"
-    echo "${VM_APT_REACHABLE}" | grep -q "FAIL" && echo "   - APT repo: archive.ubuntu.com inalcanzable" || echo "   - APT repo: OK"
+    echo "${VM_REPO_REACHABLE}" | grep -q "FAIL" && echo "   - Rocky repo: mirror.rockylinux.org inalcanzable" || echo "   - Rocky repo: OK"
     echo "${VM_CONNECTED}" | grep -q "FAIL" && echo "   - GitLab repo: packages.gitlab.com inalcanzable" || echo "   - GitLab repo: OK"
 
     echo ""
@@ -53,22 +53,31 @@ if [ -n "${CONNECT_ERRORS}" ]; then
     exit 1
 fi
 
-echo "[0/6] ✅ VM con conectividad a Internet (DNS: OK, APT: OK, GitLab repo: OK)"
+echo "[0/6] ✅ VM con conectividad a Internet (DNS: OK, Rocky repo: OK, GitLab repo: OK)"
 echo ""
 
 # ---------------------------------------------------------------
 # Step 1: Install dependencies and Omnibus repo
 # ---------------------------------------------------------------
-echo "[1/6] Instalando dependencias y repo Omnibus..."
+echo "[1/6] Instalando dependencias y repo Omnibus (Rocky Linux)..."
 
 ${VM_SSH} bash -s << 'REMOTE'
     set -euo pipefail
-    apt-get update -qq
-    apt-get install -y -qq curl openssh-server ca-certificates tzdata perl
 
-    # Add GitLab Omnibus repository
-    curl -fsSL https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | bash
-    echo "✅ Repo Omnibus agregado"
+    # Enable EPEL and PowerTools (needed for some deps)
+    dnf install -y epel-release
+    dnf config-manager --set-enabled crb 2>/dev/null || true  # CRB = PowerTools en RHEL 9+
+
+    # Install dependencies
+    dnf makecache
+    dnf install -y curl openssh-server ca-certificates tzdata perl policycoreutils
+
+    # Configure SELinux for GitLab
+    semanage port -a -t ssh_port_t -p tcp 2222 2>/dev/null || true
+
+    # Add GitLab Omnibus repository (RPM)
+    curl -fsSL https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | bash
+    echo "✅ Repo Omnibus (RPM) agregado"
 REMOTE
 
 # ---------------------------------------------------------------
@@ -79,7 +88,7 @@ echo "[2/6] Instalando GitLab CE..."
 
 ${VM_SSH} bash -s << 'REMOTE'
     set -euo pipefail
-    apt-get install -y gitlab-ce
+    dnf install -y gitlab-ce
     echo "✅ GitLab CE instalado"
 REMOTE
 

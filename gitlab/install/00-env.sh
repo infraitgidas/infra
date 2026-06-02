@@ -22,7 +22,7 @@ VM_DISK_SIZE="80G"
 
 # --- OS ---
 VM_OSTYPE="l26"
-VM_TEMPLATE="ubuntu-22.04-standard"  # cloud-init template
+VM_TEMPLATE="rocky-10-standard"  # cloud-init template en pve-desa01
 VM_CIUSER="root"
 
 # --- GitLab Configuration ---
@@ -49,7 +49,7 @@ BACKUP_RETENTION_DAYS=7
 PVE_SNAPSHOT_NAME="gitlab-weekly"
 SECRETS_FILE="/etc/gitlab/gitlab-secrets.json"
 
-echo "[00-env] GitLab VM Environment loaded"
+echo "[00-env] GitLab VM Environment loaded (Rocky Linux 10)"
 echo "[00-env] VM ${VM_ID} — ${VM_NAME} — ${VM_IP}"
-echo "[00-env] Resources: ${VM_CORES}vCPU / ${VM_MEMORY}MB RAM / ${VM_DISK_SIZE} disk"
+echo "[00-env] Template: ${VM_TEMPLATE} | Resources: ${VM_CORES}vCPU / ${VM_MEMORY}MB RAM / ${VM_DISK_SIZE} disk"
 echo "[00-env] GitLab domain: ${GITLAB_DOMAIN} | SSH port: ${GITLAB_SSH_PORT}"

@@ -57,11 +57,13 @@ ssh ${SSH_OPTS} root@${PVE_HOST_IP} bash -s -- "${HOST_SSH_PORT}" "${VM_IP_ADDR}
     EXISTING=$(iptables -t nat -C PREROUTING -p tcp --dport "${HOST_PORT}" -j DNAT --to-destination "${VM_IP}:${VM_PORT}" 2>&1 || echo "MISSING")
     if echo "${EXISTING}" | grep -q "MISSING"; then
         iptables -t nat -A PREROUTING -p tcp --dport "${HOST_PORT}" -j DNAT --to-destination "${VM_IP}:${VM_PORT}"
-        # Save rules (netfilter-persistent or iptables-persistent)
+        # Save rules (Rocky: iptables-save, Ubuntu: netfilter-persistent)
         if command -v netfilter-persistent &>/dev/null; then
             netfilter-persistent save
         elif [ -d /etc/iptables/ ]; then
             iptables-save > /etc/iptables/rules.v4
+        elif [ -d /etc/sysconfig ]; then
+            iptables-save > /etc/sysconfig/iptables
         fi
         echo "✅ DNAT agregado: :${HOST_PORT} → ${VM_IP}:${VM_PORT}"
     else
