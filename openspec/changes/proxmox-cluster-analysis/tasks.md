@@ -48,12 +48,12 @@ Chain strategy: pending → feature-branch-chain
 
 ## Fase 3: Red (P2)
 
-- [ ] 3.1 Agregar VLAN 10 (`vmbr0.10`) en `/etc/network/interfaces` de cada nodo
-- [ ] 3.2 Configurar link1 redundante en `corosync.conf` apuntando a VLAN 10
-- [ ] 3.3 Reiniciar corosync nodo por nodo y verificar con `corosync-cfgtool -s`
-- [ ] 3.4 Configurar bonding LACP en pve-desa04 (eno1-4 → bond0 → vmbr0)
-- [ ] 3.5 Crear reglas firewall de cluster en `/etc/pve/firewall/cluster.fw`
-- [ ] 3.6 Verificar: link1 UP, bonding operativo (`/proc/net/bonding/bond0`)
+- [x] 3.1 Agregar VLAN 10 (`vmbr0.10`) en `/etc/network/interfaces` de cada nodo — `scripts/f3-network/01-vlan.sh`
+- [x] 3.2 Configurar link1 redundante en `corosync.conf` apuntando a VLAN 10 — `scripts/f3-network/02-corosync-link1.sh`
+- [x] 3.3 Reiniciar corosync nodo por nodo y verificar con `corosync-cfgtool -s` — `scripts/f3-network/03-restart-corosync.sh`
+- [x] 3.4 Configurar bonding LACP en pve-desa04 (eno1-4 → bond0 → vmbr0) — `scripts/f3-network/04-bonding.sh`
+- [x] 3.5 Crear reglas firewall de cluster en `/etc/pve/firewall/cluster.fw` — `scripts/f3-network/05-firewall.sh`
+- [x] 3.6 Verificar: link1 UP, bonding operativo (`/proc/net/bonding/bond0`) — `scripts/f3-network/06-verify.sh`
 
 ## Fase 4: Optimización VMs (P2)
 
