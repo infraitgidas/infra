@@ -65,12 +65,12 @@ Chain strategy: pending → feature-branch-chain
 
 ## Fase 5: Monitoreo (P2)
 
-- [ ] 5.1 Instalar Prometheus + Grafana en CT sg-monitoring (pve-ad, CT 205)
-- [ ] 5.2 Instalar `pve_exporter` (9221) + `node_exporter` (9100) en cada nodo
-- [ ] 5.3 Configurar scrape targets en `/etc/prometheus/pve.yml`
-- [ ] 5.4 Importar dashboard Grafana ID 10347 con datasource Prometheus
-- [ ] 5.5 Configurar Alertmanager: quorum, ZFS errors, disco>80%, backup fails
-- [ ] 5.6 Verificar: `curl localhost:9221/pve`, dashboard carga, alertas disparan
+- [x] 5.1 Instalar Prometheus + Grafana en CT sg-monitoring (pve-ad, CT 205) — `scripts/f5-monitoring/01-install-prometheus.sh`, `scripts/f5-monitoring/02-install-grafana.sh`
+- [x] 5.2 Instalar `pve_exporter` (9221) + `node_exporter` (9100) en cada nodo — `scripts/f5-monitoring/03-install-exporters.sh`
+- [x] 5.3 Configurar scrape targets en `/etc/prometheus/pve.yml` — `scripts/f5-monitoring/04-scrape-config.sh`
+- [x] 5.4 Importar dashboard Grafana ID 10347 con datasource Prometheus — `scripts/f5-monitoring/05-dashboard.sh`
+- [x] 5.5 Configurar Alertmanager: quorum, ZFS errors, disco>80%, backup fails — `scripts/f5-monitoring/06-alertmanager.sh`
+- [x] 5.6 Verificar: `curl localhost:9221/pve`, dashboard carga, alertas disparan — `scripts/f5-monitoring/07-verify.sh`
 
 ## Fase 6: Documentación y Cierre
 
