@@ -7,7 +7,7 @@
 | 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | ⏳ Pendiente |
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | ⏳ Pendiente |
 | 3 | Gestor CMDB | — | `cmdb/` | `feature/cmdb` | ⏳ Pendiente |
-| 4 | Gestor ITSM | — | `itsm/` | `feature/itsm` | ⏳ Pendiente |
+| 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación |
 
 ## Leyenda de Estados SDD
 
@@ -48,20 +48,20 @@
 ### Feature 3: Gestor CMDB
 
 - **Objetivo**: Implementar una CMDB (Configuration Management Database) para inventario de infraestructura
-- **Componentes**: a definir durante exploración
-- **Estado SDD**: ⏳ Pendiente
-- **Tareas**: —
-- **Tareas Completadas**: —
+- **Componentes**: NetBox 4.x (Docker Compose), PostgreSQL 15, Redis 7, scripts discovery (Proxmox, Mikrotik, LDAP)
+- **Estado SDD**: 🛠️ Implementación
+- **Tareas**: 14/14 completadas (apply)
+- **Tareas Completadas**: Deploy stack, scripts base, discovery scripts, documentación
 
 ---
 
-### Feature 4: Gestor ITSM
+### Feature 4: Gestor ITSM — GLPI
 
 - **Objetivo**: Implementar un sistema ITSM (IT Service Management) para gestión de incidentes, cambios y problemas
-- **Componentes**: a definir durante exploración
-- **Estado SDD**: ⏳ Pendiente
-- **Tareas**: —
-- **Tareas Completadas**: —
+- **Componentes**: GLPI + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
+- **Estado SDD**: 🛠️ Implementación
+- **Tareas**: 18 tareas en 6 fases
+- **Tareas Completadas**: F1 (stack), F2 (post-deploy), F3 (backup/restore), F4 (integraciones), F5 (LDAP), F6 (verificación)
 
 ---
 
