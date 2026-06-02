@@ -1,0 +1,3 @@
+# Daily GitLab backup at 02:00
+# Path: /etc/cron.d/gitlab-backup or user crontab
+0 2 * * * root /root/gitlab/backup/01-gitlab-backup.sh >> /var/log/gitlab-backup.log 2>&1

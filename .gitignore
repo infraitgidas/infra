@@ -4,9 +4,17 @@ docs/auth.md
 identity-management/docs/mikrotik.backup
 secrets/*.plain.yaml
 
+# Redmine
+redmine/.env
+cmdb/deploy/netbox.env
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
 
 # Editor
 *.swp
