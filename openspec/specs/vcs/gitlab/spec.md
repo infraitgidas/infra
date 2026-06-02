@@ -8,7 +8,7 @@ GitLab CE (Omnibus) como VCS on-premise para el Grupo Gidas: repositorios Git pr
 
 ### Requirement: VM Provisioning
 
-Proxmox DEBE aprovisionar una VM con 4 vCPU, 8 GB RAM, 80 GB SSD y Ubuntu 22.04 LTS para GitLab CE.
+Proxmox DEBE aprovisionar una VM con 4 vCPU, 8 GB RAM, 80 GB SSD y Rocky Linux 10 para GitLab CE.
 
 #### Scenario: Recursos correctos
 
@@ -28,7 +28,7 @@ GitLab CE DEBE instalarse mediante el paquete Omnibus oficial. Redis y PostgreSQ
 
 #### Scenario: Instalación exitosa
 
-- GIVEN VM con Ubuntu 22.04 y acceso a Internet
+- GIVEN VM con Rocky Linux 10 y acceso a Internet
 - WHEN se ejecuta el script de instalación Omnibus
 - THEN `gitlab-ctl status` DEBE reportar todos los servicios como "run"
 - AND la Web UI DEBE responder en http://<hostname>:80

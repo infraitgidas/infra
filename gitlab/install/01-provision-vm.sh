@@ -3,10 +3,10 @@
 # 01-provision-vm.sh — Create GitLab VM in Proxmox
 # ================================================================
 # Provisions a VM with 4 vCPU / 8GB RAM / 80GB disk on PVE host
-# using cloud-init template for Ubuntu 22.04.
+# using cloud-init template for Rocky Linux 10.
 #
 # Prerequisites:
-#   - Cloud-init template ubuntu-22.04-standard exists in VM_STORAGE
+#   - Cloud-init template ${VM_TEMPLATE} exists in VM_STORAGE
 #   - IP 192.168.1.41 available in the subnet
 # ================================================================
 set -euo pipefail

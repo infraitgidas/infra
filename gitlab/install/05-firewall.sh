@@ -2,7 +2,7 @@
 # ================================================================
 # 05-firewall.sh — Firewall rules for GitLab services
 # ================================================================
-# Configures ufw/nftables on the PVE host to allow:
+# Configures firewalld/nftables on the PVE host to allow:
 #   - Port 80   (HTTP — Let's Encrypt challenge)
 #   - Port 443  (HTTPS — GitLab Web UI & API)
 #   - Port 2222 (SSH Git)
@@ -21,13 +21,13 @@ echo "=== Configurando firewall para GitLab ==="
 echo ""
 
 # ---------------------------------------------------------------
-# Detect firewall: ufw preferred, fallback to iptables
+# Detect firewall: firewalld preferred (Rocky default), fallback to iptables/nftables
 # ---------------------------------------------------------------
 echo "[1/5] Detectando firewall activo..."
 
 FW_TYPE=""
-if command -v ufw &>/dev/null && ufw status 2>/dev/null | grep -q "active"; then
-    FW_TYPE="ufw"
+if command -v firewall-cmd &>/dev/null && firewall-cmd --state 2>/dev/null | grep -q "running"; then
+    FW_TYPE="firewalld"
 elif command -v nft &>/dev/null; then
     FW_TYPE="nftables"
 elif command -v iptables &>/dev/null; then
@@ -36,10 +36,11 @@ fi
 
 if [ -z "${FW_TYPE}" ]; then
     echo "⚠️  No se detectó firewall activo — verificar manualmente"
-    echo "  Reglas sugeridas:"
-    echo "    ufw allow from ${LAN_SUBNET} to any port 80  proto tcp"
-    echo "    ufw allow from ${LAN_SUBNET} to any port 443 proto tcp"
-    echo "    ufw allow from ${LAN_SUBNET} to any port 2222 proto tcp"
+    echo "  Reglas sugeridas (firewalld):"
+    echo "    firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=${LAN_SUBNET} port port=80 protocol=tcp accept'"
+    echo "    firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=${LAN_SUBNET} port port=443 protocol=tcp accept'"
+    echo "    firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=${LAN_SUBNET} port port=2222 protocol=tcp accept'"
+    echo "    firewall-cmd --reload"
     exit 0
 fi
 echo "[1/5] ✅ Firewall detectado: ${FW_TYPE}"
@@ -54,8 +55,8 @@ apply_rule() {
     local port="$1"
     local desc="$2"
 
-    if [ "${FW_TYPE}" = "ufw" ]; then
-        ssh ${SSH_OPTS} root@${PVE_HOST_IP} "ufw allow from ${LAN_SUBNET} to any port ${port} proto tcp comment '${desc}'" 2>/dev/null
+    if [ "${FW_TYPE}" = "firewalld" ]; then
+        ssh ${SSH_OPTS} root@${PVE_HOST_IP} "firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=${LAN_SUBNET} port port=${port} protocol=tcp accept' && firewall-cmd --reload" 2>/dev/null
     else
         # iptables/nftables fallback
         ssh ${SSH_OPTS} root@${PVE_HOST_IP} "iptables -A INPUT -p tcp -s ${LAN_SUBNET} --dport ${port} -j ACCEPT -m comment --comment '${desc}'" 2>/dev/null
@@ -75,8 +76,8 @@ echo "[2/5] ✅ Reglas de firewall aplicadas"
 echo ""
 echo "[3/5] Verificando reglas..."
 
-if [ "${FW_TYPE}" = "ufw" ]; then
-    ssh ${SSH_OPTS} root@${PVE_HOST_IP} "ufw status numbered | grep -E '80|443|2222'" || echo "  Reglas no visibles via ufw status (verificar manual)"
+if [ "${FW_TYPE}" = "firewalld" ]; then
+    ssh ${SSH_OPTS} root@${PVE_HOST_IP} "firewall-cmd --list-rich-rules | grep -E '80|443|2222'" || echo "  Reglas no visibles via firewall-cmd (verificar manual)"
 else
     ssh ${SSH_OPTS} root@${PVE_HOST_IP} "iptables -L INPUT -n -v | grep -E '80|443|2222'" || echo "  Reglas no visibles (verificar manual)"
 fi
