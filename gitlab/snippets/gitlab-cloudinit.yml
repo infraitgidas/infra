@@ -1,0 +1,51 @@
+#cloud-config
+# ================================================================
+# gitlab-cloudinit.yml — Cloud-init config para VM GitLab
+# ================================================================
+# Subir a PVE host:
+#   scp gitlab/snippets/gitlab-cloudinit.yml root@pve-desa01:/var/lib/vz/snippets/
+# ================================================================
+
+hostname: gitlab
+fqdn: gitlab.gidas.local
+
+manage_etc_hosts: true
+
+# Configurar root password desde variable de entorno
+chpasswd:
+  expire: false
+
+# Actualizar paquetes al primer boot
+package_update: true
+package_upgrade: false
+
+packages:
+  - qemu-guest-agent
+  - curl
+  - openssh-server
+  - ca-certificates
+  - policycoreutils
+  - perl
+
+# Habilitar el agente QEMU para integración con Proxmox
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+  - echo "GitLab VM ready — run 02-install-gitlab.sh" > /root/README
+
+# Crear usuario administrador
+users:
+  - name: root
+    ssh_authorized_keys:
+      - ${SSH_PUBKEY}  # Reemplazar con la pubkey del admin
+
+# Configurar zona horaria
+timezone: America/Argentina/Buenos_Aires
+
+# Aumentar tamaño del sistema de archivos (cloud-init)
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
+
+# Resize filesystem automáticamente
+resize_rootfs: true
