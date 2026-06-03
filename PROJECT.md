@@ -38,7 +38,7 @@
 ### Feature 2: VCS On-Premise — GitLab
 
 - **Objetivo**: Instalar y configurar GitLab como sistema de control de versiones on-premise
-- **Componentes**: GitLab CE Omnibus en VM dedicada (Ubuntu 22.04)
+- **Componentes**: GitLab CE Omnibus en VM dedicada (Rocky Linux 10)
 - **Estado SDD**: 📦 Archivado ✅ — 19/19 tareas, PASS verify (12/15 COMPLIANT, 3 PARTIAL)
 - **Tareas Completadas**: Scripts de provision VM, instalación, HTTPS, SSH, firewall, backups, snapshot PVE, restore, runbook, verification
 - **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/docs/`
