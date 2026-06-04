@@ -108,25 +108,31 @@ FreeIPA DNS es el resolver primario para todos los hosts Linux. AD DNS es primar
 
 #### OU Structure
 ```
-gidas.internal
-├── Users
-│   ├── Admins            ← Cuentas administrativas (gidas-admins)
-│   ├── Investigadores     ← Miembros de investigación
-│   └── Estudiantes        ← Becarios y estudiantes
-├── Groups
-│   ├── gidas-admins
-│   ├── gidas-rojo
-│   ├── gidas-azul
-│   ├── gidas-verde
-│   ├── gidas-amarillo
-│   └── gidas-monitoring
-├── Computers
-│   ├── Proxmox            ← Nodos PVE joined
-│   ├── Containers         ← CTs joined
-│   └── Services           ← Service accounts
+GDC01.local
+├── Direccion                     ← Director + Vicedirector
+│   └── Coordinadores             ← Coordinadores (1 proyecto c/u)
+├── Proyectos
+│   ├── PROY-Telepark
+│   ├── PROY-CAPNEE
+│   ├── PROY-INFRAiT
+│   ├── PROY-GMET
+│   └── PROY-GIS
+├── Becarios                      ← Becarios (pueden estar en varios proyectos)
+├── Groups                        ← Grupos de seguridad (plano)
+├── ServiceAccounts
 └── Servers
-    └── Domain Controllers ← DCs del dominio
+    ├── Proxmox
+    └── Linux
 ```
+
+> **Documentación completa**: `identity-management/docs/identity/ad/ous.md`
+
+#### Naming Convention para Grupos
+| Prefix | Categoría | Ejemplo |
+|--------|-----------|---------|
+| `G-` | Grupo por rol funcional | `G-Direccion`, `G-Coordinadores`, `G-IdentityAdmins` |
+| `PROY-` | Proyecto de investigación | `PROY-Telepark`, `PROY-CAPNEE` |
+| `SRV-` | Servicio/aplicación | `SRV-PVEAdmin`, `SRV-InfraITAdmin` |
 
 ### 3.2 FreeIPA Server
 - **Hostname**: `ipa.gidas.internal`
@@ -208,17 +214,17 @@ pvesh create /access/domains \
 # Mapear grupos AD a roles PVE
 pvesh set /access/acl \
   --path / \
-  --groups gidas-admins \
+  --groups SRV-PVEAdmin \
   --role Administrator
 
 pvesh set /access/acl \
   --path / \
-  --groups gidas-pve-admin \
+  --groups G-Coordinadores \
   --role PVEAdmin
 
 pvesh set /access/acl \
   --path / \
-  --groups gidas-pve-viewer \
+  --groups G-Becarios \
   --role PVEViewer
 ```
 
@@ -265,7 +271,7 @@ User                  Browser              PVE Web UI          AD (VM-DC1)
 Admin                  AD (VM-DC1)        FreeIPA            SSSD          Linux Host
  │                       │                  │                 │               │
  │───create user────────▶│                  │                 │               │
- │───add to gidas-azul──▶│                  │                 │               │
+ │───add to SG-Azul─────▶│                  │                 │               │
  │                       │                  │                 │               │
  │                       │    SSSD cache refresh (60 min / sss_cache -E)      │
  │                       │                  │◀──id request────│               │
@@ -301,12 +307,12 @@ FreeIPA                           AD KDC
 
 | Grupo AD | Hosts Permitidos | Sudo Rule | Justificación |
 |----------|-----------------|-----------|---------------|
-| gidas-admins | ALL (todos nodos PVE, CTs, VMs) | `%gidas-admins ALL=(ALL) ALL` | Admin full |
-| gidas-rojo | sg-rojo, pve-desa01 | systemctl, journalctl, docker | Investigadores rojo |
-| gidas-azul | sg-azul, pve-desa02 | systemctl, journalctl, docker | Investigadores azul |
-| gidas-verde | sg-verde, pve-desa03 | systemctl, journalctl, docker | Investigadores verde |
-| gidas-amarillo | sg-amarillo, pve-desa04 | systemctl, journalctl, docker | Investigadores amarillo |
-| gidas-monitoring | sg-monitoring, ALL PVE nodes | `/usr/lib/nagios/plugins/*`, `ping` | Monitoreo RO |
+| G-Direccion | ALL | `%G-Direccion ALL=(ALL) ALL` | Admin full |
+| G-Coordinadores | ALL | `%G-Coordinadores ALL=(ALL) ALL` | Admin full |
+| G-Becarios | Host del proyecto asignado | Sin sudo | Acceso restringido |
+| G-IdentityAdmins | ALL | `ALL=(ALL) ALL` | Admin de identidad |
+| SRV-InfraITAdmin | Servidores INFRAiT, hosts desktop | `ALL=(ALL) ALL` | Sysadmin proyecto INFRAiT |
+| SRV-Monitoring | sg-monitoring, ALL PVE nodes | `/usr/lib/nagios/plugins/*`, `ping` | Monitoreo RO |
 
 **Deny by default**: cualquier grupo NO listado → acceso denegado a cualquier host.
 
@@ -417,7 +423,7 @@ find "$BACKUP_DIR" -name "ipa-*.tar.gz" -mtime +$RETENTION_DAYS -delete
 | AC2 | Trust established | `ipa trust-find` → AD domain listed | F2 |
 | AC3 | SSH auth with AD | `ssh user@host` con credenciales AD → acceso | F4 |
 | AC4 | PVE login with AD | PVE web UI login con AD → dashboard | F3 |
-| AC5 | HBAC enforced | `gidas-azul` SSH a `sg-rojo` → denied | F4 |
+| AC5 | HBAC enforced | `SG-Azul` SSH a `sg-rojo` → denied | F4 |
 | AC6 | Offline cache ≥ 8h | Desconectar AD → login con cache | F4 |
 | AC7 | Secrets encrypted | `sops -d secrets/proxmox.yaml` → AD passwords | F5 |
 | AC8 | LDAPS enabled | `openssl s_client -connect 192.168.1.117:636` → TLS handshake | F3 |

@@ -1,104 +1,70 @@
 # Identity Management — Sistema de Gestión de Identidades
 
 > Grupo de Investigación Gidas — FRLP UTN
-> Arquitectura: AD (VM-DC1) + FreeIPA cross-realm trust
+> Arquitectura: AD (DC1-GIDAS) + FreeIPA cross-realm trust
 
 ## Resumen
 
-Sistema centralizado de autenticación, autorización y DNS para toda la infraestructura del grupo, combinando Active Directory como fuente de verdad para usuarios y FreeIPA como IDM Linux con políticas nativas (HBAC, sudo, PKI).
+Sistema centralizado de autenticación, autorización y DNS para toda la infraestructura del grupo.
 
 ## Componentes
 
 | Componente | IP | Rol | SO |
 |-----------|-----|-----|-----|
-| **VM-DC1 (AD)** | 192.168.1.117 | Domain Controller, DNS secundario | Windows Server |
-| **FreeIPA** | 192.168.1.32 | IDM Linux, DNS primario, CA | Rocky Linux 10 |
+| **DC1-GIDAS (AD)** | 192.168.1.117 | Domain Controller | Windows Server 2022 Std |
+| **ipa-gidas (FreeIPA)** | 192.168.1.118 | IDM Linux, DNS, CA | Rocky Linux 10 |
 | **pve-ad** | 192.168.1.31 | Hypervisor de identidad | Proxmox 9.1.1 |
 
 ## Dominio
 
-- **DNS**: `gidas.internal`
-- **AD NetBIOS**: `GIDAS`
-- **AD Realm**: `GIDAS.INTERNAL`
-- **FreeIPA Realm**: `GIDAS.INTERNAL`
+- **DNS**: `GDC01.local`
+- **AD NetBIOS**: `GDC01`
+- **AD Realm**: `GDC01.LOCAL`
+- **FreeIPA Realm**: `IPA.GDC01.LOCAL`
 
-## Estructura de Red
-
-| Subred | Gateway | DNS Primario | DNS Secundario |
-|--------|---------|-------------|----------------|
-| 192.168.1.0/24 | 192.168.1.1 (Mikrotik) | 192.168.1.32 (FreeIPA) | 192.168.1.117 (AD) |
-
-### Resolución DNS
+## Estructura de OUs
 
 ```
-Host Linux → FreeIPA DNS (192.168.1.32) ── primary ──┐
-    ├─ gidas.internal (zona local)                     │
-    ├─ ad.gidas.internal ── forward ──▶ AD (192.168.1.117)
-    └─ externo ── forward ──▶ AD ──▶ Internet
-
-Host Windows → AD DNS (192.168.1.117) ── primary ──┐
-    ├─ ad.gidas.internal (zona local)                │
-    └─ externo ──▶ Internet
-```
-
-## AD — Unidades Organizativas
-
-```
-gidas.internal
-├── Users
-│   ├── Admins
-│   ├── Investigadores
-│   └── Estudiantes
-├── Groups
-│   ├── gidas-admins
-│   ├── gidas-rojo
-│   ├── gidas-azul
-│   ├── gidas-verde
-│   ├── gidas-amarillo
-│   └── gidas-monitoring
-├── Computers
-│   ├── Proxmox
-│   ├── Containers
-│   └── Services
+GDC01.local
+├── Direccion                     ← Director + Vicedirector
+│   └── Coordinadores             ← Coordinadores (1 proyecto c/u)
+├── Proyectos
+│   ├── PROY-Telepark
+│   ├── PROY-CAPNEE
+│   ├── PROY-INFRAiT
+│   ├── PROY-GMET
+│   └── PROY-GIS
+├── Becarios                      ← Becarios (pueden estar en varios proyectos)
+├── Groups                        ← Grupos de seguridad
+├── ServiceAccounts
 └── Servers
-    └── Domain Controllers
+    ├── Proxmox
+    └── Linux
 ```
+
+## Nomenclatura de Grupos
+
+| Prefix | Categoría | Ejemplo |
+|--------|-----------|---------|
+| `G-` | Rol funcional | `G-Direccion`, `G-Coordinadores` |
+| `PROY-` | Proyecto | `PROY-Telepark`, `PROY-INFRAiT` |
+| `SRV-` | Servicio | `SRV-PVEAdmin`, `SRV-InfraITAdmin` |
 
 ## Modelo de Acceso (HBAC)
 
-| Grupo AD | Hosts Permitidos | Sudo |
-|----------|-----------------|------|
-| gidas-admins | Todos los nodos | `ALL=(ALL) ALL` |
-| gidas-rojo | sg-rojo, pve-desa01 | systemctl, journalctl, docker |
-| gidas-azul | sg-azul, pve-desa02 | systemctl, journalctl, docker |
-| gidas-verde | sg-verde, pve-desa03 | systemctl, journalctl, docker |
-| gidas-amarillo | sg-amarillo, pve-desa04 | systemctl, journalctl, docker |
-| gidas-monitoring | sg-monitoring, todos los PVE (RO) | plugins monitoreo, ping |
-
-## Roles PVE
-
-| Grupo AD | Rol PVE |
-|----------|---------|
-| gidas-admins | Administrator |
-| gidas-pve-admin | PVEAdmin |
-| gidas-pve-viewer | PVEViewer |
-
-## Flujo de Autenticación (SSH)
-
-```
-Usuario → SSH → SSSD → FreeIPA (HBAC check) → AD (Kerberos auth) → Acceso
-```
-
-## Flujo de Autenticación (PVE)
-
-```
-Usuario → PVE Web UI → LDAPS (636) → AD (bind) → Rol PVE → Dashboard
-```
+| Grupo | Hosts | Sudo |
+|-------|-------|------|
+| G-Direccion | ALL | `ALL=(ALL) ALL` |
+| G-IdentityAdmins | ALL | `ALL=(ALL) ALL` |
+| G-Coordinadores | ALL | `ALL=(ALL) ALL` |
+| G-Becarios | Host del proyecto asignado | Sin sudo |
+| SRV-InfraITAdmin | Servidores INFRAiT, hosts desktop | `ALL=(ALL) ALL` |
+| SRV-Monitoring | ALL (RO) | Plugins monitoreo |
 
 ## Documentos Relacionados
 
-- `../sdd/specs.md` — Especificaciones técnicas
-- `../sdd/design.md` — Diseño de arquitectura detallado
-- `../tasks/planned/tasks.md` — Plan de implementación
-- `identity/onboarding.md` — Alta de usuarios
-- `identity/offboarding.md` — Baja de usuarios
+- `docs/identity/ad/ous.md` — Estructura de OUs
+- `docs/identity/ad/grupos.md` — Definición de grupos
+- `docs/identity/ad/usuarios.md` — Usuarios
+- `docs/identity/onboarding.md` — Alta de usuarios
+- `docs/identity/offboarding.md` — Baja de usuarios

@@ -13,7 +13,7 @@
 ### 1. Deshabilitar usuario en AD
 
 ```powershell
-# Conectar a VM-DC1
+# Conectar a DC1-GIDAS
 ssh Administrator@192.168.1.117
 
 # Deshabilitar cuenta (RECOMENDADO — preserva grupos y SID)
@@ -23,7 +23,7 @@ Disable-ADAccount -Identity "jperez"
 Get-ADUser jperez -Properties Enabled | fl Name, Enabled
 ```
 
-> **Nota**: Deshabilitar es preferible a eliminar. Si en el futuro el usuario regresa, solo hay que re-habilitar la cuenta y la pertenencia a grupos se mantiene.
+> **Nota**: Deshabilitar es preferible a eliminar. Si en el futuro el usuario regresa, solo hay que re-habilitar la cuenta y la pertenencia a grupos se mantiene. También preserva la auditoría de accesos históricos.
 
 ### 2. (Alternativa) Eliminar usuario del AD
 
@@ -51,9 +51,10 @@ who | grep jperez
 
 ### 5. Documentar la baja
 
+Registrar en el changelog del repo:
+
 ```bash
-# Registrar en el changelog
-echo "2026-05-29: Baja de jperez (Juan Pérez) - gidas-rojo" >> tasks/completed/offboarding.log
+echo "2026-06-03: Baja de jperez (Juan Pérez) - G-Coordinadores, PROY-Telepark" >> tasks/completed/offboarding.log
 ```
 
 ## Post-Baja
@@ -75,3 +76,7 @@ El usuario recupera acceso inmediato a los hosts de su grupo (vía HBAC + trust)
 ## Tiempo Estimado
 
 5-10 minutos.
+
+---
+
+> 📄 Referencias: `ad/grupos.md` (grupos del usuario), `ad/usuarios.md` (lista de usuarios)
