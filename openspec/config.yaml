@@ -2,12 +2,17 @@
 schema: spec-driven
 
 context: |
-  Gestión de infraestructura del Grupo de Investigación Gidas.
-  Stack: Proxmox (virtualización), Mikrotik (redes), Directory Servers (AD/FreeIPA).
-  Lenguajes: Shell, YAML, TOML — sin código de aplicación (infraestructura pura).
-  Sin CI, sin test runner, sin linter, sin formateador detectados.
-  Proyecto nuevo — todos los subdirectorios de componentes están vacíos.
-  No es un repositorio git (aún).
+  Gestión de infraestructura del Grupo de Investigación Gidas (FRLP UTN).
+  Stack: Proxmox VE cluster (pve-desa01-04 + pve-ad standalone), Mikrotik (redes),
+  Active Directory (GDC01.local), FreeIPA, Docker Compose (GLPI, Redmine, NetBox).
+  Lenguajes/formatos: Shell (Bash, POSIX), YAML, TOML — infraestructura pura, sin código de aplicación.
+  Sin CI/CD pipeline detectado. Sin test runner, linter, type checker ni formatter.
+  SDD implementado con openspec: cambios en openspec/changes/, specs en openspec/specs/.
+  Componentes por feature: redmine/, gitlab/, cmdb/, itsm/, identity-management/, directoryServer/.
+  Scripts organizados por fase numerada (00-env → verify).
+  Secretos encriptados con SOPS + age.
+  Commits convencionales (feat:, docs:, chore:).
+  Git branches: main + feature branches.
 
 strict_tdd: false
 
@@ -16,7 +21,7 @@ testing:
     available: false
     command: ""
     framework: ""
-    reason: "No test runner detected — project is infrastructure-only (no package.json, go.mod, pyproject.toml, etc.)"
+    reason: "No test runner detected — project is infrastructure-only (Shell/YAML, no package.json, go.mod, pyproject.toml, or any other language runtime)"
   layers:
     unit:
       available: false
@@ -45,17 +50,23 @@ rules:
   proposal:
     - Incluir plan de rollback para cambios riesgosos
     - Especificar impacto en servicios de infraestructura
+    - Incluir diagrama de arquitectura objetivo
   specs:
     - Usar Given/When/Then para escenarios
     - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
+    - Incluir criterios de aceptación verificables
   design:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con fundamentos
+    - Incluir plan de rollback por componente
   tasks:
     - Agrupar por fase, usar numeración jerárquica
     - Mantener tareas completables en una sesión
+    - Separar planned/ y completed/
   apply:
     - Seguir patrones existentes del proyecto
+    - Scripts numerados por fase (00-env → verify)
+    - Secretos siempre en SOPS, nunca en texto plano
     tdd: false
     test_command: ""
   verify:
@@ -65,4 +76,4 @@ rules:
   archive:
     - Advertir antes de fusionar deltas destructivos
 
-artifact_store: openspec
+artifact_store: hybrid

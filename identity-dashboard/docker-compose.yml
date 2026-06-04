@@ -1,0 +1,31 @@
+# ================================================================
+# docker-compose.yml — gidas-identity
+# ================================================================
+# Run: docker compose run --rm gidas-identity --help
+# Build: docker compose build
+# ================================================================
+
+services:
+  gidas-identity:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gidas-identity
+    image: gidas-identity:latest
+    volumes:
+      # SSH key for FreeIPA (readonly)
+      - ~/.ssh/ipa-admin-key:/secrets/ipa-admin-key:ro
+      # SOPS-encrypted secrets
+      - ../../secrets/identity.yaml:/secrets/identity.yaml:ro
+      # Age key for SOPS decryption
+      - ~/.config/sops/age/keys.txt:/home/appuser/.config/sops/age/keys.txt:ro
+    environment:
+      - SOPS_AGE_KEY_FILE=/home/appuser/.config/sops/age/keys.txt
+      - GIDAS_SECRETS_PATH=/secrets/identity.yaml
+      - TZ=America/Argentina/Buenos_Aires
+    # Interactive terminal for password output
+    stdin_open: true
+    tty: true
+    # Non-privileged — no capabilities needed
+    cap_drop:
+      - ALL
