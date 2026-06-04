@@ -1,6 +1,7 @@
 # Secrets — archivos encriptados con SOPS + age
 # Editar con: sops secrets/<archivo>.yaml
 docs/auth.md
+identity-management/docs/mikrotik.backup
 secrets/*.plain.yaml
 
 # OS
@@ -11,3 +12,4 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
