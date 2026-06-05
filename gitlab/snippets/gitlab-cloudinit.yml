@@ -15,6 +15,9 @@ manage_etc_hosts: true
 chpasswd:
   expire: false
 
+# Asegurar que root pueda acceder por SSH
+disable_root: false
+
 # Actualizar paquetes al primer boot
 package_update: true
 package_upgrade: false
@@ -36,7 +39,7 @@ runcmd:
 users:
   - name: root
     ssh_authorized_keys:
-      - ${SSH_PUBKEY}  # Reemplazar con la pubkey del admin
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB/gd64FZHihsOwWNDAH9Sa5UYsKX1Ss/PJg4lgofTPf infra@37709.gidas
 
 # Configurar zona horaria
 timezone: America/Argentina/Buenos_Aires

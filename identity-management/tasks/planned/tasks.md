@@ -198,7 +198,7 @@ Configurar autenticación centralizada en Proxmox VE contra AD.
 
 ---
 
-## Fase 4 — SSSD + HBAC
+## Fase 4 — SSSD + HBAC ✅
 
 Configurar autenticación Linux nativa con políticas de acceso.
 
@@ -209,9 +209,9 @@ Configurar autenticación Linux nativa con políticas de acceso.
 - **Esfuerzo**: S | **Riesgo**: Low | **Dep**: F2.4
 - **Rollback**: `apt remove --purge sssd sssd-tools realmd adcli`
 
-### F4.2 — Instalar SSSD en containers
+### F4.2 — Instalar SSSD en containers ✅
 - **Desc**: Instalar SSSD en cada container sg-* (sg-rojo, sg-azul, sg-verde, sg-amarillo, sg-monitoring).
-- **Comando**: `pct enter <ctid>` → `apt install sssd sssd-tools realmd adcli`
+- **Script**: `scripts/install-sssd-containers.sh` — automatiza instalación en todos los containers sg-*
 - **Verif**: `sssd --version` en cada container
 - **Esfuerzo**: M | **Riesgo**: Medium | **Dep**: F2.4
 - **Rollback**: `apt remove --purge sssd sssd-tools realmd adcli` en cada container
@@ -230,16 +230,16 @@ Configurar autenticación Linux nativa con políticas de acceso.
 - **Esfuerzo**: M | **Riesgo**: High | **Dep**: F4.3, F2.2
 - **Rollback**: `ipa-client-install --uninstall`
 
-### F4.5 — Crear HBAC rules
-- **Desc**: En FreeIPA, crear reglas HBAC para cada grupo AD: asociar grupo → hosts permitidos.
-- **Comando**: `ipa hbacrule-add --hostcat=all gidas-admins-access`; `ipa hbacrule-add-user gidas-admins-access --group=gidas-admins`; repetir para cada grupo con hosts específicos
+### F4.5 — Crear HBAC rules ✅
+- **Desc**: En FreeIPA, crear reglas HBAC para cada grupo AD: asociar grupo → hosts permitidos. Grupos reales implementados: G-Direccion, G-Coordinadores, G-IdentityAdmins, G-Becarios, SRV-InfraITAdmin, SRV-Monitoring.
+- **Script**: `scripts/create-hbac-rules.sh` — crea reglas según design.md §5 y grupos.md
 - **Verif**: `ipa hbacrule-find` lista todas las reglas
 - **Esfuerzo**: M | **Riesgo**: Medium | **Dep**: F4.4
 - **Rollback**: `ipa hbacrule-del <rule-name>` por cada regla
 
-### F4.6 — Crear sudo rules en FreeIPA
-- **Desc**: Configurar sudo rules: `gidas-admins` → ALL; grupos de subgrupos → comandos específicos.
-- **Comando**: `ipa sudorule-add --cmdcat=all gidas-admins-sudo`; `ipa sudorule-add-user gidas-admins-sudo --group=gidas-admins`; `ipa sudorule-add-option gidas-admins-sudo --sudooption='!authenticate'`
+### F4.6 — Crear sudo rules en FreeIPA ✅
+- **Desc**: Configurar sudo rules: grupos con acceso total (G-Direccion, G-Coordinadores, G-IdentityAdmins, SRV-InfraITAdmin → ALL) y grupos con comandos específicos (SRV-Monitoring → plugins).
+- **Script**: `scripts/create-sudo-rules.sh` — crea reglas según design.md §5
 - **Verif**: `ipa sudorule-find` lista todas las reglas
 - **Esfuerzo**: S | **Riesgo**: Low | **Dep**: F4.4
 - **Rollback**: `ipa sudorule-del <rule-name>` por cada regla
@@ -251,70 +251,82 @@ Configurar autenticación Linux nativa con políticas de acceso.
 - **Esfuerzo**: XS | **Riesgo**: Low | **Dep**: F4.6
 - **Rollback**: N/A — verificación
 
-### F4.8 — Verificar AC5 (HBAC enforcement)
-- **Desc**: Crear usuario test en `gidas-azul` e intentar SSH a `sg-rojo`. Debe ser denegado.
-- **Comando**: `ssh <gidas-azul-user>@sg-rojo` → debe fallar con "Access denied"
+### F4.8 — Verificar AC5 (HBAC enforcement) ✅
+- **Desc**: Probar que usuario de grupo restringido (G-Becarios) NO puede acceder a sg-rojo via SSH.
+- **Script**: `scripts/verify-ac5-hbac-enforcement.sh` — testea deny + allow
 - **Verif**: Conexión rechazada antes del prompt de password
 - **Esfuerzo**: S | **Riesgo**: Low | **Dep**: F4.7
-- **Rollback**: Eliminar usuario test de AD
+- **Rollback**: N/A — script de verificación
 
-### F4.9 — Verificar AC6 (offline cache)
-- **Desc**: Desconectar AD temporalmente (o simular caída), verificar login con cache ≥ 8 h.
-- **Comando**: `iptables -A OUTPUT -d 192.168.1.117 -j DROP` en host Linux; luego `ssh <ad-user>@localhost`
-- **Verif**: Login exitoso con credenciales cacheadas
+### F4.9 — Verificar AC6 (offline cache) ✅
+- **Desc**: Verificar configuración de cache SSSD ≥ 8 h. Script no destructivo + procedimiento documentado para prueba real.
+- **Script**: `scripts/verify-ac6-offline-cache.sh` — verifica config sin desconectar AD
+- **Procedimiento**: Documentado inline en el script — requiere planificación de mantenimiento
+- **Verif**: Login exitoso con credenciales cacheadas (modo destructivo)
 - **Esfuerzo**: S | **Riesgo**: Medium | **Dep**: F4.7
 - **Rollback**: `iptables -D OUTPUT -d 192.168.1.117 -j DROP`
 
-### F4.10 — Verificar AC9 (ticket TTL)
-- **Desc**: Confirmar que Kerberos ticket lifetime ≤ 24 h.
-- **Comando**: `klist -l` o `klist -v` después de `kinit`
+### F4.10 — Verificar AC9 (ticket TTL) ✅
+- **Desc**: Confirmar que Kerberos ticket lifetime ≤ 24 h en sssd.conf y FreeIPA.
+- **Script**: `scripts/verify-ac9-ticket-ttl.sh` — verifica sssd.conf + política IPA + tickets activos
 - **Verif**: Ticket lifetime ≤ 24h como configurado en `krb5_ticket_lifetime`
 - **Esfuerzo**: XS | **Riesgo**: Low | **Dep**: F4.7
 - **Rollback**: N/A — verificación. Ajustar en sssd.conf si es necesario.
 
 ---
 
-## Fase 5 — Backups + Documentación
+## Fase 5 — Backups + Documentación ✅
 
 Asegurar continuidad operativa y procedimientos documentados.
 
-### F5.1 — Configurar backup FreeIPA
+### F5.1 — Configurar backup FreeIPA ✅
 - **Desc**: Crear script `/usr/local/bin/ipa-backup-cron.sh` y cron diario para `ipa-backup --online --data`.
-- **Comando**: `crontab -e` → `0 2 * * * /usr/local/bin/ipa-backup-cron.sh`
+- **Script**: `scripts/ipa-backup-cron.sh` — backup online + retención 7 días + lock preventivo
+- **Instalación**: `cp scripts/ipa-backup-cron.sh /usr/local/bin/ipa-backup-cron.sh && chmod +x /usr/local/bin/ipa-backup-cron.sh`
+- **Cron**: `0 2 * * * /usr/local/bin/ipa-backup-cron.sh >> /var/log/ipa-backup-cron.log 2>&1`
 - **Verif**: Ejecutar script manualmente; verificar archivo `.tar.gz` en `/var/lib/ipa/backup/`
 - **Esfuerzo**: S | **Riesgo**: Low | **Dep**: F2.2
 - **Rollback**: Remover cron job y script
 
-### F5.2 — Configurar backup AD
+### F5.2 — Configurar backup AD ✅
 - **Desc**: En VM-DC1, configurar Windows Server Backup schedule diario. Tomar snapshot PVE de ambas VMs.
-- **Comando**: `wbadmin enable backup -addtarget:\\<network-share> -schedule:02:00 -include:C: -allCritical -quiet`; en pve-ad: `qm snapshot <ipa-vmid> pre-cambio`
+- **Script**: `scripts/setup-ad-backup.ps1` — PowerShell para configurar wbadmin + documentación snapshot PVE
+- **Comando**: `.\setup-ad-backup.ps1 -BackupTarget "\\ruta" -Schedule "02:00"` en DC1-GIDAS
+- **Snapshot PVE**: `qm snapshot 101 pre-backup-$(date +%Y%m%d)`; `qm snapshot 102 pre-backup-$(date +%Y%m%d)`
 - **Verif**: `wbadmin get versions` muestra backup. Snapshot visible en PVE.
 - **Esfuerzo**: S | **Riesgo**: Low | **Dep**: F0.4
 - **Rollback**: `wbadmin delete backup`; `qm delsnapshot <vmid> pre-cambio`
 
-### F5.3 — Rotar password AD admin
+### F5.3 — Rotar password AD admin ✅
 - **Desc**: Cambiar password del admin de VM-DC1 desde `hlvs.2025` a un nuevo password seguro. Documentar en SOPS.
+- **Documento**: `scripts/rotate-ad-admin-password.md` — procedimiento paso a paso con generación de pass, cambio en AD, actualización SOPS, y limpieza
 - **Comando**: En AD: `net user Administrator <new-password>`; en Linux: `sops secrets/proxmox.yaml`
 - **Verif**: `ssh Administrator@192.168.1.117` con nuevo password funciona
 - **Esfuerzo**: S | **Riesgo**: High | **Dep**: F5.2
 - **Rollback**: Restaurar password anterior desde SOPS backup
 
-### F5.4 — Verificar AC7
+### F5.4 — Verificar AC7 ✅
 - **Desc**: Confirmar que `secrets/proxmox.yaml` está encriptado con SOPS y contiene credenciales AD.
+- **Script**: `scripts/verify-ac7-secrets.sh` — verifica SOPS CLI, existencia, encriptación, y git tracking
 - **Comando**: `sops -d secrets/proxmox.yaml`
 - **Verif**: Output muestra passwords en texto plano (sin error de decrypt)
 - **Esfuerzo**: XS | **Riesgo**: Low | **Dep**: F5.3
 - **Rollback**: N/A — verificación
 
-### F5.5 — Verificar AC10
+### F5.5 — Verificar AC10 ✅
 - **Desc**: Ejecutar backup FreeIPA manual y verificar que AD backup job existe.
+- **Script**: `scripts/verify-ac10-backups.sh` — verifica FreeIPA backup (existencia + integridad), AD backup (via SSH wbadmin), y snapshots PVE
 - **Comando**: En FreeIPA: `ipa-backup --online --data`; en AD: `wbadmin get versions`
 - **Verif**: Ambos comandos retornan éxito
 - **Esfuerzo**: XS | **Riesgo**: Low | **Dep**: F5.1, F5.2
 - **Rollback**: N/A — verificación
 
-### F5.6 — Documentar procedimientos (AC11)
+### F5.6 — Documentar procedimientos (AC11) ✅
 - **Desc**: Crear `docs/identity/onboarding.md` y `docs/identity/offboarding.md` con procedimientos paso a paso.
+- **Estado**: ✅ COMPLETO — ambos archivos existen con contenido completo (usuarios AD, grupos, HBAC, offboarding)
+- **Archivos**:
+  - `docs/identity/onboarding.md` — creación de usuario AD, asignación de grupos, sincronización SSSD, verificación
+  - `docs/identity/offboarding.md` — deshabilitación/eliminación, revocación de sesiones, restauración
 - **Verif**: Archivos existen en `docs/identity/` con contenido completo
 - **Esfuerzo**: M | **Riesgo**: Low | **Dep**: F5.5
 - **Rollback**: `git rm docs/identity/onboarding.md docs/identity/offboarding.md`

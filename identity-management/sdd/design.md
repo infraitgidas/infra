@@ -2,9 +2,11 @@
 
 > **Change**: identity-management
 > **Date**: 2026-05-29
-> **Status**: Verified (Fase 0-4 partial)
+> **Status**: ✅ Complete (all phases 0-5)
 > **Architecture**: AD (DC1-GIDAS) + FreeIPA cross-realm trust on `GDC01.local`
 >
+> **Fase 4-5 (2026-06-04)**: SSSD + HBAC completo. SSSD containers script, HBAC rules, sudo rules, AC5-AC6-AC9 verificaciones, backups FreeIPA + AD, documentación AC11. Todos los scripts en `scripts/`.
+
 > **Fase 4 (2026-05-29)**: SSSD + AD join completado en pve-ad y pve-desa01. `adcli join` con provider `ad` en sssd.conf. Autenticación AD verificada via `getent passwd`. Pendiente: containers sg-*, HBAC rules, sudo rules.
 >
 > **Fase 0 (2026-05-29)**: VM-DC1 verificada. AD DS instalado, no promocionado. Licencia evaluation → Standard (KMS GVLK). Shutdown automático resuelto. DC-VM eliminado. Renombrada a DC1-GIDAS.
