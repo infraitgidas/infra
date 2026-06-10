@@ -1,7 +1,9 @@
 """PowerShell templates for Active Directory user operations.
 
 Uses ``-PasswordNeverExpires $true`` and ``pwdLastSet=0`` for first-login
-password change, per project conventions.
+password change, per project conventions.  ``-ChangePasswordAtLogon`` is
+NOT used because it conflicts with ``-PasswordNeverExpires $true`` in
+New-ADUser; ``pwdLastSet=0`` (via Set-ADUser) is the reliable approach.
 
 sAMAccountName convention (enforced by ``config.build_sam_account_name``):
 first-letter + full surname, lowercase, no spaces.
@@ -37,7 +39,6 @@ New-ADUser -Name "{first} {last}" `
     -AccountPassword $sec `
     -Enabled $true `
     -PasswordNeverExpires $true `
-    -ChangePasswordAtLogon ${str(force_change).lower()} `
     -Title "{role}" `
     -Department "{proyecto}" `
     -Description "Creado via gidas-identity CLI"
