@@ -50,6 +50,33 @@ Dominio: {domain}
     return subject, body
 
 
+def user_welcome(
+    username: str,
+    full_name: str,
+    password: str,
+    *,
+    domain: str = "GDC01.local",
+) -> tuple[str, str]:
+    """Return ``(subject, body)`` for a welcome email to the new user."""
+    subject = f"Bienvenido a GIDAS — tus credenciales de acceso"
+    body = f"""Hola {full_name},
+
+Tu cuenta fue creada en el dominio GIDAS.
+
+Usuario: {username}@GDC01.local
+Password: {password}
+
+Acceso Linux: ssh {username}@ipa-gidas.gidas.internal
+Acceso Windows: RDP a tu VM del proyecto
+
+Tenés que cambiar la contraseña en el primer inicio de sesión.
+
+Saludos,
+Equipo de Infraestructura GIDAS
+"""
+    return subject, body
+
+
 def password_reset(
     username: str,
     full_name: str,

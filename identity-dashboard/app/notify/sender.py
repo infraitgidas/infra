@@ -44,13 +44,19 @@ class EmailSender:
         subject: str,
         body: str,
         html: str | None = None,
+        *,
+        to_addr: str | None = None,
     ) -> bool:
         """Send an email.
 
         Returns ``True`` on success, ``False`` on failure (logged).
         If *html* is provided, a multipart/alternative message is sent
         with both plain-text and HTML parts.
+
+        If *to_addr* is provided it overrides the default recipient
+        from config (useful for sending welcome emails to the new user).
         """
+        recipient = to_addr or self._to
         msg: Any
         if html:
             msg = MIMEMultipart("alternative")
@@ -61,7 +67,7 @@ class EmailSender:
 
         msg["Subject"] = subject
         msg["From"] = self._from
-        msg["To"] = self._to
+        msg["To"] = recipient
 
         try:
             with smtplib.SMTP(self._host, self._port, timeout=10) as server:
@@ -70,7 +76,7 @@ class EmailSender:
                 if self._user and self._password:
                     server.login(self._user, self._password)
                 server.send_message(msg)
-            logger.info("Email sent: %s -> %s (%s)", self._from, self._to, subject)
+            logger.info("Email sent: %s -> %s (%s)", self._from, recipient, subject)
             return True
         except Exception:
             logger.warning("Email delivery failed: %s", subject, exc_info=True)

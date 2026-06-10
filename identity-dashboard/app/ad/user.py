@@ -26,6 +26,7 @@ def create_user(
     *,
     role: str = "",
     proyecto: str = "",
+    email: str = "",
     force_change: bool = True,
 ) -> str:
     """PowerShell script to create an AD user and set password-change flags."""
@@ -41,6 +42,7 @@ New-ADUser -Name "{first} {last}" `
     -PasswordNeverExpires $true `
     -Title "{role}" `
     -Department "{proyecto}" `
+    -EmailAddress "{email}" `
     -Description "Creado via gidas-identity CLI"
 
 # Force password change at first login

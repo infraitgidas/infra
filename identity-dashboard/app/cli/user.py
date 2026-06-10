@@ -27,6 +27,7 @@ from app.freeipa.user import user_find as ipa_user_find
 from app.notify.sender import EmailSender
 from app.notify.templates import user_created as email_user_created
 from app.notify.templates import user_modified as email_user_modified
+from app.notify.templates import user_welcome as email_user_welcome
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +116,7 @@ def create(
     logger.info("Creating AD user %s ...", username)
     create_ps = ad_create_user(
         username, first, last, ou_path, password,
-        role=role, proyecto=proyecto,
+        role=role, proyecto=proyecto, email=email or "",
     )
     result = ad.run_ps(create_ps)
     if not result["ok"]:
@@ -137,7 +138,7 @@ def create(
     ad_created = True
     try:
         logger.info("Creating FreeIPA user %s ...", username)
-        ipa_cmd = ipa_user_add(username, first, last, role=role, proyecto=proyecto)
+        ipa_cmd = ipa_user_add(username, first, last, role=role, proyecto=proyecto, email=email or "")
         result = freeipa.run_ipa(ipa_cmd)
         if not result["ok"]:
             err_msg = result.get("error", "unknown")
@@ -167,10 +168,21 @@ def create(
     if notify:
         try:
             sender = EmailSender(config.smtp)
-            subject, body = email_user_created(
+
+            # Welcome email to the new user
+            if email:
+                welcome_subj, welcome_body = email_user_welcome(
+                    username, name, password,
+                )
+                sender.send(welcome_subj, welcome_body, to_addr=email)
+
+            # Notification to admin
+            admin_subj, admin_body = email_user_created(
                 username, name, role, proyecto, password,
             )
-            sender.send(subject, body)
+            if email:
+                admin_body += f"\nEmail: {email}\n"
+            sender.send(admin_subj, admin_body)
         except Exception as exc:
             logger.warning("Email notification failed: %s", exc)
 

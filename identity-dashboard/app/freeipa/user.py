@@ -12,18 +12,24 @@ def user_add(
     *,
     role: str = "",
     proyecto: str = "",
+    email: str = "",
     shell: str = "/bin/bash",
 ) -> str:
     """Build ``ipa user-add`` subcommand (without ``ipa`` prefix)."""
-    return (
-        f"user-add {username} "
-        f'--first="{first}" '
-        f'--last="{last}" '
-        f'--title="{role}" '
-        f'--orgunit="{proyecto}" '
-        f"--shell={shell} "
-        f"--homedir=/home/{username}"
-    )
+    parts = [
+        f"user-add {username}",
+        f'--first="{first}"',
+        f'--last="{last}"',
+    ]
+    if role:
+        parts.append(f'--title="{role}"')
+    if proyecto:
+        parts.append(f'--orgunit="{proyecto}"')
+    if email:
+        parts.append(f'--email="{email}"')
+    parts.append(f"--shell={shell}")
+    parts.append(f"--homedir=/home/{username}")
+    return " ".join(parts)
 
 
 def user_mod(

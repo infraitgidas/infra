@@ -43,8 +43,9 @@ from app.freeipa.user import user_find as ipa_user_find
 from app.logging import setup_logging
 from app.notify.sender import EmailSender
 from app.notify.templates import (
-    user_created as email_new_user,
     password_reset as email_password_reset,
+    user_created as email_new_user,
+    user_welcome as email_user_welcome,
 )
 
 console = Console()
@@ -138,6 +139,39 @@ def _list_groups(config: AppConfig) -> None:
         ad.close()
 
 
+# ── AD helpers for form data ────────────────────────────────────────
+
+
+def _fetch_ad_groups(ad: ADClient) -> list[str]:
+    """Fetch all AD group names, return sorted list."""
+    try:
+        result = ad.run_ps(
+            "Get-ADGroup -Filter * | Select-Object -ExpandProperty Name | Sort-Object"
+        )
+        if result["ok"]:
+            raw = result["output"].strip()
+            return [g.strip() for g in raw.splitlines() if g.strip()]
+    except Exception:
+        pass
+    return []
+
+
+def _fetch_ad_projects(ad: ADClient) -> list[str]:
+    """Fetch unique Department values from AD users."""
+    try:
+        result = ad.run_ps(
+            "Get-ADUser -Filter * -Properties Department "
+            "| Select-Object -ExpandProperty Department -Unique "
+            "| Where-Object { $_ } | Sort-Object"
+        )
+        if result["ok"]:
+            raw = result["output"].strip()
+            return [p.strip() for p in raw.splitlines() if p.strip()]
+    except Exception:
+        pass
+    return []
+
+
 # ── User create ─────────────────────────────────────────────────────
 
 
@@ -145,6 +179,7 @@ def _create_user(config: AppConfig) -> None:
     """Interactive user creation (AD + FreeIPA)."""
     console.print(Panel.fit("[bold]Crear usuario[/]", border_style="cyan"))
 
+    # ── Basic fields ────────────────────────────────────────────────
     full_name = questionary.text("Nombre completo:").ask()
     if not full_name:
         return
@@ -157,11 +192,55 @@ def _create_user(config: AppConfig) -> None:
     ).ask()
     if not role:
         return
-    proyecto = questionary.text("Proyecto:").ask()
-    if not proyecto:
+
+    user_email = questionary.text("Email del usuario:").ask()
+    if not user_email:
         return
 
-    notify = questionary.confirm("¿Enviar email al admin?", default=False).ask()
+    # ── Fetch AD groups & projects ──────────────────────────────────
+    ad_catalog = ADClient(config.ad)
+    try:
+        with console.status("[cyan]Cargando grupos y proyectos desde AD...[/]"):
+            all_groups = _fetch_ad_groups(ad_catalog)
+            all_projects = _fetch_ad_projects(ad_catalog)
+    finally:
+        ad_catalog.close()
+
+    # ── Project selector ────────────────────────────────────────────
+    project_choices = list(all_projects) if all_projects else []
+    project_choices.append("➕  Crear proyecto nuevo")
+    proyecto = questionary.select(
+        "Proyecto (Department en AD):",
+        choices=project_choices,
+    ).ask()
+    if not proyecto:
+        return
+    if proyecto == "➕  Crear proyecto nuevo":
+        proyecto = questionary.text("Nombre del proyecto:").ask()
+        if not proyecto:
+            return
+
+    # ── Group selector ──────────────────────────────────────────────
+    group_choices = list(all_groups) if all_groups else []
+    group_choices.append("➕  Crear grupo nuevo")
+    selected_groups = questionary.checkbox(
+        "Grupos adicionales (además del default por rol):",
+        choices=group_choices,
+    ).ask()
+    if selected_groups is None:
+        selected_groups = []
+
+    # Check if user selected "Crear grupo nuevo"
+    extra_groups: list[str] = []
+    for g in selected_groups:
+        if g == "➕  Crear grupo nuevo":
+            new_group = questionary.text("Nombre del nuevo grupo:").ask()
+            if new_group:
+                extra_groups.append(new_group)
+        else:
+            extra_groups.append(g)
+
+    notify = questionary.confirm("¿Enviar email de bienvenida al usuario?", default=True).ask()
 
     # ── Resolve data
     password = stdlib_secrets.token_urlsafe(16)
@@ -178,10 +257,13 @@ def _create_user(config: AppConfig) -> None:
     table.add_column("Valor")
     table.add_row("Nombre", full_name)
     table.add_row("Username", username)
+    table.add_row("Email", user_email)
     table.add_row("Rol", role)
     table.add_row("OU", ou_path)
-    table.add_row("Grupo default", group_name or "—")
     table.add_row("Proyecto", proyecto)
+    table.add_row("Grupo default", group_name or "—")
+    if extra_groups:
+        table.add_row("Grupos extra", ", ".join(extra_groups))
     table.add_row("Password", f"[bold yellow]{password}[/]")
     console.print(table)
 
@@ -197,7 +279,7 @@ def _create_user(config: AppConfig) -> None:
         with console.status("[cyan]Creando en AD...[/]"):
             result = ad.run_ps(
                 ad_create_user(username, first, last, ou_path, password,
-                               role=role, proyecto=proyecto)
+                               role=role, proyecto=proyecto, email=user_email)
             )
         if not result["ok"]:
             console.print(f"[red]ERROR en AD:[/] {result['error']}")
@@ -210,10 +292,23 @@ def _create_user(config: AppConfig) -> None:
             if not result["ok"]:
                 console.print(f"[yellow]WARN en AD:[/] No se pudo agregar a grupo: {result['error']}")
 
+        # Add extra groups in AD (create if needed)
+        for g in extra_groups:
+            # Try to add — if group doesn't exist, create it first
+            with console.status(f"[cyan]Agregando a grupo '{g}' en AD...[/]"):
+                result = ad.run_ps(ad_add_member(g, username))
+                if not result["ok"] and "not found" in result.get("error", "").lower():
+                    # Group doesn't exist, create it
+                    console.print(f"[yellow]Grupo '{g}' no existe, creando...[/]")
+                    ad.run_ps(f"New-ADGroup -Name '{g}' -GroupScope Global -Path 'CN=Users,DC=GDC01,DC=local'")
+                    result = ad.run_ps(ad_add_member(g, username))
+                if not result["ok"]:
+                    console.print(f"[yellow]WARN:[/] No se pudo agregar a '{g}': {result['error']}")
+
         # ── FreeIPA ──
         with console.status("[cyan]Creando en FreeIPA...[/]"):
             result = freeipa.run_ipa(
-                ipa_user_add(username, first, last, role=role, proyecto=proyecto)
+                ipa_user_add(username, first, last, role=role, proyecto=proyecto, email=user_email)
             )
         if not result["ok"]:
             # Rollback AD
@@ -223,24 +318,44 @@ def _create_user(config: AppConfig) -> None:
             console.print("[red]Creación fallida — AD revertido[/]")
             return
 
-        # Add to FreeIPA group
-        if group_name:
-            with console.status(f"[cyan]Agregando a grupo {group_name} en FreeIPA...[/]"):
-                freeipa.run_ipa(ipa_group_add_member(group_name, username))
+        # Add to FreeIPA groups
+        for g in [group_name] + extra_groups:
+            if not g:
+                continue
+            with console.status(f"[cyan]Agregando a grupo {g} en FreeIPA...[/]"):
+                freeipa.run_ipa(ipa_group_add_member(g, username))
 
         # ── Notify ──
         if notify:
             try:
                 sender = EmailSender(config.smtp)
-                subject, body = email_new_user(username, full_name, password)
-                sender.send(subject, body)
-                console.print("[green]Email de notificación enviado[/]")
+
+                # Welcome email to the new user
+                welcome_subj, welcome_body = email_user_welcome(
+                    username, full_name, password,
+                )
+                sent = sender.send(welcome_subj, welcome_body, to_addr=user_email)
+                if sent:
+                    console.print(f"[green]Email de bienvenida enviado a {user_email}[/]")
+                else:
+                    console.print(f"[yellow]WARN:[/] No se pudo enviar el email de bienvenida")
+
+                # Notification to admin
+                admin_subj, admin_body = email_new_user(
+                    username, full_name, role, proyecto, password,
+                )
+                admin_body += f"\nEmail: {user_email}\n"
+                if extra_groups:
+                    admin_body += f"Grupos: {', '.join(extra_groups)}\n"
+                sender.send(admin_subj, admin_body)
+                console.print(f"[green]Notificación enviada a gidas@frlp.utn.edu.ar[/]")
             except Exception as e:
                 console.print(f"[yellow]WARN:[/] Notificación falló: {e}")
 
         console.print()
         console.print(Panel.fit(
             f"[bold green]Usuario '{username}' creado exitosamente[/]\n"
+            f"Email: {user_email}\n"
             f"Password: [bold yellow]{password}[/]",
             border_style="green",
         ))
