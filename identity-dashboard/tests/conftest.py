@@ -44,8 +44,8 @@ def app_config() -> AppConfig:
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
-    """Return a Click CliRunner with mix_stderr=False."""
-    return CliRunner(mix_stderr=False)
+    """Return a Click CliRunner (default mix_stderr=True for compat)."""
+    return CliRunner()
 
 
 # ── Mock AppConfig injection helper ─────────────────────────────────
