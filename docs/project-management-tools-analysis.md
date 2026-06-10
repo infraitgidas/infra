@@ -522,19 +522,28 @@ Fundamento:
 
 ---
 
+## Decisión Final
+
+**2026-06-10 — Decidido: Redmine.**
+
+Después de evaluar las alternativas, se opta por **continuar con Redmine** como plataforma principal. Las razones concretas:
+
+1. **Ya funciona y el equipo lo conoce** — migrar tiene costo real y beneficio marginal.
+2. **Menor consumo de recursos** — 2 GB RAM vs 4-8 GB de OpenProject. En un PVE con recursos acotados, importa.
+3. **Versatilidad vía custom fields + plugins** — podemos modelar lo que necesitemos sin cambiar de herramienta.
+4. **Integración Git nativa** — ya anda con GitLab.
+5. **La migración a OpenProject no es trivial** — no tiene migrador desde Redmine. Si algún día queremos migrar, mejor hacerlo con datos limpios y mínima dependencia de plugins.
+
+Ver ADR-001 en `docs/decisions/001-redmine-platform.md` para el registro completo de la decisión.
+
 ## Próximos Pasos
 
-1. ✅ **Decidir herramienta** (este documento)
-2. ⬜ Hacer PoC con OpenProject en CT Docker
-   - Deploy con Docker Compose
-   - Configurar LDAP contra FreeIPA
-   - Crear estructura de proyecto GIDAS
-   - Importar datos desde Redmine (vía API)
-3. ⬜ Evaluar performance con 30 usuarios simulados
-4. ⬜ Definir workflows y roles
-5. ⬜ Capacitar al equipo
-6. ⬜ Migración gradual desde Redmine
-7. ⬜ Período de solapamiento (ambos sistemas)
+1. ✅ **Decidir herramienta** (este documento + ADR-001)
+2. ⬜ Inventariar plugins instalados y evaluar cuáles vale la pena agregar
+3. ⬜ Aplicar tema UI moderno si la adopción del equipo lo requiere
+4. ⬜ Revisar workflows y roles actuales
+5. ⬜ Evaluar performance actual antes de agregar carga
+6. ⬜ Documentar configuración y procedimientos
 
 ---
 
