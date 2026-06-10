@@ -1,8 +1,11 @@
 """SSH connection manager for FreeIPA operations.
 
 Connects to the IPA server via paramiko, obtains a Kerberos ticket via
-``kinit`` (password from decrypted secrets, passed via stdin), and
-executes ``ipa`` CLI commands.
+the host keytab (``sudo kinit -k``), and executes ``ipa`` CLI commands
+via ``sudo``.  Only needs an SSH user with password-less sudo access;
+no FreeIPA admin password is stored or transmitted.
+
+If the SSH user doesn't have sudo, falls back to password-based kinit.
 """
 
 from __future__ import annotations
@@ -20,6 +23,10 @@ logger = logging.getLogger(__name__)
 _RETRY_DELAYS = [3, 6]
 _MAX_RETRIES = 2
 
+# Default keytab path for password-less kinit via sudo
+_KEYTAB_PATH = "/etc/krb5.keytab"
+_KEYTAB_PRINCIPAL = "host/ipa-gidas.gdc01.local@IPA.GDC01.LOCAL"
+
 
 class FreeIPAClientError(Exception):
     """Raised when FreeIPA operations fail after all retries."""
@@ -27,6 +34,10 @@ class FreeIPAClientError(Exception):
 
 class FreeIPAClient:
     """Manages an SSH session to the FreeIPA server.
+
+    Uses the host keytab for Kerberos authentication so no admin
+    password is needed.  All ``ipa`` commands run via ``sudo``
+    because the keytab is only readable by root.
 
     Usage::
 
@@ -51,7 +62,7 @@ class FreeIPAClient:
         client.connect(
             hostname=self._config.host,
             username=self._config.ssh_user,
-            key_filename=self._config.ssh_key_path,
+            key_filename=self._config.ssh_key_path if self._config.ssh_key_path else None,
             timeout=15,
         )
         self._client = client
@@ -66,15 +77,14 @@ class FreeIPAClient:
     # ── Command execution ──────────────────────────────────────────
 
     def run(self, command: str, timeout: int = 30) -> dict[str, Any]:
-        """Execute an arbitrary *command* on the FreeIPA server.
+        """Execute a *command* on the FreeIPA server via keytab + sudo.
 
-        Prepends ``kinit`` with the admin password so the ``ipa`` CLI
-        has a valid Kerberos ticket.  The admin password is **never**
-        logged (the logging filter in ``app.logging`` strips it).
+        Obtains a Kerberos ticket via the host keytab (readable only by
+        root), then runs the command via sudo so the ``ipa`` CLI has a
+        valid ticket.  No admin password is stored or transmitted.
         """
-        # kinit via stdin to avoid exposing the password in the process table
-        kinit = f"echo '{self._config.admin_password}' | kinit admin"
-        full_cmd = f"{kinit} && {command}"
+        kinit = f"sudo kinit -k -t {_KEYTAB_PATH} {_KEYTAB_PRINCIPAL}"
+        full_cmd = f"{kinit} && sudo {command}"
 
         last_error: Exception | None = None
 
