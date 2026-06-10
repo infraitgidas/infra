@@ -13,6 +13,9 @@ from typing import Any
 def passwd(username: str, password: str) -> str:
     """Build a command to change *username*'s password via stdin.
 
+    Returns the full command including pipe (use with :meth:`run`,
+    **not** :meth:`run_ipa`, since ``run_ipa`` prepends ``ipa ``).
+
     The raw *password* value is embedded in a shell echo — however the
     logging layer (``SanitizingFilter``) strips password-like values
     before they reach the output.

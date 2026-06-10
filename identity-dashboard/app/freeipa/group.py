@@ -6,18 +6,18 @@ from typing import Any
 
 
 def group_add_member(group: str, username: str) -> str:
-    """Build ``ipa group-add-member`` command."""
-    return f"ipa group-add-member {group} --users={username}"
+    """Build ``ipa group-add-member`` subcommand (without ``ipa`` prefix)."""
+    return f"group-add-member {group} --users={username}"
 
 
 def group_remove_member(group: str, username: str) -> str:
-    """Build ``ipa group-remove-member`` command."""
-    return f"ipa group-remove-member {group} --users={username}"
+    """Build ``ipa group-remove-member`` subcommand (without ``ipa`` prefix)."""
+    return f"group-remove-member {group} --users={username}"
 
 
 def group_find(group: str) -> str:
-    """Build ``ipa group-find`` command."""
-    return f"ipa group-find {group}"
+    """Build ``ipa group-find`` subcommand (without ``ipa`` prefix)."""
+    return f"group-find {group}"
 
 
 # ── Command registry ──────────────────────────────────────────────────

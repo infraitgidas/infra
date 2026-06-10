@@ -69,9 +69,12 @@ class ADClient:
             try:
                 r = self.session.run_ps(script)
                 if r.status_code == 0:
-                    return {"ok": True, "output": r.std_out.decode("utf-16-le")}
+                    # pywinrm returns mixed-encoding bytes (mostly UTF-8
+                    # with occasional Latin-1 user data). Latin-1 can
+                    # decode any byte without loss.
+                    return {"ok": True, "output": r.std_out.decode("latin-1")}
 
-                stderr = r.std_err.decode("utf-16-le")
+                stderr = r.std_err.decode("latin-1", errors="replace")
                 logger.warning(
                     "PS non-zero exit [attempt %d/%d]: %s",
                     attempt,

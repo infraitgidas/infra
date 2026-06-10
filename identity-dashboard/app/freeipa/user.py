@@ -14,9 +14,9 @@ def user_add(
     proyecto: str = "",
     shell: str = "/bin/bash",
 ) -> str:
-    """Build ``ipa user-add`` command."""
+    """Build ``ipa user-add`` subcommand (without ``ipa`` prefix)."""
     return (
-        f"ipa user-add {username} "
+        f"user-add {username} "
         f'--first="{first}" '
         f'--last="{last}" '
         f'--title="{role}" '
@@ -32,8 +32,8 @@ def user_mod(
     role: str | None = None,
     proyecto: str | None = None,
 ) -> str:
-    """Build ``ipa user-mod`` command."""
-    parts = [f"ipa user-mod {username}"]
+    """Build ``ipa user-mod`` subcommand (without ``ipa`` prefix)."""
+    parts = [f"user-mod {username}"]
     if role is not None:
         parts.append(f'--title="{role}"')
     if proyecto is not None:
@@ -42,23 +42,23 @@ def user_mod(
 
 
 def user_find(username: str) -> str:
-    """Build ``ipa user-find`` command."""
-    return f"ipa user-find {username}"
+    """Build ``ipa user-find`` subcommand (without ``ipa`` prefix)."""
+    return f"user-find {username}"
 
 
 def user_disable(username: str) -> str:
-    """Build ``ipa user-disable`` command."""
-    return f"ipa user-disable {username}"
+    """Build ``ipa user-disable`` subcommand (without ``ipa`` prefix)."""
+    return f"user-disable {username}"
 
 
 def user_enable(username: str) -> str:
-    """Build ``ipa user-enable`` command."""
-    return f"ipa user-enable {username}"
+    """Build ``ipa user-enable`` subcommand (without ``ipa`` prefix)."""
+    return f"user-enable {username}"
 
 
 def user_del(username: str) -> str:
-    """Build ``ipa user-del`` command."""
-    return f"ipa user-del {username}"
+    """Build ``ipa user-del`` subcommand (without ``ipa`` prefix)."""
+    return f"user-del {username}"
 
 
 # ── Command registry ──────────────────────────────────────────────────

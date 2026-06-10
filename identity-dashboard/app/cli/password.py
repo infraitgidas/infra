@@ -116,7 +116,7 @@ def password_cmd(
     try:
         logger.info("Resetting FreeIPA password for %s ...", username)
         ipa_cmd = ipa_passwd(username, password)
-        result = freeipa.run_ipa(ipa_cmd, timeout=30)
+        result = freeipa.run(ipa_cmd, timeout=30)
         if not result["ok"]:
             err_msg = result.get("error", "unknown")
             logger.error("FreeIPA password reset failed: %s", err_msg)

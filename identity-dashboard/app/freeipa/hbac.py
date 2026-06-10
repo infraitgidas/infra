@@ -14,27 +14,27 @@ from typing import Any
 
 def hbacrule_find_by_user(username: str) -> str:
     """List HBAC rules applicable to *username*."""
-    return f"ipa hbacrule-find --users={username} --all"
+    return f"hbacrule-find --users={username} --all"
 
 
 def hbacrule_enable(rule: str) -> str:
     """Enable an HBAC rule by name."""
-    return f"ipa hbacrule-enable {rule}  # --notify placeholder"
+    return f"hbacrule-enable {rule}"
 
 
 def hbacrule_disable(rule: str) -> str:
     """Disable an HBAC rule by name."""
-    return f"ipa hbacrule-disable {rule}  # --notify placeholder"
+    return f"hbacrule-disable {rule}"
 
 
 def hbacrule_find(rule: str) -> str:
     """Find an HBAC rule by name or pattern."""
-    return f"ipa hbacrule-find {rule} --all"
+    return f"hbacrule-find {rule} --all"
 
 
 def hbacsvc_find(svc: str) -> str:
     """Find an HBAC service by name or pattern."""
-    return f"ipa hbacsvc-find {svc}"
+    return f"hbacsvc-find {svc}"
 
 
 def hbactest(
@@ -43,9 +43,7 @@ def hbactest(
     service: str,
 ) -> str:
     """Simulate an HBAC access check (``ipa hbactest``)."""
-    return (
-        f"ipa hbactest --user={user} --host={host} --service={service}"
-    )
+    return f"hbactest --user={user} --host={host} --service={service}"
 
 
 # ── Command registry ──────────────────────────────────────────────────
