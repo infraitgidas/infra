@@ -100,6 +100,16 @@ else
     FAIL=$((FAIL + 1))
 fi
 
+# ── 8. Unit tests ──────────────────────────────────────────────
+echo "8. Running unit tests..."
+if python3 -m pytest tests/ -q --tb=short 2>&1 | tail -5; then
+    green "Unit tests passed"
+    PASS=$((PASS + 1))
+else
+    red "Unit tests failed"
+    FAIL=$((FAIL + 1))
+fi
+
 # ── Summary ────────────────────────────────────────────────────
 echo ""
 echo "=== Results: ${PASS} passed, ${FAIL} failed ==="
