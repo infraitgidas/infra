@@ -38,13 +38,23 @@ def hbac_group() -> None:
 @hbac_group.command(name="list")
 @click.option("--user", "username", default=None, help="Filter rules by username")
 @click.option("--host", default=None, help="Filter rules by host")
+@click.option("--dry-run", is_flag=True, default=False, help="Print actions without executing")
 @click.pass_context
 def list_rules(
     ctx: click.Context,
     username: str | None,
     host: str | None,
+    dry_run: bool,
 ) -> None:
     """List HBAC rules, optionally filtered by user or host."""
+    if dry_run:
+        click.echo("[DRY-RUN] Would list HBAC rules from FreeIPA")
+        if username:
+            click.echo(f"           Filter by user: {username}")
+        if host:
+            click.echo(f"           Filter by host: {host}")
+        return
+
     config = _get_config(ctx)
     freeipa = FreeIPAClient(config.freeipa)
 
@@ -82,17 +92,24 @@ def list_rules(
     default=True,
     help="Enable or disable the rule",
 )
+@click.option("--dry-run", is_flag=True, default=False, help="Print actions without executing")
 @click.pass_context
 def toggle_rule(
     ctx: click.Context,
     rule: str,
     enable_rule: bool,
+    dry_run: bool,
 ) -> None:
     """Enable or disable an HBAC rule in FreeIPA."""
+    action = "enable" if enable_rule else "disable"
+
+    if dry_run:
+        click.echo(f"[DRY-RUN] Would {action} HBAC rule: {rule}")
+        return
+
     config = _get_config(ctx)
     freeipa = FreeIPAClient(config.freeipa)
 
-    action = "enable" if enable_rule else "disable"
     logger.info("%s HBAC rule %s ...", action.capitalize(), rule)
 
     try:

@@ -297,9 +297,18 @@ def modify(
 @user_group.command(name="list")
 @click.option("--ou", default=None, help="Filter by OU (partial DN match)")
 @click.option("--role", default=None, help="Filter by role (Title attribute)")
+@click.option("--dry-run", is_flag=True, default=False, help="Print actions without executing")
 @click.pass_context
-def list_users(ctx: click.Context, ou: str | None, role: str | None) -> None:
+def list_users(ctx: click.Context, ou: str | None, role: str | None, dry_run: bool) -> None:
     """List user accounts from Active Directory."""
+    if dry_run:
+        click.echo("[DRY-RUN] Would list users from Active Directory")
+        if ou:
+            click.echo(f"           OU filter: {ou}")
+        if role:
+            click.echo(f"           Role filter: {role}")
+        return
+
     config = _get_config(ctx)
     ad = ADClient(config.ad)
 
@@ -327,9 +336,16 @@ def list_users(ctx: click.Context, ou: str | None, role: str | None) -> None:
 
 @user_group.command(name="show")
 @click.argument("username")
+@click.option("--dry-run", is_flag=True, default=False, help="Print actions without executing")
 @click.pass_context
-def show_user(ctx: click.Context, username: str) -> None:
+def show_user(ctx: click.Context, username: str, dry_run: bool) -> None:
     """Show details for a specific user in AD and FreeIPA."""
+    if dry_run:
+        click.echo(f"[DRY-RUN] Would show details for user: {username}")
+        click.echo("           AD: Get-ADUser")
+        click.echo("           FreeIPA: ipa user-find")
+        return
+
     config = _get_config(ctx)
     ad = ADClient(config.ad)
     freeipa = FreeIPAClient(config.freeipa)
