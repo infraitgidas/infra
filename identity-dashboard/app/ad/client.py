@@ -69,12 +69,20 @@ class ADClient:
             try:
                 r = self.session.run_ps(script)
                 if r.status_code == 0:
-                    # pywinrm returns mixed-encoding bytes (mostly UTF-8
-                    # with occasional Latin-1 user data). Latin-1 can
-                    # decode any byte without loss.
-                    return {"ok": True, "output": r.std_out.decode("latin-1")}
+                    # PowerShell legacy output uses the OEM code page
+                    # (CP850 for Spanish). Try UTF-8 first (PowerShell
+                    # Core), then CP850, then fall back to latin-1.
+                    for enc in ("utf-8", "cp850", "latin-1"):
+                        try:
+                            text = r.std_out.decode(enc)
+                            break
+                        except (UnicodeDecodeError, LookupError):
+                            continue
+                    else:
+                        text = r.std_out.decode("latin-1", errors="replace")
+                    return {"ok": True, "output": text}
 
-                stderr = r.std_err.decode("latin-1", errors="replace")
+                stderr = r.std_err.decode("cp850", errors="replace")
                 logger.warning(
                     "PS non-zero exit [attempt %d/%d]: %s",
                     attempt,
