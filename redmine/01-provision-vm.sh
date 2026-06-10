@@ -41,7 +41,7 @@ echo "[Step 2] Using template ID: ${TEMPLATE_ID} ✓"
 # --- Step 3: Clone template and configure ---
 echo "[Step 3] Creating VM ${VM_ID} from template ${TEMPLATE_ID}..."
 ssh ${SSH_OPTS} "root@${PM_IP}" \
-    "qm clone ${TEMPLATE_ID} ${VM_ID} --name ${VM_HOSTNAME} --full --storage local-lvm"
+    "qm clone ${TEMPLATE_ID} ${VM_ID} --name ${VM_HOSTNAME} --full --storage shared-vms"
 
 echo "[Step 3] Configuring VM ${VM_ID}..."
 ssh ${SSH_OPTS} "root@${PM_IP}" \

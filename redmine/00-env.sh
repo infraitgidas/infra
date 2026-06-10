@@ -8,8 +8,8 @@
 set -euo pipefail
 
 # --- Proxmox Node ---
-PM_NODE="pve-desa"
-PM_IP="192.168.1.11"
+PM_NODE="pve-desa04"
+PM_IP="192.168.1.14"
 
 # --- VM Specs ---
 VM_ID=206
@@ -68,5 +68,6 @@ export REDMINE_DIR BACKUP_DIR SSL_DIR SSH_OPTS
 export POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD REDMINE_SECRET_KEY
 
 echo "[00-env] Loaded Redmine environment"
-echo "[00-env] VM: ${VM_ID} @ ${PM_NODE} → ${VM_FQDN} (${VM_IP})"
+echo "[00-env] VM: ${VM_ID} @ ${PM_NODE} (${PM_IP}) → ${VM_FQDN} (${VM_IP})"
+echo "[00-env] Storage: shared-vms"
 echo "[00-env] Stack: redmine:${REDMINE_VERSION} + postgres:${POSTGRES_VERSION} + nginx:${NGINX_VERSION}"
