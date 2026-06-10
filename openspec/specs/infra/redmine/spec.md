@@ -2,28 +2,35 @@
 
 ## Propósito
 
-Desplegar y operar Redmine como gestor de proyectos open source en un LXC de
-`pve-ad`, siguiendo el patrón Docker Compose del stack `sg-monitoring`.
+Desplegar y operar Redmine como gestor de proyectos open source en una VM de
+`pve-desa`, siguiendo el patrón Docker Compose del stack `sg-monitoring`.
 
 ## Requisitos
 
-### Requisito: Infraestructura del contenedor
+### Requisito: Infraestructura de la VM
 
-El sistema DEBE crear un contenedor LXC dedicado (CT ~206) en `pve-ad` con
-2 vCPU, 4 GB RAM y 20 GB disco.
+El sistema DEBE crear una VM QEMU/KVM dedicada (ID ~206) en `pve-desa` con
+2 vCPU, 4 GB RAM, 20 GB disco y Rocky Linux 10 como sistema operativo.
 
-#### Escenario: Creación de CT desde scripts
+#### Escenario: Creación de VM desde scripts
 
-- DADO `pve-ad` operativo con recursos disponibles
-- CUANDO se ejecuta el script de creación del CT
-- ENTONCES el CT DEBE crearse con Ubuntu LTS, 2 vCPU, 4 GB RAM y 20 GB disco
-- Y el CT DEBE tener conectividad a Internet para pulling de imágenes Docker
+- DADO `pve-desa` operativo con recursos disponibles
+- CUANDO se ejecuta el script de aprovisionamiento (`qm create`)
+- ENTONCES la VM DEBE crearse con Rocky Linux 10, 2 vCPU, 4 GB RAM y 20 GB disco
+- Y la VM DEBE tener conectividad a Internet para pulling de imágenes Docker
 
-#### Escenario: CT ID libre
+#### Escenario: VM ID libre
 
-- DADO un CT ID propuesto (ej: 206)
-- CUANDO se verifica disponibilidad en `pve-ad`
+- DADO un VM ID propuesto (ej: 206)
+- CUANDO se verifica disponibilidad en `pve-desa` vía `qm list`
 - ENTONCES el script DEBE confirmar que el ID no está en uso antes de crear
+
+#### Escenario: Usuario de acceso
+
+- DADO la VM creada con Rocky Linux 10
+- CUANDO se completa el primer boot con cloud-init
+- ENTONCES el usuario `infra` DEBE existir con contraseña configurada
+- Y DEBE permitir acceso SSH para los pasos de bootstrap
 
 ### Requisito: Despliegue del stack Redmine
 
@@ -32,15 +39,15 @@ Docker Compose.
 
 #### Escenario: Stack completo funcionando
 
-- DADO el CT creado con Docker Engine instalado
+- DADO la VM con Docker Engine instalado (repos oficiales Rocky Linux)
 - CUANDO se ejecuta `docker compose up -d`
 - ENTONCES los tres servicios DEBEN estar en estado running
-- Y Redmine DEBE ser accesible en `http://localhost:3000` dentro del CT
+- Y Redmine DEBE ser accesible en `http://localhost:3000` dentro de la VM
 
 #### Escenario: Persistencia de datos
 
 - DADO el stack desplegado
-- CUANDO se reinicia el CT o los contenedores
+- CUANDO se reinicia la VM o los contenedores
 - ENTONCES las bases de datos y archivos subidos DEBEN persistir en volúmenes
   Docker
 
@@ -52,8 +59,7 @@ El sistema DEBE exponer Redmine vía HTTPS mediante nginx reverse proxy.
 
 - DADO nginx configurado como reverse proxy hacia `redmine:3000`
 - CUANDO se accede a `https://redmine.gidas.local` desde la red interna
-- ENTONCES nginx DEBE responder con certificado válido (auto-firmado o
-  Let's Encrypt)
+- ENTONCES nginx DEBE responder con certificado válido (auto-firmado)
 
 #### Escenario: Redirección HTTP a HTTPS
 
@@ -84,7 +90,7 @@ El sistema DEBE ejecutar backups diarios de la base PostgreSQL.
 
 #### Escenario: Dump programado
 
-- DADO un cron configurado en el CT host
+- DADO un cron configurado en la VM host
 - CUANDO se ejecuta diariamente el script de backup
 - ENTONCES `pg_dump` DEBE generar un archivo `.sql.gz` en `/var/backups/redmine/`
 
@@ -101,26 +107,27 @@ plugins, themes).
 
 #### Escenario: Backup de volúmenes
 
-- DADO el contenedor con volúmenes Docker de Redmine
+- DADO la VM con volúmenes Docker de Redmine
 - CUANDO se ejecuta el script de backup
 - ENTONCES los directorios DEBEN comprimirse en un tarball
 - Y el tarball DEBE copiarse al storage interno de backups
 
 ### Requisito: Scripts reproducibles
 
-Los scripts de deploy DEBEN ser ejecutables en orden numerado desde un CT
-limpio.
+Los scripts de deploy DEBEN ser ejecutables en orden numerado desde una VM
+limpia.
 
 #### Escenario: Deploy desde cero
 
-- DADO un CT Ubuntu LTS recién creado sin Docker
-- CUANDO se ejecutan los scripts en orden (`00-env.sh`, `01-create-ct.sh`,
-  `02-deploy-stack.sh`, `03-configure-ssl.sh`)
+- DADO una VM Rocky Linux 10 recién creada sin Docker
+- CUANDO se ejecutan los scripts en orden (`01-provision-vm.sh`,
+  `02-bootstrap-vm.sh`, `03-deploy-stack.sh`, `04-configure-ssl.sh`)
 - ENTONCES el stack DEBE quedar operativo sin intervención manual
 
 #### Escenario: Rollback completo
 
 - DADO el stack desplegado
-- CUANDO se ejecuta `docker compose down` y se destruye el CT
-- ENTONCES el script DEBE liberar el CT ID y los recursos asociados
+- CUANDO se ejecuta `docker compose down` y se destruye la VM (`qm stop && qm
+  destroy`)
+- ENTONCES el script DEBE liberar el VM ID y los recursos asociados
 - Y los backups previos DEBEN estar disponibles para restauración futura

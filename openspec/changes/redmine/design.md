@@ -2,19 +2,20 @@
 
 ## Technical Approach
 
-Stack Docker Compose (`redmine:6.1` + `postgres:16` + `nginx:1.29`) en LXC dedicado (CT 206) en `pve-ad`. A diferencia de `sg-monitoring` (binarios nativos), Redmine se deploya vía Docker Compose porque la imagen oficial de Redmine ya incluye el runtime Ruby + dependencias — evita compilar gems en el CT. Scripts numerados replican el patrón `scripts/` existente.
+Stack Docker Compose (`redmine:6.1` + `postgres:16` + `nginx:1.27-alpine`) en VM dedicada (~ID 206) en `pve-desa` con Rocky Linux 10. A diferencia de `sg-monitoring` (binarios nativos), Redmine se deploya vía Docker Compose porque la imagen oficial de Redmine ya incluye el runtime Ruby + dependencias — evita compilar gems en la VM. Scripts numerados replican el patrón `scripts/` existente.
 
 ```
 redmine/
-├── 00-env.sh              ← vars (CT_ID, IP, versiones, secrets)
-├── 01-create-ct.sh        ← crea CT vía API Proxmox
-├── 02-deploy-stack.sh     ← instala Docker + deploy compose
-├── 03-configure-ssl.sh    ← certs + nginx + firewall
-├── 04-backup.sh           ← cron pg_dump + tarball
+├── 00-env.sh              ← vars (VM_ID, IP, versiones, secrets)
+├── 01-provision-vm.sh     ← crea VM vía `qm` en `pve-desa`
+├── 02-bootstrap-vm.sh     ← SSH como `infra`, instala Docker CE
+├── 03-deploy-stack.sh     ← scp docker-compose.yml + compose up -d
+├── 04-configure-ssl.sh    ← certs + nginx + firewall
+├── 05-backup.sh           ← cron pg_dump + tarball volúmenes
 ├── docker-compose.yml     ← servicios redmine + postgres + nginx
 ├── nginx/
 │   ├── redmine.conf       ← reverse proxy virtualhost
-│   └── ssl/               ← certs (creados por 03-configure-ssl.sh)
+│   └── ssl/               ← certs (creados por 04-configure-ssl.sh)
 └── .env                   ← secrets (generado por 00-env.sh, gitignored)
 ```
 
@@ -24,10 +25,19 @@ redmine/
 
 | Option | Tradeoff | Decision |
 |--------|----------|----------|
-| Native (Ruby + gems) | Compilar gems en CT liviano, mantenimiento manual de upgrades | ❌ |
+| Native (Ruby + gems) | Compilar gems en VM liviana, mantenimiento manual de upgrades | ❌ |
 | Docker Compose | Redmine oficial ya incluye runtime, upgrades = cambiar tag, mismo patrón expansión futura (GLPI, GitLab) | ✅ |
 
-**Rationale**: La imagen `redmine:6.1` es oficial, incluye Passenger + gems precompilados. Docker Compose da aislamiento de procesos y upgrades atómicos. El CT con 4GB RAM corre el stack sin swap.
+**Rationale**: La imagen `redmine:6.1` es oficial, incluye Passenger + gems precompilados. Docker Compose da aislamiento de procesos y upgrades atómicos. La VM con 4GB RAM corre el stack sin swap.
+
+### Decision: Rocky Linux 10 sobre Ubuntu LTS
+
+| Option | Tradeoff | Decision |
+|--------|----------|----------|
+| Ubuntu LTS (24.04) | Mayor ecosistema, docs, familiaridad en el equipo | ❌ |
+| Rocky Linux 10 | RHEL lineage, mismo stack Docker sin diferencias operativas, preferencia del equipo operaciones | ✅ |
+
+**Rationale**: El stack Docker Compose corre idéntico en cualquier distribución. Rocky Linux 10 ofrece lineage RHEL para consistencia con otros servicios del datacenter. Docker Engine tiene soporte oficial en ambas — no hay diferencia funcional para este deploy.
 
 ### Decision: Self-signed SSL (inicial) sobre Let's Encrypt
 
@@ -80,15 +90,16 @@ Internet (internal)
 
 | File | Action | Description |
 |------|--------|-------------|
-| `redmine/00-env.sh` | Create | Variables de entorno: CT_ID=206, IP, versiones, credenciales |
-| `redmine/01-create-ct.sh` | Create | Crea CT via `pvesh` en `pve-ad`, configura red + SSH |
-| `redmine/02-deploy-stack.sh` | Create | Instala Docker Engine + deploy `docker compose up -d` |
-| `redmine/03-configure-ssl.sh` | Create | Genera certs self-signed, configura nginx + firewall |
-| `redmine/04-backup.sh` | Create | Cron: pg_dump + tarball de volúmenes |
-| `redmine/docker-compose.yml` | Create | Servicios: redmine:6.1, postgres:16, nginx:1.29 |
+| `redmine/00-env.sh` | Create | Variables de entorno: VM_ID=206, IP, versiones, credenciales |
+| `redmine/01-provision-vm.sh` | Create | Crea VM via `qm` en `pve-desa`, cloud-init + red |
+| `redmine/02-bootstrap-vm.sh` | Create | SSH como `infra`, instala Docker CE desde repos oficiales |
+| `redmine/03-deploy-stack.sh` | Create | scp docker-compose.yml + `.env`, `docker compose up -d` |
+| `redmine/04-configure-ssl.sh` | Create | Genera certs self-signed, configura nginx + firewall |
+| `redmine/05-backup.sh` | Create | Cron: pg_dump + tarball de volúmenes |
+| `redmine/docker-compose.yml` | Create | Servicios: redmine:6.1, postgres:16, nginx:1.27-alpine |
 | `redmine/nginx/redmine.conf` | Create | Virtualhost nginx reverse proxy + SSL |
 | `redmine/.env` | Create | Secrets (gitignored): POSTGRES_PASSWORD, REDMINE_SECRET_KEY |
-| `openspec/changes/redmine/design.md` | Create | Este documento |
+| `openspec/changes/redmine/design.md` | Modify | Alineado con VM en pve-desa, Rocky Linux 10, qm provisioning |
 
 ## Interfaces / Contracts
 
@@ -117,7 +128,7 @@ services:
       REDMINE_SECRET_KEY: ${REDMINE_SECRET_KEY}
 
   nginx:
-    image: nginx:1.29
+    image: nginx:1.27-alpine
     ports: [ "443:443", "80:80" ]
     volumes:
       - ./nginx/redmine.conf:/etc/nginx/conf.d/redmine.conf:ro
@@ -125,7 +136,7 @@ services:
     depends_on: [ redmine ]
 ```
 
-Volúmenes Docker nombrados — no bind mounts (los bind mounts del CT host complican permisos con el usuario `redmine` del container, uid 999).
+Volúmenes Docker nombrados en vez de bind mounts — Docker gestiona permisos y respaldos vía `docker run --volumes-from` o `docker cp`.
 
 ## Testing Strategy
 
@@ -135,22 +146,22 @@ Volúmenes Docker nombrados — no bind mounts (los bind mounts del CT host comp
 | Deploy dry-run | `docker compose config` valida YAML | Ejecutar post-commit |
 | Smoke test | HTTPS + login admin | `curl -k https://redmine.gidas.local/login` + grep admin |
 | Backup integrity | `.sql.gz` | `gunzip -t` + `pg_restore --dry-run` |
-| Restore drill | DB restore en contenedor temporal | Script `04-backup.sh --dry-run` valida sin escribir |
+| Restore drill | DB restore en contenedor temporal | Script `05-backup.sh --dry-run` valida sin escribir |
 
 No hay test runner en el proyecto — validación vía shell scripts.
 
 ## Migration / Rollout
 
 ```
-CT creado  →  Docker Engine  →  compose up  →  SSL config  →  backup cron
+VM creada  →  Docker Engine  →  compose up  →  SSL config  →  backup cron
     1               2               3               4              5
 ```
 
 Cada paso es idempotente y puede re-ejecutarse. Rollout en una tarde, sin ventana de mantenimiento porque es servicio nuevo.
 
-**Rollback**: `docker compose down -v` (pierde datos) + `pvesh delete CT 206`. Los scripts se revierten con `git revert`. Backups existen pre-rollback si se ejecutó `04-backup.sh`.
+**Rollback**: `docker compose down -v` (pierde datos) + `qm stop <VM_ID> && qm destroy <VM_ID>`. Los scripts se revierten con `git revert`. Backups existen pre-rollback si se ejecutó `05-backup.sh`.
 
-## Open Questions
+## Open Questions (Resolved)
 
-- [ ] Hostname DNS interno de Redmine (`redmine.gidas.local` o IP directa)? — depende de si DNS interno está operativo.
-- [ ] Timing de `REDMINE_SECRET_KEY` — se genera con `openssl rand -hex 32` en `00-env.sh` o se pasa como variable manual?
+- [x] Hostname DNS interno de Redmine (`redmine.gidas.local` o IP directa)? — se usa `redmine.gidas.local` como FQDN en nginx y certs. La IP directa `192.168.1.20` también funciona para acceso interno sin DNS. Decisión: soportar ambos.
+- [x] Timing de `REDMINE_SECRET_KEY` — se genera con `openssl rand -hex 32` en `00-env.sh` si no está definido vía `secrets/redmine.yaml` (SOPS) o `.env`. Decisión: auto-generación con override.
