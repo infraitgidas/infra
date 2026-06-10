@@ -8,6 +8,7 @@
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
+| 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 
 ## Leyenda de Estados SDD
 
@@ -66,4 +67,21 @@
 
 ---
 
-*Última actualización: 2026-06-02*
+### Feature 5: Identidad AD+FreeIPA — identity-dashboard
+
+- **Objetivo**: Herramienta unificada CLI + TUI para gestión de usuarios en Active Directory y FreeIPA
+- **Componentes**: Python/Click (CLI), Python/rich+questionary (TUI), SOPS secrets, Makefile
+- **Estado SDD**: 🛠️ Implementación ✅
+- **Tareas Completadas**:
+  - CLI completo: user CRUD, grupos, HBAC, password reset con rollback
+  - TUI interactivo con menú de 7 opciones
+  - Creación de usuarios con email, selector de proyectos y grupos desde AD
+  - SMTP Outlook configurado (infrait@frlp.utn.edu.ar)
+  - Welcome email al nuevo usuario + notificación al admin
+  - Makefile para comandos rápidos
+  - Documentación en `docs/identity-dashboard.md`
+- **Archivos**: `identity-dashboard/`, `secrets/identity.yaml`, `docs/identity-dashboard.md`, `Makefile`
+
+---
+
+*Última actualización: 2026-06-10*
