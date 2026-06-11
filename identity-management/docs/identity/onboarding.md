@@ -53,7 +53,21 @@ Add-ADGroupMember -Identity "PROY-Telepark" -Members "jperez"
 
 **Regla**: Un usuario puede pertenecer a múltiples grupos `PROY-*`. Siempre debe pertenecer a al menos un grupo `G-*` (rol).
 
-### 3. Forzar sincronización SSSD
+> **Redmine**: El grupo `APP-Redmine` es un grupo contenedor que incluye a `G-Direccion`, `G-Coordinadores`, `G-Becarios`, etc. como miembros anidados. Al agregar un usuario a un grupo `G-*`, automáticamente obtiene acceso a Redmine (vía nested group). No es necesario agregar usuarios directamente a `APP-Redmine`.
+
+### 3. Sincronización Redmine (automática)
+
+Redmine sincroniza grupos y roles desde AD mediante un approach híbrido:
+
+| Capa | Mecanismo | Frecuencia |
+|------|-----------|------------|
+| **Auth (access gate)** | LDAP AuthSource con filtro `APP-Redmine` | En cada login |
+| **Grupos AD → Redmine** | LDAP Group Sync nativo de Redmine | Cada N minutos (configurable) |
+| **Roles por proyecto** | `redmine/scripts/sync-ad-members.sh` via cron | Cada 15 minutos |
+
+El usuario podrá loguearse en Redmine inmediatamente (onthefly_register lo crea al primer login). Los roles y proyectos se asignan automáticamente dentro de los 15 minutos posteriores.
+
+### 4. Forzar sincronización SSSD
 
 ```bash
 ssh root@ipa.gidas.internal
@@ -63,7 +77,7 @@ ssh root@<host>
 sss_cache -E  # limpiar y recargar caché
 ```
 
-### 4. Verificar acceso
+### 5. Verificar acceso
 
 ```bash
 # Desde cualquier host Linux con SSSD
@@ -77,7 +91,7 @@ ssh jperez@sg-azul.gidas.internal
 # Debe fallar: "Access denied" (HBAC enforcement)
 ```
 
-### 5. Configurar password inicial
+### 6. Configurar password inicial
 
 El usuario debe cambiar su contraseña en el primer login. Si necesita hacerlo desde Linux:
 
@@ -104,12 +118,15 @@ O desde Windows: `Ctrl+Alt+Del → Change Password` en RDP.
 - [ ] Grupo(s) de proyecto asignado (`PROY-*`) si aplica
 - [ ] Grupo de servicio asignado (`SRV-*`) si aplica (ej: SRV-InfraITAdmin para sysadmin de INFRAiT)
 - [ ] HBAC rule verifica acceso a hosts correctos
+- [ ] Redmine: login vía LDAP funciona (APP-Redmine gate)
+- [ ] Redmine: grupos sincronizados (LDAP Group Sync)
+- [ ] Redmine: roles y proyectos asignados (sync-ad-members.sh)
 - [ ] Password inicial documentado
 - [ ] Usuario informado del procedimiento de cambio de password
 
 ## Tiempo Estimado
 
-10-15 minutos.
+10-15 minutos (más 15 min para sincronización Redmine).
 
 ---
 

@@ -87,21 +87,77 @@ Redmine DEBE autenticar usuarios contra Active Directory (GDC01.local) mediante 
 - DADO un servidor AD accesible (192.168.1.117, puerto 389)
 - CUANDO se configura un AuthSource LDAP en Redmine
 - ENTONCES el servidor DEBE ser `192.168.1.117`
-- Y DEBE usar filtro `(memberOf=CN=redmine,OU=Groups,DC=GDC01,DC=local)`
+- Y DEBE usar filtro `(memberOf=CN=APP-Redmine,OU=Groups,DC=GDC01,DC=local)`
 - Y DEBE tener `onthefly_register` habilitado
 
 #### Escenario: Login con usuario AD
 
-- DADO un usuario miembro del grupo `redmine` en AD
+- DADO un usuario miembro del grupo `APP-Redmine` en AD
 - CUANDO ingresa a Redmine con su usuario AD y contraseña
 - ENTONCES el sistema DEBE autenticarlo
 - Y DEBE crear su cuenta local automáticamente (onthefly_register)
 
 #### Escenario: Restricción por grupo
 
-- DADO un usuario NO miembro del grupo `redmine` en AD
+- DADO un usuario NO miembro del grupo `APP-Redmine` en AD
 - CUANDO intenta autenticarse en Redmine
 - ENTONCES el sistema DEBE rechazar el acceso
+
+### Requisito: Sincronización LDAP de Grupos
+
+Redmine DEBE sincronizar grupos desde AD mediante LDAP Group Sync nativo.
+
+#### Escenario: Configuración del Group Sync
+
+- DADO el AuthSource LDAP configurado con onthefly_register
+- CUANDO se configura LDAP Group Sync en Redmine
+- ENTONCES DEBE sincronizar grupos desde `OU=Groups,DC=GDC01,DC=local`
+- Y DEBE crear grupos Redmine con los mismos nombres que los grupos AD
+- Y DEBE actualizar la membresía de los grupos automáticamente
+
+#### Escenario: Nuevo grupo en AD
+
+- DADO un nuevo grupo `PROY-GMET` creado en AD
+- CUANDO se ejecuta el Group Sync
+- ENTONCES DEBE aparecer como grupo en Redmine
+- Y DEBE contener a los mismos miembros que el grupo AD
+
+### Requisito: Sync Fino de Roles por Proyecto (Hybrid Approach)
+
+Redmine DEBE usar un script complementario para asignar roles finos por proyecto según la membresía de grupos AD, siguiendo el approach híbrido documentado en `staff.md`.
+
+#### Escenario: Script de sync ejecutado
+
+- DADO el script `redmine/scripts/sync-ad-members.sh`
+- CUANDO se ejecuta (manual o por cron)
+- ENTONCES DEBE consultar AD vía LDAP
+- Y DEBE consultar Redmine vía REST API
+- Y DEBE aplicar la lógica de mapping definida en staff.md
+
+#### Escenario: Lógica de mapping aplicada
+
+- DADO un usuario en `G-Direccion`
+- CUANDO se ejecuta el sync
+- ENTONCES DEBE tener rol Director en TODOS los proyectos
+
+- DADO un usuario en `G-Coordinadores` Y `PROY-CAPNEE`
+- CUANDO se ejecuta el sync
+- ENTONCES DEBE tener rol Coordinador en el proyecto CAPNEE
+
+- DADO un usuario en `G-Becarios` Y `PROY-CAPNEE`
+- CUANDO se ejecuta el sync
+- ENTONCES DEBE tener rol Becario en el proyecto CAPNEE
+
+- DADO un usuario en `G-Coordinadores`
+- CUANDO se ejecuta el sync
+- ENTONCES DEBE tener rol Coordinador en los proyectos Dirección y Administración
+
+#### Escenario: Script configurado en cron
+
+- DADO el script instalado en `/opt/infra/redmine/scripts/sync-ad-members.sh`
+- CUANDO se configura cron
+- ENTONCES DEBE ejecutarse cada 15 minutos
+- Y DEBE tener flag `--dry-run` para pruebas
 
 ### Requisito: Estructura de proyectos
 
@@ -131,16 +187,18 @@ Redmine DEBE contener los proyectos del laboratorio con roles y workflow definid
 - Y cada rol DEBE poder avanzar la issue hacia adelante en el flujo
 - Y DEBE haber 126 transiciones configuradas
 
-#### Escenario: Asignación de miembros
+#### Escenario: Asignación de miembros (vía sync AD → Redmine)
 
-- DADO los grupos de AD
-- CUANDO se asignan miembros a proyectos
-- ENTONCES CAPNEE DEBE tener a aalvarezf (Coordinador), rcaceresp, jetcheverry, cvalero (Becarios)
-- Y TELEPARK DEBE tener a mpenalva (Coordinador)
-- Y GMET DEBE tener a zquiroz (Coordinador)
-- Y GIS DEBE tener a jmarchesini (Coordinador)
-- Y INFRAiT DEBE tener a errodriguez (Coordinador), rmonfroglio (Becario)
-- Y Dirección y Administración DEBEN tener a Directores + Coordinadores
+- DADO los grupos de AD como fuente de verdad
+- CUANDO se ejecuta `sync-ad-members.sh`
+- ENTONCES la membresía se asigna AUTOMÁTICAMENTE según la intersección de grupos AD:
+  - CAPNEE DEBE tener a aalvarezf (Coordinador), rcaceresp, jetcheverry, cvalero (Becarios)
+  - TELEPARK DEBE tener a mpenalva (Coordinador)
+  - GMET DEBE tener a zquiroz (Coordinador)
+  - GIS DEBE tener a jmarchesini (Coordinador)
+  - INFRAiT DEBE tener a errodriguez (Coordinador), rmonfroglio (Becario)
+  - Dirección y Administración DEBEN tener a Directores + Coordinadores
+- Y NO DEBE requerir intervención manual en Redmine para miembros nuevos
 
 ### Requisito: Correo electrónico SMTP
 

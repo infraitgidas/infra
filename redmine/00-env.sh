@@ -59,6 +59,21 @@ VM_PASS="${vm_pass:-${VM_PASS:-hlsv.2025}}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-${postgres_password:-$(openssl rand -base64 24 2>/dev/null || echo 'changeme')}}"
 REDMINE_SECRET_KEY="${REDMINE_SECRET_KEY:-${redmine_secret_key:-$(openssl rand -hex 32 2>/dev/null || echo 'changeme')}}"
 
+# --- AD LDAP (para scripts de sync) ---
+AD_HOST="${AD_HOST:-192.168.1.117}"
+AD_PORT="${AD_PORT:-389}"
+AD_BIND_DN="${AD_BIND_DN:-CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local}"
+AD_BIND_PASS="${AD_BIND_PASS:-${ad_bind_pass:-}}"
+AD_GROUPS_DN="${AD_GROUPS_DN:-OU=Groups,DC=GDC01,DC=local}"
+
+# --- Redmine API (para scripts de sync) ---
+REDMINE_API_KEY="${REDMINE_API_KEY:-${redmine_api_key:-}}"
+
+# --- Role IDs (según Redmine real) ---
+ROLE_DIRECTOR_ID="${ROLE_DIRECTOR_ID:-3}"
+ROLE_COORDINADOR_ID="${ROLE_COORDINADOR_ID:-4}"
+ROLE_BECARIO_ID="${ROLE_BECARIO_ID:-6}"
+
 # --- Export for child scripts ---
 export PM_NODE PM_IP VM_ID VM_IP VM_CORES VM_MEMORY VM_DISK
 export VM_USER VM_PASS VM_HOSTNAME VM_DOMAIN VM_FQDN
@@ -66,6 +81,9 @@ export VM_GATEWAY VM_NETMASK VM_BRIDGE VM_TEMPLATE
 export REDMINE_VERSION POSTGRES_VERSION NGINX_VERSION
 export REDMINE_DIR BACKUP_DIR SSL_DIR SSH_OPTS
 export POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD REDMINE_SECRET_KEY
+export AD_HOST AD_PORT AD_BIND_DN AD_BIND_PASS AD_GROUPS_DN
+export REDMINE_API_KEY
+export ROLE_DIRECTOR_ID ROLE_COORDINADOR_ID ROLE_BECARIO_ID
 
 echo "[00-env] Loaded Redmine environment"
 echo "[00-env] VM: ${VM_ID} @ ${PM_NODE} (${PM_IP}) → ${VM_FQDN} (${VM_IP})"

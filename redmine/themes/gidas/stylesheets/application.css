@@ -1,7 +1,491 @@
-/* GIDAS theme — logo only. No color changes to default layout. */
+/* ================================================================
+   GIDAS Theme — Redmine
+   ================================================================
+   Grupo de Investigación GIDAS
+   Facultad Regional La Plata — Universidad Tecnológica Nacional
+   
+   Palette:
+     Primary (rojo GIDAS):   #c0392b
+     Primary dark:           #a93226
+     Primary light:          #e74c3c
+     Accent:                 #e67e22
+     Background:             #f8f9fa
+     Text:                   #2c3e50
+     Muted:                  #7f8c8d
+   ================================================================ */
+
+/* ================================================================
+   1. GLOBAL
+   ================================================================ */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #2c3e50;
+    background: #f8f9fa;
+}
+
+a {
+    color: #c0392b;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: #a93226;
+}
+
+/* ================================================================
+   2. HEADER
+   ================================================================ */
+#header {
+    background: #c0392b;
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    border-bottom: 3px solid #e67e22;
+    padding: 12px 20px;
+    min-height: 48px;
+}
+
 #header h1 {
-  background: url(../images/logo-gidas.png) no-repeat left center;
-  background-size: auto 32px;
-  padding-left: 150px;
-  min-height: 36px;
+    background: url(../images/logo-gidas.png) no-repeat left center;
+    background-size: auto 36px;
+    padding: 6px 0 6px 160px;
+    min-height: 40px;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+#header a {
+    color: #ffffff;
+}
+
+#header a:hover {
+    color: #f5cba7;
+}
+
+/* Quick search */
+#quick-search {
+    color: rgba(255,255,255,0.85);
+}
+
+#quick-search input {
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-radius: 4px;
+}
+
+#quick-search input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+/* ================================================================
+   3. TOP MENU
+   ================================================================ */
+#top-menu {
+    background: #8e2b1f;
+    font-size: 0.85em;
+}
+
+#top-menu a {
+    color: rgba(255,255,255,0.85);
+    padding: 4px 10px;
+}
+
+#top-menu a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+}
+
+/* ================================================================
+   4. MAIN MENU
+   ================================================================ */
+#main-menu {
+    background: #a93226;
+    border-bottom: none;
+    padding: 0 10px;
+}
+
+#main-menu li a {
+    color: rgba(255,255,255,0.8);
+    padding: 8px 14px;
+    border-radius: 4px 4px 0 0;
+    margin: 0 1px;
+    font-weight: 500;
+}
+
+#main-menu li a:hover,
+#main-menu li a.selected {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+}
+
+#main-menu li a.selected {
+    background: #f8f9fa;
+    color: #c0392b;
+    font-weight: 600;
+}
+
+/* ================================================================
+   5. CONTENT
+   ================================================================ */
+#content {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 20px 25px;
+    margin: 10px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+#content h2 {
+    color: #c0392b;
+    font-weight: 600;
+    border-bottom: 2px solid #e74c3c;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+h3 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Buttons */
+input[type="submit"], input[type="button"], button {
+    background: #c0392b;
+    color: #fff;
+    border: 1px solid #a93226;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+input[type="submit"]:hover, input[type="button"]:hover, button:hover {
+    background: #a93226;
+}
+
+input[type="submit"].button-small,
+input[type="button"].button-small,
+button.button-small {
+    font-size: 0.9em;
+    padding: 4px 10px;
+}
+
+/* ================================================================
+   6. HOMEPAGE (Welcome)
+   ================================================================ */
+#content .splitcontentleft {
+    width: 65%;
+}
+
+#content .splitcontentright {
+    width: 32%;
+}
+
+/* Welcome box */
+.gidas-welcome {
+    background: linear-gradient(135deg, #fdf2f2 0%, #fef9e7 100%);
+    border-left: 4px solid #c0392b;
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.gidas-welcome h2 {
+    color: #c0392b;
+    border-bottom: none;
+    margin-top: 0;
+    padding-bottom: 0;
+}
+
+.gidas-welcome .gidas-stats {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.gidas-welcome .stat-box {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 100px;
+    flex: 1;
+}
+
+.gidas-welcome .stat-box .stat-number {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #c0392b;
+    display: block;
+}
+
+.gidas-welcome .stat-box .stat-label {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    margin-top: 2px;
+}
+
+/* ================================================================
+   7. TABLES
+   ================================================================ */
+table.list {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+table.list th {
+    background: #c0392b;
+    color: #fff;
+    padding: 8px 10px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+table.list td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+table.list tr:nth-child(even) {
+    background: #fafafa;
+}
+
+table.list tr:hover {
+    background: #fdf2f2;
+}
+
+/* ================================================================
+   8. FLASH MESSAGES
+   ================================================================ */
+.flash {
+    border-radius: 4px;
+    padding: 10px 14px;
+}
+
+.flash.notice {
+    background: #eafaf1;
+    border: 1px solid #82e0aa;
+    color: #1e8449;
+}
+
+.flash.error {
+    background: #fdedec;
+    border: 1px solid #f1948a;
+    color: #c0392b;
+}
+
+/* ================================================================
+   9. SIDEBAR
+   ================================================================ */
+#sidebar {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 14px;
+    font-size: 0.9em;
+}
+
+#sidebar h3 {
+    color: #c0392b;
+    font-size: 1em;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 6px;
+}
+
+/* ================================================================
+   10. FOOTER
+   ================================================================ */
+#footer {
+    background: #2c3e50;
+    color: rgba(255,255,255,0.7);
+    padding: 16px 20px;
+    font-size: 0.85em;
+    text-align: center;
+    border-top: 3px solid #e67e22;
+    margin-top: 20px;
+}
+
+#footer a {
+    color: #e74c3c;
+}
+
+#footer a:hover {
+    color: #f1948a;
+}
+
+/* ================================================================
+   11. PROJECT OVERVIEW
+   ================================================================ */
+#projects-index {
+    background: transparent;
+}
+
+#projects-index .project {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.2s ease;
+}
+
+#projects-index .project:hover {
+    box-shadow: 0 2px 8px rgba(192,57,43,0.1);
+    border-color: #c0392b;
+}
+
+#projects-index .project a.project {
+    font-weight: 600;
+    color: #c0392b;
+}
+
+/* ================================================================
+   12. ISSUES
+   ================================================================ */
+.issue {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+.issue .subject h3 {
+    color: #2c3e50;
+}
+
+.status-1 { /* New */
+    color: #2980b9;
+    font-weight: 600;
+}
+
+.status-2 { /* In Progress */
+    color: #e67e22;
+    font-weight: 600;
+}
+
+.status-3 { /* Resolved */
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.status-4 { /* Feedback */
+    color: #8e44ad;
+    font-weight: 600;
+}
+
+.status-5 { /* Closed */
+    color: #7f8c8d;
+}
+
+.status-6 { /* Rejected */
+    color: #c0392b;
+}
+
+/* ================================================================
+   13. WIKI
+   ================================================================ */
+.wiki {
+    line-height: 1.7;
+}
+
+.wiki h1, .wiki h2, .wiki h3 {
+    color: #c0392b;
+}
+
+.wiki h1 {
+    border-bottom: 2px solid #e74c3c;
+    padding-bottom: 8px;
+}
+
+/* ================================================================
+   14. LOGIN PAGE
+   ================================================================ */
+#login-form {
+    max-width: 400px;
+    margin: 40px auto;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+#login-form h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+#login-form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.1em;
+}
+
+/* ================================================================
+   15. RESPONSIVE
+   ================================================================ */
+@media screen and (max-width: 899px) {
+    #header h1 {
+        font-size: 1.1em;
+        padding-left: 140px;
+        background-size: auto 30px;
+    }
+    
+    #content .splitcontentleft,
+    #content .splitcontentright {
+        width: 100%;
+        float: none;
+    }
+    
+    .gidas-welcome .stat-box {
+        min-width: 80px;
+    }
+}
+
+@media screen and (max-width: 599px) {
+    #header h1 {
+        font-size: 1em;
+        padding-left: 0;
+        padding-top: 44px;
+        background-position: center top;
+        text-align: center;
+    }
+    
+    #main-menu li a {
+        padding: 6px 8px;
+        font-size: 0.85em;
+    }
+}
+
+/* ================================================================
+   16. PRINT
+   ================================================================ */
+@media print {
+    #header, #top-menu, #main-menu, #sidebar, #footer {
+        display: none;
+    }
+    
+    #content {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
 }
