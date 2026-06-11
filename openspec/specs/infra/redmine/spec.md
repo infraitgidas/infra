@@ -233,3 +233,54 @@ limpia.
   destroy`)
 - ENTONCES el script DEBE liberar el VM ID y los recursos asociados
 - Y los backups previos DEBEN estar disponibles para restauración futura
+
+### Requisito: Personalización de interfaz
+
+Redmine DEBE tener una interfaz personalizada con la imagen institucional de GIDAS y UTN.
+
+#### Escenario: Tema GIDAS seleccionable
+
+- DADO el theme `gidas` instalado en `/usr/src/redmine/themes/gidas/`
+- CUANDO se accede a Administración > Configuración > Pantalla > Tema
+- ENTONCES DEBE aparecer "Gidas" como opción seleccionable
+- Y DEBE aplicar colores rojos suaves (#c0392b, #e74c3c) en header, menú y botones
+- Y DEBE mostrar el logo de GIDAS en el header
+
+#### Escenario: Dashboard público con branding
+
+- DADO nginx sirviendo el dashboard estático
+- CUANDO se accede a `https://redmine.gidas.local/dashboard/`
+- ENTONCES DEBE mostrar el header con el logo de GIDAS
+- Y DEBE mostrar el footer con el logo de UTN La Plata
+- Y DEBE tener una paleta de colores rojo suave
+
+#### Escenario: Favicon institucional
+
+- DADO nginx configurado para servir assets estáticos
+- CUANDO se solicita `/favicon.ico`
+- ENTONCES DEBE redirigir a `/theme-assets/favicon_utn.png`
+
+#### Escenario: Resolución DNS
+
+- DADO la entrada DNS configurada en MikroTik (192.168.1.1)
+- CUANDO se consulta `redmine.gidas.local`
+- ENTONCES DEBE resolver a `192.168.1.20`
+
+### Requisito: Plugins instalados
+
+Redmine DEBE tener plugins para tablero Kanban y gestión de presupuesto.
+
+#### Escenario: Plugin Kanban instalado
+
+- DADO el plugin `kanban` instalado en `/usr/src/redmine/plugins/kanban/`
+- CUANDO se accede a Administración > Plugins
+- ENTONCES DEBE listar "Kanban plugin v0.0.12"
+- Y los proyectos DEBEN poder habilitar el módulo "Kanban" en sus módulos
+
+#### Escenario: Plugin Budget instalado
+
+- DADO el plugin `redmineup_projects_time_tracking` instalado
+- CUANDO se accede a Administración > Plugins
+- ENTONCES DEBE listar "Projects Time Tracking v0.8.0"
+- Y DEBE mostrar métricas de presupuesto (CPI, EAC, Variance) en la lista de proyectos
+- Y DEBE requerir migraciones de base de datos (6 migraciones ejecutadas)
