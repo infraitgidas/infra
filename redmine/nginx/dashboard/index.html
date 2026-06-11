@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redmine - Tablero de Peticiones</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#eaeaea;padding:20px}
+
+/* Alertas */
+#alert-container{position:fixed;top:0;left:0;right:0;z-index:1000}
+.alert{background:#e74c3c;color:#fff;padding:15px 20px;text-align:center;font-size:16px;font-weight:600;
+  box-shadow:0 4px 15px rgba(231,76,60,.4);animation:slideDown .5s ease;cursor:pointer}
+.alert:hover{opacity:.9}
+.alert.success{background:#27ae60;box-shadow:0 4px 15px rgba(39,174,96,.4)}
+.alert.info{background:#3498db;box-shadow:0 4px 15px rgba(52,152,219,.4)}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;flex-wrap:wrap;gap:10px}
+.header h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text}
+.header .status-bar{display:flex;gap:20px;align-items:center;font-size:13px;color:#888}
+.header .status-bar .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.header .status-bar .dot.green{background:#27ae60;animation:pulse 2s infinite}
+.header .status-bar .dot.red{background:#e74c3c}
+@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+
+/* Filtros */
+.filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filters select,.filters input{background:#16213e;border:1px solid #0f3460;color:#eaeaea;padding:8px 12px;
+  border-radius:6px;font-size:13px;outline:none;transition:border .2s}
+.filters select:focus,.filters input:focus{border-color:#667eea}
+.filters input{flex:1;min-width:200px}
+.filters label{font-size:13px;color:#888;display:flex;align-items:center;gap:5px}
+
+/* Tabla */
+.table-container{overflow-x:auto;border-radius:10px;border:1px solid #0f3460}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead{background:#16213e}
+th{padding:12px 15px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600;
+  cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:#eaeaea}
+th .sort{font-size:10px;margin-left:3px}
+td{padding:10px 15px;border-top:1px solid #0f3460;vertical-align:middle}
+tr:hover td{background:rgba(102,126,234,.08)}
+tr.new-row{animation:highlight 2s ease}
+@keyframes highlight{0%{background:rgba(39,174,96,.2)}100%{background:transparent}}
+tr.changed{animation:flash 2s ease}
+@keyframes flash{0%{background:rgba(231,76,60,.2)}100%{background:transparent}}
+
+/* Status badges */
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge-nueva{background:#3498db;color:#fff}
+.badge-iniciada{background:#f39c12;color:#fff}
+.badge-en-revision{background:#9b59b6;color:#fff}
+.badge-en-espera{background:#7f8c8d;color:#fff}
+.badge-terminada{background:#27ae60;color:#fff}
+.badge-cerrada{background:#2c3e50;color:#fff}
+
+/* Priority */
+.priority{font-size:12px;font-weight:600;padding:2px 8px;border-radius:4px}
+.p-low{color:#27ae60}.p-normal{color:#f39c12}.p-high{color:#e67e22}.p-urgent{color:#e74c3c}.p-immediate{color:#c0392b;font-weight:800}
+
+/* Proyecto badge */
+.project-badge{font-size:11px;padding:2px 8px;border-radius:4px;background:#0f3460;color:#eaeaea;white-space:nowrap}
+
+/* Responsive */
+@media(max-width:768px){
+  body{padding:10px}
+  .header h1{font-size:18px}
+  th,td{padding:8px 10px;font-size:12px}
+}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:#555}
+.empty .icon{font-size:48px;margin-bottom:15px}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:#555}
+.spinner{width:30px;height:30px;border:3px solid #0f3460;border-top-color:#667eea;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Last updated */
+.last-updated{text-align:right;font-size:12px;color:#555;margin-top:10px}
+.last-updated .time{color:#888;font-weight:600}
+
+/* Notificacion browser */
+.notification-banner{position:fixed;bottom:20px;right:20px;background:#16213e;border:1px solid #0f3460;
+  border-radius:10px;padding:15px 20px;max-width:350px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:999;
+  display:none;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.notification-banner.show{display:block}
+.notification-banner .title{font-size:14px;font-weight:600;color:#667eea;margin-bottom:5px}
+.notification-banner .msg{font-size:13px;color:#ccc}
+.notification-banner .close{position:absolute;top:8px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:16px}
+</style>
+</head>
+<body>
+
+<div id="alert-container"></div>
+<div id="notification-banner" class="notification-banner">
+  <button class="close" onclick="this.parentElement.classList.remove('show')">&times;</button>
+  <div class="title" id="notif-title"></div>
+  <div class="msg" id="notif-msg"></div>
+</div>
+
+<div class="header">
+  <h1>&#9670; Tablero de Peticiones</h1>
+  <div class="status-bar">
+    <span><span class="dot green" id="status-dot"></span><span id="status-text">Conectando...</span></span>
+    <span id="issue-count">0 peticiones</span>
+    <span id="update-interval">Act. 10s</span>
+  </div>
+</div>
+
+<div class="filters">
+  <label>Proyecto:
+    <select id="filter-project" onchange="applyFilters()">
+      <option value="">Todos</option>
+    </select>
+  </label>
+  <label>Estado:
+    <select id="filter-status" onchange="applyFilters()">
+      <option value="">Todos</option>
+      <option value="Nueva">Nueva</option>
+      <option value="Iniciada">Iniciada</option>
+      <option value="En Revisi&oacute;n">En Revisi&oacute;n</option>
+      <option value="En Espera">En Espera</option>
+      <option value="Terminada">Terminada</option>
+      <option value="Cerrada">Cerrada</option>
+    </select>
+  </label>
+  <label>Buscar:
+    <input type="text" id="filter-search" placeholder="Buscar por asunto, usuario, proyecto..." oninput="applyFilters()">
+  </label>
+</div>
+
+<div id="table-container" class="table-container">
+  <div class="loading" id="loading-state">
+    <div class="spinner"></div>
+    <div>Cargando peticiones...</div>
+  </div>
+</div>
+
+<div class="last-updated">
+  Ultima actualizaci&oacute;n: <span class="time" id="last-updated">---</span>
+  &nbsp;|&nbsp; <a href="#" onclick="forceRefresh();return false" style="color:#667eea;text-decoration:none">Actualizar ahora</a>
+</div>
+
+<script>
+const API_KEY = '9fff064f6e505e02530a806279a2594ef5aa90e9';
+const API_BASE = window.location.origin;
+const POLL_INTERVAL = 10000;
+
+let allIssues = [];
+let previousHash = '';
+let knownChanges = [];
+let pollTimer = null;
+let isFirstLoad = true;
+
+// Map status names to CSS classes
+function statusClass(name) {
+  const map = {'Nueva':'nueva','Iniciada':'iniciada','En Revisi\u00f3n':'en-revision','En Espera':'en-espera','Terminada':'terminada','Cerrada':'cerrada'};
+  return 'badge-'+ (map[name]||'nueva');
+}
+
+// Priority display
+function priorityHtml(p) {
+  const classes = {1:'p-low',2:'p-normal',3:'p-high',4:'p-urgent',5:'p-immediate'};
+  const names = {1:'Baja',2:'Normal',3:'Alta',4:'Urgente',5:'Inmediata'};
+  return '<span class="priority '+ (classes[p]||'p-normal') +'">'+ (names[p]||p) +'</span>';
+}
+
+// Time ago
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff/60000);
+  if(mins<1) return 'ahora';
+  if(mins<60) return mins+'m';
+  const hrs = Math.floor(mins/60);
+  if(hrs<24) return hrs+'h '+ (mins%60) +'m';
+  return Math.floor(hrs/24)+'d';
+}
+
+// Show alert
+function showAlert(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'alert '+(type||'');
+  el.textContent = msg;
+  el.onclick = function(){this.remove()};
+  document.getElementById('alert-container').appendChild(el);
+  setTimeout(() => {if(el.parentNode) el.remove()}, 8000);
+}
+
+// Show notification banner
+function showNotification(title, msg) {
+  const banner = document.getElementById('notification-banner');
+  document.getElementById('notif-title').textContent = title;
+  document.getElementById('notif-msg').textContent = msg;
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 10000);
+}
+
+// Compute hash of current issue states
+function computeHash(issues) {
+  return issues.map(i => i.id+':'+i.status.name+':'+i.assigned_to+':'+i.subject).join('|');
+}
+
+// Detect and report changes
+function detectChanges(newIssues) {
+  const hash = computeHash(newIssues);
+  if (isFirstLoad && hash) {
+    previousHash = hash;
+    isFirstLoad = false;
+    return [];
+  }
+  if (hash === previousHash) return [];
+  
+  const changes = [];
+  const oldMap = {};
+  
+  // Build old map from previous issues stored in session
+  const oldIssues = JSON.parse(sessionStorage.getItem('rm_issues')||'[]');
+  oldIssues.forEach(i => oldMap[i.id] = i);
+  
+  newIssues.forEach(issue => {
+    if (oldMap[issue.id]) {
+      if (oldMap[issue.id].status.name !== issue.status.name) {
+        changes.push({
+          type: 'status',
+          issue: issue,
+          from: oldMap[issue.id].status.name,
+          to: issue.status.name,
+          project: issue.project
+        });
+      }
+    } else {
+      changes.push({
+        type: 'new',
+        issue: issue,
+        project: issue.project
+      });
+    }
+  });
+  
+  previousHash = hash;
+  return changes;
+}
+
+// Fetch issues from Redmine API
+async function fetchIssues() {
+  const url = API_BASE + '/issues.json?status_id=*&sort=updated_on:desc&limit=100&include=project,status,priority,author';
+  try {
+    const res = await fetch(url, {headers: {'X-Redmine-API-Key': API_KEY}});
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    return data.issues.map(i => ({
+      id: i.id,
+      subject: i.subject,
+      project: i.project.name,
+      project_id: i.project.id,
+      status: {name: i.status.name, id: i.status.id},
+      priority: i.priority.id,
+      author: i.author.name,
+      assigned_to: i.assigned_to ? i.assigned_to.name : 'Sin asignar',
+      created_on: i.created_on,
+      updated_on: i.updated_on
+    }));
+  } catch(e) {
+    console.error('Fetch error:', e);
+    return null;
+  }
+}
+
+// Render table
+function renderIssues(issues) {
+  const container = document.getElementById('table-container');
+  
+  if (!issues || issues.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="icon">📋</div>No hay peticiones</div>';
+    document.getElementById('issue-count').textContent = '0 peticiones';
+    return;
+  }
+  
+  document.getElementById('issue-count').textContent = issues.length + ' peticion'+(issues.length!==1?'es':'');
+  
+  // Save for change detection
+  sessionStorage.setItem('rm_issues', JSON.stringify(issues));
+  
+  let html = '<table><thead><tr>'+
+    '<th onclick="sortBy(\'id\')"># <span class="sort">▼</span></th>'+
+    '<th onclick="sortBy(\'project\')">Proyecto</th>'+
+    '<th onclick="sortBy(\'subject\')">Asunto</th>'+
+    '<th onclick="sortBy(\'status\')">Estado</th>'+
+    '<th onclick="sortBy(\'priority\')">Prioridad</th>'+
+    '<th onclick="sortBy(\'assigned\')">Asignado</th>'+
+    '<th onclick="sortBy(\'updated\')">Actualizado</th>'+
+    '</tr></thead><tbody>';
+  
+  issues.forEach(issue => {
+    html += '<tr id="issue-'+issue.id+'">'+
+      '<td style="font-weight:600;color:#667eea">#'+issue.id+'</td>'+
+      '<td><span class="project-badge">'+escapeHtml(issue.project)+'</span></td>'+
+      '<td><a href="'+API_BASE+'/issues/'+issue.id+'" target="_blank" style="color:#eaeaea;text-decoration:none">'+escapeHtml(issue.subject)+'</a></td>'+
+      '<td><span class="badge '+statusClass(issue.status.name)+'">'+issue.status.name+'</span></td>'+
+      '<td>'+priorityHtml(issue.priority)+'</td>'+
+      '<td style="font-size:13px">'+escapeHtml(issue.assigned_to)+'</td>'+
+      '<td style="font-size:12px;color:#888" title="'+issue.updated_on+'">'+timeAgo(issue.updated_on)+'</td>'+
+      '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// Apply filters
+function applyFilters() {
+  let filtered = [...allIssues];
+  const proj = document.getElementById('filter-project').value;
+  const status = document.getElementById('filter-status').value;
+  const search = document.getElementById('filter-search').value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  
+  if (proj) filtered = filtered.filter(i => i.project === proj);
+  if (status) filtered = filtered.filter(i => i.status.name === status);
+  if (search) filtered = filtered.filter(i => 
+    i.subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
+    i.assigned_to.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
+    i.project.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
+    i.author.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search)
+  );
+  
+  renderIssues(filtered);
+}
+
+// Update projects filter
+function updateProjectFilter(issues) {
+  const projects = [...new Set(issues.map(i => i.project))].sort();
+  const sel = document.getElementById('filter-project');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todos</option>';
+  projects.forEach(p => {
+    sel.innerHTML += '<option value="'+p+'">'+p+'</option>';
+  });
+  if (current) sel.value = current;
+}
+
+// Sort
+let sortField = 'updated_on';
+let sortDir = -1;
+
+function sortBy(field) {
+  if (sortField === field) sortDir *= -1;
+  else { sortField = field; sortDir = -1; }
+  
+  const sorted = [...allIssues].sort((a,b) => {
+    let va = a[field]||'', vb = b[field]||'';
+    if (field === 'id'||field === 'priority') {va=Number(va);vb=Number(vb)}
+    else if (field === 'updated') {va=new Date(a.updated_on);vb=new Date(b.updated_on)}
+    return (va<vb?-1:va>vb?1:0) * sortDir;
+  });
+  
+  allIssues = sorted;
+  applyFilters();
+}
+
+// Main update
+async function updateDashboard() {
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+  
+  statusDot.className = 'dot';
+  statusText.textContent = 'Actualizando...';
+  
+  let issues = await fetchIssues();
+  
+  if (issues === null) {
+    statusDot.className = 'dot red';
+    statusText.textContent = 'Error de conexi\u00f3n';
+    return;
+  }
+  
+  statusDot.className = 'dot green';
+  statusText.textContent = 'Conectado';
+  document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('es-AR');
+  
+  // Detect changes
+  const changes = detectChanges(issues);
+  
+  if (changes.length > 0) {
+    changes.forEach(change => {
+      if (change.type === 'new') {
+        showAlert('🆕 Nueva petici\u00f3n en '+change.project+': #'+change.issue.id+' - '+change.issue.subject, 'success');
+        showNotification('Nueva petici\u00f3n', change.project+': '+change.issue.subject);
+      } else if (change.type === 'status') {
+        showAlert('🔄 Cambio de estado en '+change.project+': #'+change.issue.id+' pas\u00f3 de "'+change.from+'" a "'+change.to+'"', 'info');
+        showNotification('Estado actualizado', change.project+': '+change.issue.subject+' → '+change.to);
+      }
+    });
+    
+    // Try browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const last = changes[changes.length-1];
+      new Notification('Redmine: '+last.project, {
+        body: last.type==='new' ? 'Nueva: '+last.issue.subject : last.issue.subject+' → '+last.to,
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>'
+      });
+    }
+  }
+  
+  // Store for next comparison
+  allIssues = issues;
+  updateProjectFilter(issues);
+  applyFilters();
+}
+
+// Force refresh
+function forceRefresh() {
+  clearTimeout(pollTimer);
+  updateDashboard().then(() => {
+    pollTimer = setTimeout(updateDashboard, POLL_INTERVAL);
+  });
+}
+
+// Request notification permission
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+// Init
+async function init() {
+  requestNotifPermission();
+  await updateDashboard();
+  pollTimer = setInterval(updateDashboard, POLL_INTERVAL);
+}
+
+init();
+</script>
+</body>
+</html>
