@@ -69,20 +69,122 @@ El sistema DEBE exponer Redmine vía HTTPS mediante nginx reverse proxy.
 
 ### Requisito: Autenticación local
 
-Redmine DEBE usar autenticación local como mecanismo primario.
+Redmine DEBE usar autenticación local como mecanismo de respaldo.
 
 #### Escenario: Login de administrador
 
 - DADO Redmine desplegado con configuración por defecto
-- CUANDO se accede a `/login` con credenciales admin por defecto
+- CUANDO se accede a `/login` con credenciales admin
 - ENTONCES el sistema DEBE permitir el ingreso
 - Y DEBE solicitar cambio de contraseña en el primer login
 
-#### Escenario: Creación de usuario local
+### Requisito: Autenticación LDAP contra AD
 
-- DADO un administrador autenticado en la interfaz de Redmine
-- CUANDO crea un nuevo usuario con email y contraseña
-- ENTONCES el usuario DEBE poder iniciar sesión con sus credenciales
+Redmine DEBE autenticar usuarios contra Active Directory (GDC01.local) mediante LDAP.
+
+#### Escenario: Configuración del servidor LDAP
+
+- DADO un servidor AD accesible (192.168.1.117, puerto 389)
+- CUANDO se configura un AuthSource LDAP en Redmine
+- ENTONCES el servidor DEBE ser `192.168.1.117`
+- Y DEBE usar filtro `(memberOf=CN=redmine,OU=Groups,DC=GDC01,DC=local)`
+- Y DEBE tener `onthefly_register` habilitado
+
+#### Escenario: Login con usuario AD
+
+- DADO un usuario miembro del grupo `redmine` en AD
+- CUANDO ingresa a Redmine con su usuario AD y contraseña
+- ENTONCES el sistema DEBE autenticarlo
+- Y DEBE crear su cuenta local automáticamente (onthefly_register)
+
+#### Escenario: Restricción por grupo
+
+- DADO un usuario NO miembro del grupo `redmine` en AD
+- CUANDO intenta autenticarse en Redmine
+- ENTONCES el sistema DEBE rechazar el acceso
+
+### Requisito: Estructura de proyectos
+
+Redmine DEBE contener los proyectos del laboratorio con roles y workflow definidos.
+
+#### Escenario: Proyectos creados
+
+- DADO Redmine operativo
+- CUANDO se listan los proyectos
+- ENTONCES DEBEN existir: Dirección, Administración, CAPNEE, INFRAiT, TELEPARK, GMET, GIS
+- Y todos DEBEN ser privados
+
+#### Escenario: Roles definidos
+
+- DADO la administración de roles
+- CUANDO se listan los roles disponibles
+- ENTONCES DEBEN existir: Director, Coordinador, Graduado, Becario, Pasante, Externo
+- Y Director DEBE tener permisos totales (9 permisos)
+- Y Coordinador DEBE tener permisos de gestión (7 permisos)
+- Y Becario DEBE tener permisos limitados (crear/ver issues)
+
+#### Escenario: Workflow de issues
+
+- DADO la configuración de workflow
+- CUANDO se crea una issue
+- ENTONCES los estados DEBEN ser: Nueva → Iniciada → En Revisión → En Espera → Terminada → Cerrada
+- Y cada rol DEBE poder avanzar la issue hacia adelante en el flujo
+- Y DEBE haber 126 transiciones configuradas
+
+#### Escenario: Asignación de miembros
+
+- DADO los grupos de AD
+- CUANDO se asignan miembros a proyectos
+- ENTONCES CAPNEE DEBE tener a aalvarezf (Coordinador), rcaceresp, jetcheverry, cvalero (Becarios)
+- Y TELEPARK DEBE tener a mpenalva (Coordinador)
+- Y GMET DEBE tener a zquiroz (Coordinador)
+- Y GIS DEBE tener a jmarchesini (Coordinador)
+- Y INFRAiT DEBE tener a errodriguez (Coordinador), rmonfroglio (Becario)
+- Y Dirección y Administración DEBEN tener a Directores + Coordinadores
+
+### Requisito: Correo electrónico SMTP
+
+Redmine DEBE enviar notificaciones por correo electrónico vía SMTP Outlook.
+
+#### Escenario: Configuración SMTP
+
+- DADO el servidor SMTP de Outlook
+- CUANDO se envía un correo desde Redmine
+- ENTONCES DEBE usar `smtp.office365.com:587` con STARTTLS
+- Y DEBE autenticar como `infrait@frlp.utn.edu.ar`
+- Y DEBE poder enviar correos a cualquier destinatario
+
+### Requisito: Notificaciones por evento
+
+Redmine DEBE notificar a los usuarios según eventos en las issues.
+
+#### Escenario: Nueva issue notifica a todos los miembros
+
+- DADO una issue creada en un proyecto
+- CUANDO se guarda la issue
+- ENTONCES TODOS los miembros del proyecto DEBEN recibir un mail de notificación
+- Y los usuarios DEBEN tener `mail_notification = "all"`
+
+#### Escenario: Asignación notifica al usuario
+
+- DADO una issue asignada a un usuario
+- CUANDO se guarda la asignación
+- ENTONCES el usuario asignado DEBE recibir notificación por mail
+- Y el evento `issue_assigned_to_changed` DEBE estar en la lista de notificables
+
+### Requisito: Dashboard público
+
+Redmine DEBE exponer un dashboard público con el estado de las peticiones.
+
+#### Escenario: Acceso al dashboard
+
+- DADO un navegador sin autenticación
+- CUANDO se accede a `http://redmine.gidas.local/dashboard/`
+- ENTONCES DEBE mostrar una tabla con todas las issues
+- Y DEBE tener código de colores por estado (azul, naranja, púrpura, gris, verde, oscuro)
+- Y DEBE actualizarse automáticamente cada 10 segundos
+- Y DEBE mostrar alertas visuales cuando ocurren cambios de estado
+- Y DEBE permitir filtrar por proyecto, estado y búsqueda textual
 
 ### Requisito: Backup de PostgreSQL
 
