@@ -3,198 +3,662 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Redmine - Tablero de Peticiones</title>
+<title>GIDAS · Tablero de Peticiones — Redmine</title>
+<link rel="icon" type="image/png" href="/theme-assets/favicon_utn.png">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#eaeaea;padding:20px}
+/* ============================================================
+   GIDAS Dashboard — Soft Red Theme
+   ============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-/* Alertas */
-#alert-container{position:fixed;top:0;left:0;right:0;z-index:1000}
-.alert{background:#e74c3c;color:#fff;padding:15px 20px;text-align:center;font-size:16px;font-weight:600;
-  box-shadow:0 4px 15px rgba(231,76,60,.4);animation:slideDown .5s ease;cursor:pointer}
-.alert:hover{opacity:.9}
-.alert.success{background:#27ae60;box-shadow:0 4px 15px rgba(39,174,96,.4)}
-.alert.info{background:#3498db;box-shadow:0 4px 15px rgba(52,152,219,.4)}
-@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
-
-/* Header */
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;flex-wrap:wrap;gap:10px}
-.header h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;background-clip:text}
-.header .status-bar{display:flex;gap:20px;align-items:center;font-size:13px;color:#888}
-.header .status-bar .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-.header .status-bar .dot.green{background:#27ae60;animation:pulse 2s infinite}
-.header .status-bar .dot.red{background:#e74c3c}
-@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
-
-/* Filtros */
-.filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.filters select,.filters input{background:#16213e;border:1px solid #0f3460;color:#eaeaea;padding:8px 12px;
-  border-radius:6px;font-size:13px;outline:none;transition:border .2s}
-.filters select:focus,.filters input:focus{border-color:#667eea}
-.filters input{flex:1;min-width:200px}
-.filters label{font-size:13px;color:#888;display:flex;align-items:center;gap:5px}
-
-/* Tabla */
-.table-container{overflow-x:auto;border-radius:10px;border:1px solid #0f3460}
-table{width:100%;border-collapse:collapse;font-size:14px}
-thead{background:#16213e}
-th{padding:12px 15px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600;
-  cursor:pointer;user-select:none;white-space:nowrap}
-th:hover{color:#eaeaea}
-th .sort{font-size:10px;margin-left:3px}
-td{padding:10px 15px;border-top:1px solid #0f3460;vertical-align:middle}
-tr:hover td{background:rgba(102,126,234,.08)}
-tr.new-row{animation:highlight 2s ease}
-@keyframes highlight{0%{background:rgba(39,174,96,.2)}100%{background:transparent}}
-tr.changed{animation:flash 2s ease}
-@keyframes flash{0%{background:rgba(231,76,60,.2)}100%{background:transparent}}
-
-/* Status badges */
-.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
-.badge-nueva{background:#3498db;color:#fff}
-.badge-iniciada{background:#f39c12;color:#fff}
-.badge-en-revision{background:#9b59b6;color:#fff}
-.badge-en-espera{background:#7f8c8d;color:#fff}
-.badge-terminada{background:#27ae60;color:#fff}
-.badge-cerrada{background:#2c3e50;color:#fff}
-
-/* Priority */
-.priority{font-size:12px;font-weight:600;padding:2px 8px;border-radius:4px}
-.p-low{color:#27ae60}.p-normal{color:#f39c12}.p-high{color:#e67e22}.p-urgent{color:#e74c3c}.p-immediate{color:#c0392b;font-weight:800}
-
-/* Proyecto badge */
-.project-badge{font-size:11px;padding:2px 8px;border-radius:4px;background:#0f3460;color:#eaeaea;white-space:nowrap}
-
-/* Responsive */
-@media(max-width:768px){
-  body{padding:10px}
-  .header h1{font-size:18px}
-  th,td{padding:8px 10px;font-size:12px}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+               Ubuntu, Cantarell, "Fira Sans", "Droid Sans", Helvetica, Arial,
+               sans-serif;
+  background: #f5f0eb;
+  color: #333;
+  min-height: 100vh;
 }
 
-/* Empty state */
-.empty{text-align:center;padding:60px 20px;color:#555}
-.empty .icon{font-size:48px;margin-bottom:15px}
+/* ============================================
+   Header
+   ============================================ */
+.header {
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(192,57,43,0.25);
+}
 
-/* Loading */
-.loading{text-align:center;padding:40px;color:#555}
-.spinner{width:30px;height:30px;border:3px solid #0f3460;border-top-color:#667eea;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-/* Last updated */
-.last-updated{text-align:right;font-size:12px;color:#555;margin-top:10px}
-.last-updated .time{color:#888;font-weight:600}
+.header-brand .logo-gidas {
+  height: 36px;
+  width: auto;
+}
 
-/* Notificacion browser */
-.notification-banner{position:fixed;bottom:20px;right:20px;background:#16213e;border:1px solid #0f3460;
-  border-radius:10px;padding:15px 20px;max-width:350px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:999;
-  display:none;animation:slideUp .3s ease}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.notification-banner.show{display:block}
-.notification-banner .title{font-size:14px;font-weight:600;color:#667eea;margin-bottom:5px}
-.notification-banner .msg{font-size:13px;color:#ccc}
-.notification-banner .close{position:absolute;top:8px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:16px}
+.header-brand h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.header-brand h1 span {
+  font-weight: 300;
+  opacity: 0.85;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.header-status .status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.12);
+  padding: 4px 12px;
+  border-radius: 14px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.green { background: #2ecc71; box-shadow: 0 0 6px rgba(46,204,113,0.5); }
+.status-dot.red   { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,0.5); }
+.status-dot.green.animate { animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ============================================
+   Alert Container
+   ============================================ */
+#alert-container { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+.alert {
+  color: #fff;
+  padding: 14px 24px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  animation: alert-slide .4s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.alert:hover { opacity: 0.9; }
+.alert.success { background: #27ae60; }
+.alert.info    { background: #2980b9; }
+.alert.warning { background: #e67e22; }
+@keyframes alert-slide {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ============================================
+   Main Content
+   ============================================ */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Filters */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.filter-group select,
+.filter-group input {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.12);
+}
+
+.filter-group input {
+  width: 200px;
+}
+
+/* ============================================
+   Table
+   ============================================ */
+.table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8e0d8;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead {
+  background: #faf5f0;
+}
+
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  border-bottom: 2px solid #c0392b;
+  transition: color .15s;
+}
+
+th:hover { color: #c0392b; }
+
+th .sort-marker {
+  font-size: 9px;
+  margin-left: 4px;
+  opacity: 0.5;
+}
+
+th:hover .sort-marker { opacity: 1; }
+
+td {
+  padding: 9px 14px;
+  border-top: 1px solid #f0ebe5;
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: background .15s;
+}
+
+tbody tr:nth-child(even) td {
+  background: #fcfaf8;
+}
+
+tbody tr:hover td {
+  background: #fdedec;
+}
+
+tbody tr.new-row td {
+  animation: row-highlight 3s ease;
+}
+
+@keyframes row-highlight {
+  0%   { background: rgba(231,76,60,0.08); }
+  100% { background: transparent; }
+}
+
+tbody tr.changed td {
+  animation: row-flash 3s ease;
+}
+
+@keyframes row-flash {
+  0%   { background: rgba(192,57,43,0.12); }
+  100% { background: transparent; }
+}
+
+/* ============================================
+   Status Badges
+   ============================================ */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.badge-nueva       { background: #dbeafe; color: #1e40af; }
+.badge-iniciada    { background: #fef3c7; color: #92400e; }
+.badge-en-revision { background: #ede9fe; color: #5b21b6; }
+.badge-en-espera   { background: #f3f4f6; color: #4b5563; }
+.badge-terminada   { background: #d1fae5; color: #065f46; }
+.badge-cerrada     { background: #e5e7eb; color: #374151; }
+
+/* ============================================
+   Priority
+   ============================================ */
+.priority {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.priority.p-low      { background: #d1fae5; color: #065f46; }
+.priority.p-normal   { background: #fef3c7; color: #92400e; }
+.priority.p-high     { background: #ffedd5; color: #9a3412; }
+.priority.p-urgent   { background: #fce4ec; color: #b71c1c; }
+.priority.p-immediate {
+  background: #c0392b;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ============================================
+   Project Badge
+   ============================================ */
+.project-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0ebe5;
+  color: #666;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Issue link */
+.issue-link {
+  color: #2471a3;
+  text-decoration: none;
+  font-weight: 500;
+}
+.issue-link:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+/* ============================================
+   Count
+   ============================================ */
+.issue-count {
+  font-weight: 700;
+  font-size: 14px;
+  color: #c0392b;
+}
+
+/* ============================================
+   States
+   ============================================ */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #f0ebe5;
+  border-top-color: #c0392b;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #aaa;
+}
+
+.empty .empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+/* ============================================
+   Last Updated
+   ============================================ */
+.last-updated {
+  text-align: right;
+  font-size: 12px;
+  color: #999;
+  margin-top: 10px;
+}
+
+.last-updated .time {
+  color: #666;
+  font-weight: 600;
+}
+
+.refresh-link {
+  color: #c0392b;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.refresh-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   Notification Banner
+   ============================================ */
+.notification-banner {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #fff;
+  border: 1px solid #e0d8d0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  max-width: 340px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  z-index: 999;
+  display: none;
+  animation: banner-up .3s ease;
+}
+
+.notification-banner.show { display: block; }
+
+@keyframes banner-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.notif-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c0392b;
+  margin-bottom: 4px;
+}
+
+.notif-msg {
+  font-size: 12px;
+  color: #666;
+}
+
+.notif-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.notif-close:hover { color: #666; }
+
+/* ============================================
+   Footer
+   ============================================ */
+.footer {
+  background: #2c3e50;
+  color: #95a5a6;
+  font-size: 11px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.footer .logo-utn {
+  height: 22px;
+  width: auto;
+  opacity: 0.7;
+}
+
+.footer a {
+  color: #bdc3c7;
+  text-decoration: none;
+}
+
+.footer a:hover { color: #fff; }
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 900px) {
+  .header { padding: 10px 16px; }
+  .container { padding: 14px 16px; }
+  .header-brand h1 { font-size: 16px; }
+  .header-brand .logo-gidas { height: 28px; }
+  .filter-group input { width: 140px; }
+}
+
+@media (max-width: 600px) {
+  .header { flex-direction: column; align-items: flex-start; }
+  .header-status { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .filter-group input { width: 100%; }
+  th, td { padding: 7px 10px; font-size: 12px; }
+  .footer { flex-direction: column; text-align: center; }
+}
+
+/* ============================================
+   Scrollbar
+   ============================================ */
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: #f5f0eb; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c0392b; }
 </style>
 </head>
 <body>
 
+<!-- Alert Container -->
 <div id="alert-container"></div>
+
+<!-- Notification Banner -->
 <div id="notification-banner" class="notification-banner">
-  <button class="close" onclick="this.parentElement.classList.remove('show')">&times;</button>
-  <div class="title" id="notif-title"></div>
-  <div class="msg" id="notif-msg"></div>
+  <button class="notif-close" onclick="this.parentElement.classList.remove('show')">&times;</button>
+  <div class="notif-title" id="notif-title"></div>
+  <div class="notif-msg" id="notif-msg"></div>
 </div>
 
-<div class="header">
-  <h1>&#9670; Tablero de Peticiones</h1>
-  <div class="status-bar">
-    <span><span class="dot green" id="status-dot"></span><span id="status-text">Conectando...</span></span>
-    <span id="issue-count">0 peticiones</span>
-    <span id="update-interval">Act. 10s</span>
+<!-- Header -->
+<header class="header">
+  <div class="header-brand">
+    <img class="logo-gidas" src="/theme-assets/logo-gidas.png" alt="GIDAS">
+    <h1>Tablero <span>de Peticiones</span></h1>
   </div>
-</div>
-
-<div class="filters">
-  <label>Proyecto:
-    <select id="filter-project" onchange="applyFilters()">
-      <option value="">Todos</option>
-    </select>
-  </label>
-  <label>Estado:
-    <select id="filter-status" onchange="applyFilters()">
-      <option value="">Todos</option>
-      <option value="Nueva">Nueva</option>
-      <option value="Iniciada">Iniciada</option>
-      <option value="En Revisi&oacute;n">En Revisi&oacute;n</option>
-      <option value="En Espera">En Espera</option>
-      <option value="Terminada">Terminada</option>
-      <option value="Cerrada">Cerrada</option>
-    </select>
-  </label>
-  <label>Buscar:
-    <input type="text" id="filter-search" placeholder="Buscar por asunto, usuario, proyecto..." oninput="applyFilters()">
-  </label>
-</div>
-
-<div id="table-container" class="table-container">
-  <div class="loading" id="loading-state">
-    <div class="spinner"></div>
-    <div>Cargando peticiones...</div>
+  <div class="header-status">
+    <div class="status-item">
+      <span class="status-dot green" id="status-dot"></span>
+      <span id="status-text">Conectando...</span>
+    </div>
+    <div class="status-item">
+      <span class="issue-count" id="issue-count">0</span>
+      <span>peticiones</span>
+    </div>
+    <div class="status-item">
+      <span id="update-interval">10s</span>
+    </div>
   </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="filter-group">
+        <label for="filter-project">Proyecto</label>
+        <select id="filter-project" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-status">Estado</label>
+        <select id="filter-status" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="Nueva">Nueva</option>
+          <option value="Iniciada">Iniciada</option>
+          <option value="En Revisión">En Revisión</option>
+          <option value="En Espera">En Espera</option>
+          <option value="Terminada">Terminada</option>
+          <option value="Cerrada">Cerrada</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-search">Buscar</label>
+        <input type="text" id="filter-search" placeholder="Asunto, usuario, proyecto..." oninput="applyFilters()">
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <span id="last-updated-label">Última actualización: <strong id="last-updated">---</strong></span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" id="table-container">
+    <div class="loading" id="loading-state">
+      <div class="spinner"></div>
+      <div>Cargando peticiones...</div>
+    </div>
+  </div>
+
+  <div class="last-updated">
+    <a href="#" class="refresh-link" onclick="forceRefresh();return false">↻ Actualizar ahora</a>
+  </div>
+
 </div>
 
-<div class="last-updated">
-  Ultima actualizaci&oacute;n: <span class="time" id="last-updated">---</span>
-  &nbsp;|&nbsp; <a href="#" onclick="forceRefresh();return false" style="color:#667eea;text-decoration:none">Actualizar ahora</a>
-</div>
+<!-- Footer -->
+<footer class="footer">
+  <span>GIDAS · Grupo de Investigación y Desarrollo Aplicado en Sistemas</span>
+  <span>
+    <a href="https://www.frlp.utn.edu.ar" target="_blank" rel="noopener">
+      <img class="logo-utn" src="/theme-assets/logo_utn.svg" alt="UTN La Plata">
+    </a>
+  </span>
+</footer>
 
 <script>
+// ================================================================
+// Redmine Dashboard — real-time issue tracker
+// ================================================================
+
 const API_KEY = '9fff064f6e505e02530a806279a2594ef5aa90e9';
 const API_BASE = window.location.origin;
 const POLL_INTERVAL = 10000;
 
 let allIssues = [];
 let previousHash = '';
-let knownChanges = [];
 let pollTimer = null;
 let isFirstLoad = true;
 
-// Map status names to CSS classes
+// --- Helpers ---
+
 function statusClass(name) {
-  const map = {'Nueva':'nueva','Iniciada':'iniciada','En Revisi\u00f3n':'en-revision','En Espera':'en-espera','Terminada':'terminada','Cerrada':'cerrada'};
-  return 'badge-'+ (map[name]||'nueva');
+  const map = {
+    'Nueva': 'nueva',
+    'Iniciada': 'iniciada',
+    'En Revisión': 'en-revision',
+    'En Espera': 'en-espera',
+    'Terminada': 'terminada',
+    'Cerrada': 'cerrada'
+  };
+  return 'badge-' + (map[name] || 'nueva');
 }
 
-// Priority display
 function priorityHtml(p) {
   const classes = {1:'p-low',2:'p-normal',3:'p-high',4:'p-urgent',5:'p-immediate'};
-  const names = {1:'Baja',2:'Normal',3:'Alta',4:'Urgente',5:'Inmediata'};
-  return '<span class="priority '+ (classes[p]||'p-normal') +'">'+ (names[p]||p) +'</span>';
+  const names   = {1:'Baja',2:'Normal',3:'Alta',4:'Urgente',5:'Inmediata'};
+  const cls = classes[p] || 'p-normal';
+  return `<span class="priority ${cls}">${names[p] || p}</span>`;
 }
 
-// Time ago
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff/60000);
-  if(mins<1) return 'ahora';
-  if(mins<60) return mins+'m';
-  const hrs = Math.floor(mins/60);
-  if(hrs<24) return hrs+'h '+ (mins%60) +'m';
-  return Math.floor(hrs/24)+'d';
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'ahora';
+  if (mins < 60) return mins + 'm';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ' + (mins % 60) + 'm';
+  return Math.floor(hrs / 24) + 'd';
 }
 
-// Show alert
+function escapeHtml(t) {
+  return String(t)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// --- Notifications ---
+
 function showAlert(msg, type) {
   const el = document.createElement('div');
-  el.className = 'alert '+(type||'');
+  el.className = 'alert ' + (type || '');
   el.textContent = msg;
-  el.onclick = function(){this.remove()};
+  el.onclick = function() { this.remove(); };
   document.getElementById('alert-container').appendChild(el);
-  setTimeout(() => {if(el.parentNode) el.remove()}, 8000);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);
 }
 
-// Show notification banner
 function showNotification(title, msg) {
   const banner = document.getElementById('notification-banner');
   document.getElementById('notif-title').textContent = title;
@@ -203,12 +667,12 @@ function showNotification(title, msg) {
   setTimeout(() => banner.classList.remove('show'), 10000);
 }
 
-// Compute hash of current issue states
+// --- Change detection ---
+
 function computeHash(issues) {
-  return issues.map(i => i.id+':'+i.status.name+':'+i.assigned_to+':'+i.subject).join('|');
+  return issues.map(i => i.id + ':' + i.status.name + ':' + i.assigned_to + ':' + i.subject).join('|');
 }
 
-// Detect and report changes
 function detectChanges(newIssues) {
   const hash = computeHash(newIssues);
   if (isFirstLoad && hash) {
@@ -217,207 +681,207 @@ function detectChanges(newIssues) {
     return [];
   }
   if (hash === previousHash) return [];
-  
+
   const changes = [];
+  const oldIssues = JSON.parse(sessionStorage.getItem('rm_issues') || '[]');
   const oldMap = {};
-  
-  // Build old map from previous issues stored in session
-  const oldIssues = JSON.parse(sessionStorage.getItem('rm_issues')||'[]');
   oldIssues.forEach(i => oldMap[i.id] = i);
-  
+
   newIssues.forEach(issue => {
     if (oldMap[issue.id]) {
       if (oldMap[issue.id].status.name !== issue.status.name) {
         changes.push({
-          type: 'status',
-          issue: issue,
-          from: oldMap[issue.id].status.name,
-          to: issue.status.name,
+          type: 'status', issue: issue,
+          from: oldMap[issue.id].status.name, to: issue.status.name,
           project: issue.project
         });
       }
     } else {
-      changes.push({
-        type: 'new',
-        issue: issue,
-        project: issue.project
-      });
+      changes.push({ type: 'new', issue: issue, project: issue.project });
     }
   });
-  
+
   previousHash = hash;
   return changes;
 }
 
-// Fetch issues from Redmine API
+// --- Data fetching ---
+
 async function fetchIssues() {
   const url = API_BASE + '/issues.json?status_id=*&sort=updated_on:desc&limit=100&include=project,status,priority,author';
   try {
-    const res = await fetch(url, {headers: {'X-Redmine-API-Key': API_KEY}});
-    if (!res.ok) throw new Error('HTTP '+res.status);
+    const res = await fetch(url, { headers: { 'X-Redmine-API-Key': API_KEY } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     return data.issues.map(i => ({
       id: i.id,
       subject: i.subject,
       project: i.project.name,
       project_id: i.project.id,
-      status: {name: i.status.name, id: i.status.id},
+      status: { name: i.status.name, id: i.status.id },
       priority: i.priority.id,
       author: i.author.name,
       assigned_to: i.assigned_to ? i.assigned_to.name : 'Sin asignar',
       created_on: i.created_on,
       updated_on: i.updated_on
     }));
-  } catch(e) {
+  } catch (e) {
     console.error('Fetch error:', e);
     return null;
   }
 }
 
-// Render table
+// --- Rendering ---
+
 function renderIssues(issues) {
   const container = document.getElementById('table-container');
-  
+
   if (!issues || issues.length === 0) {
-    container.innerHTML = '<div class="empty"><div class="icon">📋</div>No hay peticiones</div>';
-    document.getElementById('issue-count').textContent = '0 peticiones';
+    container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No hay peticiones</div>';
+    document.getElementById('issue-count').textContent = '0';
     return;
   }
-  
-  document.getElementById('issue-count').textContent = issues.length + ' peticion'+(issues.length!==1?'es':'');
-  
-  // Save for change detection
+
+  document.getElementById('issue-count').textContent = issues.length;
   sessionStorage.setItem('rm_issues', JSON.stringify(issues));
-  
-  let html = '<table><thead><tr>'+
-    '<th onclick="sortBy(\'id\')"># <span class="sort">▼</span></th>'+
-    '<th onclick="sortBy(\'project\')">Proyecto</th>'+
-    '<th onclick="sortBy(\'subject\')">Asunto</th>'+
-    '<th onclick="sortBy(\'status\')">Estado</th>'+
-    '<th onclick="sortBy(\'priority\')">Prioridad</th>'+
-    '<th onclick="sortBy(\'assigned\')">Asignado</th>'+
-    '<th onclick="sortBy(\'updated\')">Actualizado</th>'+
+
+  let html = '<table><thead><tr>' +
+    '<th onclick="sortBy(\'id\')"># <span class="sort-marker">▼</span></th>' +
+    '<th onclick="sortBy(\'project\')">Proyecto</th>' +
+    '<th onclick="sortBy(\'subject\')">Asunto</th>' +
+    '<th onclick="sortBy(\'status\')">Estado</th>' +
+    '<th onclick="sortBy(\'priority\')">Prioridad</th>' +
+    '<th onclick="sortBy(\'assigned\')">Asignado</th>' +
+    '<th onclick="sortBy(\'updated\')">Actualizado</th>' +
     '</tr></thead><tbody>';
-  
+
   issues.forEach(issue => {
-    html += '<tr id="issue-'+issue.id+'">'+
-      '<td style="font-weight:600;color:#667eea">#'+issue.id+'</td>'+
-      '<td><span class="project-badge">'+escapeHtml(issue.project)+'</span></td>'+
-      '<td><a href="'+API_BASE+'/issues/'+issue.id+'" target="_blank" style="color:#eaeaea;text-decoration:none">'+escapeHtml(issue.subject)+'</a></td>'+
-      '<td><span class="badge '+statusClass(issue.status.name)+'">'+issue.status.name+'</span></td>'+
-      '<td>'+priorityHtml(issue.priority)+'</td>'+
-      '<td style="font-size:13px">'+escapeHtml(issue.assigned_to)+'</td>'+
-      '<td style="font-size:12px;color:#888" title="'+issue.updated_on+'">'+timeAgo(issue.updated_on)+'</td>'+
+    const statusLabel = issue.status.name;
+    const assignedTo = issue.assigned_to;
+
+    html += '<tr id="issue-' + issue.id + '">' +
+      '<td style="font-weight:600;color:#c0392b">#' + issue.id + '</td>' +
+      '<td><span class="project-badge">' + escapeHtml(issue.project) + '</span></td>' +
+      '<td><a class="issue-link" href="' + API_BASE + '/issues/' + issue.id + '" target="_blank" rel="noopener">' + escapeHtml(issue.subject) + '</a></td>' +
+      '<td><span class="badge ' + statusClass(statusLabel) + '">' + statusLabel + '</span></td>' +
+      '<td>' + priorityHtml(issue.priority) + '</td>' +
+      '<td style="font-size:12px;color:#666">' + escapeHtml(assignedTo) + '</td>' +
+      '<td style="font-size:12px;color:#999" title="' + issue.updated_on + '">' + timeAgo(issue.updated_on) + '</td>' +
       '</tr>';
   });
-  
+
   html += '</tbody></table>';
   container.innerHTML = html;
 }
 
-function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+// --- Filters ---
 
-// Apply filters
 function applyFilters() {
   let filtered = [...allIssues];
-  const proj = document.getElementById('filter-project').value;
+  const proj   = document.getElementById('filter-project').value;
   const status = document.getElementById('filter-status').value;
-  const search = document.getElementById('filter-search').value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  
-  if (proj) filtered = filtered.filter(i => i.project === proj);
+  const search = document.getElementById('filter-search').value
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (proj)   filtered = filtered.filter(i => i.project === proj);
   if (status) filtered = filtered.filter(i => i.status.name === status);
-  if (search) filtered = filtered.filter(i => 
-    i.subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
-    i.assigned_to.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
-    i.project.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search) ||
-    i.author.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(search)
+  if (search) filtered = filtered.filter(i =>
+    i.subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(search) ||
+    i.assigned_to.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(search) ||
+    i.project.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(search) ||
+    i.author.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(search)
   );
-  
   renderIssues(filtered);
 }
 
-// Update projects filter
 function updateProjectFilter(issues) {
   const projects = [...new Set(issues.map(i => i.project))].sort();
   const sel = document.getElementById('filter-project');
   const current = sel.value;
   sel.innerHTML = '<option value="">Todos</option>';
   projects.forEach(p => {
-    sel.innerHTML += '<option value="'+p+'">'+p+'</option>';
+    sel.innerHTML += '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>';
   });
   if (current) sel.value = current;
 }
 
-// Sort
-let sortField = 'updated_on';
+// --- Sorting ---
+
+let sortField = 'updated';
 let sortDir = -1;
 
 function sortBy(field) {
-  if (sortField === field) sortDir *= -1;
+  if (sortField === field) { sortDir *= -1; }
   else { sortField = field; sortDir = -1; }
-  
-  const sorted = [...allIssues].sort((a,b) => {
-    let va = a[field]||'', vb = b[field]||'';
-    if (field === 'id'||field === 'priority') {va=Number(va);vb=Number(vb)}
-    else if (field === 'updated') {va=new Date(a.updated_on);vb=new Date(b.updated_on)}
-    return (va<vb?-1:va>vb?1:0) * sortDir;
+
+  const sorted = [...allIssues].sort((a, b) => {
+    let va, vb;
+    if (field === 'id' || field === 'priority') {
+      va = Number(a[field]); vb = Number(b[field]);
+    } else if (field === 'updated') {
+      va = new Date(a.updated_on); vb = new Date(b.updated_on);
+    } else if (field === 'assigned') {
+      va = a.assigned_to || ''; vb = b.assigned_to || '';
+    } else {
+      va = a[field] || ''; vb = b[field] || '';
+    }
+    return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
   });
-  
+
   allIssues = sorted;
   applyFilters();
 }
 
-// Main update
+// --- Main update cycle ---
+
 async function updateDashboard() {
   const statusDot = document.getElementById('status-dot');
   const statusText = document.getElementById('status-text');
-  
-  statusDot.className = 'dot';
+
+  statusDot.className = 'status-dot';
   statusText.textContent = 'Actualizando...';
-  
-  let issues = await fetchIssues();
-  
+
+  const issues = await fetchIssues();
+
   if (issues === null) {
-    statusDot.className = 'dot red';
-    statusText.textContent = 'Error de conexi\u00f3n';
+    statusDot.className = 'status-dot red';
+    statusText.textContent = 'Error de conexión';
     return;
   }
-  
-  statusDot.className = 'dot green';
+
+  statusDot.className = 'status-dot green animate';
   statusText.textContent = 'Conectado';
   document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('es-AR');
-  
-  // Detect changes
+
   const changes = detectChanges(issues);
-  
+
   if (changes.length > 0) {
     changes.forEach(change => {
       if (change.type === 'new') {
-        showAlert('🆕 Nueva petici\u00f3n en '+change.project+': #'+change.issue.id+' - '+change.issue.subject, 'success');
-        showNotification('Nueva petici\u00f3n', change.project+': '+change.issue.subject);
+        showAlert('🆕 Nueva petición en ' + change.project + ': #' + change.issue.id + ' - ' + change.issue.subject, 'success');
+        showNotification('Nueva petición', change.project + ': ' + change.issue.subject);
       } else if (change.type === 'status') {
-        showAlert('🔄 Cambio de estado en '+change.project+': #'+change.issue.id+' pas\u00f3 de "'+change.from+'" a "'+change.to+'"', 'info');
-        showNotification('Estado actualizado', change.project+': '+change.issue.subject+' → '+change.to);
+        showAlert('🔄 Cambio de estado en ' + change.project + ': #' + change.issue.id + ' pasó de "' + change.from + '" a "' + change.to + '"', 'info');
+        showNotification('Estado actualizado', change.project + ': ' + change.issue.subject + ' → ' + change.to);
       }
     });
-    
-    // Try browser notification
+
+    // Browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
-      const last = changes[changes.length-1];
-      new Notification('Redmine: '+last.project, {
-        body: last.type==='new' ? 'Nueva: '+last.issue.subject : last.issue.subject+' → '+last.to,
-        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>'
-      });
+      const last = changes[changes.length - 1];
+      const title = 'Redmine: ' + last.project;
+      const body = last.type === 'new'
+        ? 'Nueva: ' + last.issue.subject
+        : last.issue.subject + ' → ' + last.to;
+      new Notification(title, { body: body, icon: '/theme-assets/favicon_utn.png' });
     }
   }
-  
-  // Store for next comparison
+
   allIssues = issues;
   updateProjectFilter(issues);
   applyFilters();
 }
 
-// Force refresh
 function forceRefresh() {
   clearTimeout(pollTimer);
   updateDashboard().then(() => {
@@ -425,14 +889,14 @@ function forceRefresh() {
   });
 }
 
-// Request notification permission
 function requestNotifPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 }
 
-// Init
+// --- Init ---
+
 async function init() {
   requestNotifPermission();
   await updateDashboard();

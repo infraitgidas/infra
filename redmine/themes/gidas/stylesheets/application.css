@@ -1,0 +1,594 @@
+/* ================================================================
+   Redmine Theme: GIDAS
+   Soft red tones · Comfortable for screen work · GIDAS + UTN branding
+   ================================================================ */
+
+/* --- Palette ---
+   Primary red:       #c0392b
+   Secondary red:     #e74c3c
+   Light red:         #fadbd8
+   Very light red:    #fdedec
+   Dark bg:           #2c3e50
+   Body text:         #333333
+   Page bg:           #f5f5f5
+   Content bg:        #ffffff
+   Border:            #ddd
+   Success green:     #27ae60
+   Warning orange:    #f39c12
+   Info blue:         #2980b9
+   Link default:      #2471a3
+   ================================================================ */
+
+/* ============================================
+   Base & Typography
+   ============================================ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+               Ubuntu, Cantarell, "Fira Sans", "Droid Sans", Helvetica, Arial,
+               sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  background: #f5f5f5;
+}
+
+a { color: #2471a3; }
+a:hover { color: #c0392b; text-decoration: underline; }
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* ============================================
+   Top Menu (login/user bar)
+   ============================================ */
+#top-menu {
+  background: #2c3e50;
+  color: #ccc;
+  height: 28px;
+  font-size: 11px;
+  padding: 4px 0 0;
+}
+
+#top-menu a {
+  color: #bdc3c7;
+  padding: 2px 6px;
+}
+#top-menu a:hover {
+  color: #fff;
+  background: #c0392b;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+#account {
+  margin-right: 12px;
+}
+
+/* ============================================
+   Header (logo bar)
+   ============================================ */
+#header {
+  background: #c0392b;
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+  color: #fff;
+  min-height: 60px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+#header a { color: #fff; }
+
+#header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 0;
+  margin: 0;
+  line-height: 44px;
+}
+
+#header h1 a {
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#header h1 a:hover {
+  opacity: 0.9;
+}
+
+/* Logo image in header — GIDAS logo */
+#header h1 img {
+  max-height: 36px;
+  vertical-align: middle;
+}
+
+#quick-search {
+  margin-top: 8px;
+}
+
+#quick-search input {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  width: 200px;
+}
+
+#quick-search input::placeholder { color: rgba(255,255,255,0.6); }
+#quick-search input:focus {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  outline: none;
+}
+
+/* ============================================
+   Main Menu (project navigation tabs)
+   ============================================ */
+#main-menu {
+  background: #a93226;
+  border-bottom: none;
+  padding: 0 12px;
+  font-size: 12px;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.08);
+}
+
+#main-menu li {
+  margin: 0;
+  padding: 0;
+}
+
+#main-menu a {
+  color: rgba(255,255,255,0.85);
+  background: transparent;
+  padding: 7px 14px 6px;
+  border: none;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+#main-menu a:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  text-decoration: none;
+}
+
+#main-menu li.selected a,
+#main-menu a.selected {
+  background: #f5f5f5;
+  color: #c0392b;
+  font-weight: 600;
+  border: none;
+  margin: 0;
+}
+
+#main-menu li.selected a:hover,
+#main-menu a.selected:hover {
+  background: #f5f5f5;
+  color: #a93226;
+}
+
+/* ============================================
+   Page Layout — Main Content
+   ============================================ */
+#main {
+  background: #fff;
+  margin: 0;
+}
+
+#sidebar {
+  background: #fafafa;
+  border-left: 1px solid #eee;
+  padding: 16px 14px;
+  font-size: 12px;
+}
+
+#sidebar h3 {
+  color: #c0392b;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #fadbd8;
+  padding-bottom: 4px;
+  margin-top: 16px;
+}
+
+#sidebar h3:first-child { margin-top: 0; }
+
+#sidebar a {
+  color: #555;
+}
+#sidebar a:hover {
+  color: #c0392b;
+}
+
+/* Sidebar issues/entries lists */
+#sidebar ul li {
+  padding: 2px 0;
+}
+
+#content {
+  padding: 18px 24px;
+}
+
+/* ============================================
+   Contextual / Action Buttons
+   ============================================ */
+.contextual {
+  margin-bottom: 8px;
+}
+
+.contextual a,
+.contextual input[type="submit"] {
+  background: #fff;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.contextual a:hover,
+.contextual input[type="submit"]:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+input[type="submit"], input[type="button"], .button {
+  background: #c0392b;
+  color: #fff;
+  border: 1px solid #a93226;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+input[type="submit"]:hover, input[type="button"]:hover, .button:hover {
+  background: #a93226;
+}
+
+input[type="submit"]:active, input[type="button"]:active {
+  background: #922b21;
+}
+
+input[type="submit"][disabled], input[type="button"][disabled] {
+  background: #ccc;
+  border-color: #bbb;
+  cursor: not-allowed;
+}
+
+input[type="text"], input[type="password"], input[type="email"],
+textarea, select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus,
+textarea:focus, select:focus {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.15);
+  outline: none;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+table.list {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+table.list th {
+  background: #f5f5f5;
+  background: linear-gradient(to bottom, #fafafa, #f0f0f0);
+  color: #555;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 8px 10px;
+  border-bottom: 2px solid #c0392b;
+  white-space: nowrap;
+}
+
+table.list td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+table.list tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+table.list tr:hover td {
+  background: #fdedec;
+}
+
+/* Issue subject links */
+table.list td a {
+  color: #2471a3;
+  font-weight: 500;
+}
+table.list td a:hover {
+  color: #c0392b;
+}
+
+/* ============================================
+   Issue attributes box
+   ============================================ */
+.attributes {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.attributes th {
+  background: #fdedec;
+  color: #c0392b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 6px 10px;
+  width: 130px;
+}
+
+.attributes td {
+  padding: 6px 10px;
+}
+
+/* ============================================
+   Flash / Notification messages
+   ============================================ */
+.flash {
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.flash.notice {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.flash.warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+.flash.error {
+  background: #fdedec;
+  border: 1px solid #fadbd8;
+  color: #c0392b;
+}
+
+/* ============================================
+   Wiki / Textile content
+   ============================================ */
+.wiki {
+  line-height: 1.7;
+  font-size: 13px;
+}
+
+.wiki h1, .wiki h2, .wiki h3 {
+  color: #2c3e50;
+}
+
+.wiki h2 {
+  border-bottom: 2px solid #fadbd8;
+  padding-bottom: 4px;
+}
+
+.wiki a {
+  color: #2471a3;
+}
+
+.wiki a:hover {
+  color: #c0392b;
+}
+
+.wiki pre {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.wiki code {
+  background: #f8f9fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #c0392b;
+  font-size: 12px;
+}
+
+/* ============================================
+   Tooltips & Hints
+   ============================================ */
+div.tooltip {
+  background: #2c3e50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ============================================
+   Calendar / Datepicker
+   ============================================ */
+.ui-datepicker {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.ui-datepicker .ui-state-active {
+  background: #c0392b !important;
+  border-color: #c0392b !important;
+  color: #fff !important;
+}
+
+.ui-datepicker .ui-state-hover {
+  background: #fadbd8 !important;
+  border-color: #c0392b !important;
+}
+
+/* ============================================
+   Progress bars
+   ============================================ */
+.progress {
+  background: #ecf0f1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress .closed {
+  background: #27ae60;
+}
+
+.progress .done {
+  background: #c0392b;
+}
+
+.progress .todo {
+  background: #ddd;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+#footer {
+  background: #2c3e50;
+  color: #95a5a6;
+  font-size: 11px;
+  padding: 14px 16px;
+  text-align: center;
+  border-top: 3px solid #c0392b;
+}
+
+#footer a {
+  color: #bdc3c7;
+}
+#footer a:hover {
+  color: #fff;
+}
+
+/* ============================================
+   Login page
+   ============================================ */
+body.login {
+  background: #f5f5f5;
+}
+
+#login-form {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  padding: 24px;
+  max-width: 360px;
+  margin: 60px auto;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+#login-form input[type="submit"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* ============================================
+   Responsive tweaks
+   ============================================ */
+@media (max-width: 899px) {
+  #header { padding: 6px 10px; }
+  #content { padding: 12px 14px; }
+  #sidebar { padding: 12px 10px; }
+  #quick-search input { width: 140px; }
+}
+
+@media (max-width: 599px) {
+  #header h1 { font-size: 16px; }
+  #quick-search { display: none; }
+  #main-menu a { padding: 6px 8px; font-size: 11px; }
+}
+
+/* ============================================
+   Custom: GIDAS branding additions
+   ============================================ */
+/* Red accent on selected tabs across the app */
+.tabs-buttons a.selected {
+  background: #c0392b;
+  color: #fff;
+}
+
+/* Issue status badges */
+.status-badge.status-open { border-left: 4px solid #c0392b; }
+.status-badge.status-closed { border-left: 4px solid #27ae60; }
+
+/* Pagination */
+.pagination {
+  font-size: 12px;
+  padding: 8px 0;
+}
+
+.pagination .current {
+  background: #c0392b;
+  color: #fff;
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+
+/* Tracker badges */
+.tracker-label {
+  background: #fdedec;
+  color: #c0392b;
+  border: 1px solid #fadbd8;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Priority colors in issue lists */
+.priority-highest { color: #c0392b; font-weight: 700; }
+.priority-high3   { color: #e67e22; font-weight: 600; }
+.priority-lowest  { color: #7f8c8d; }
+
+/* Custom scrollbar (webkit) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c0392b; }

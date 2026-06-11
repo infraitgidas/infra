@@ -36,7 +36,7 @@ services:
     volumes:
       - redmine_files:/usr/src/redmine/files
       - redmine_plugins:/usr/src/redmine/plugins
-      - redmine_themes:/usr/src/redmine/public/themes
+      - ./themes:/usr/src/redmine/public/themes
     environment:
       REDMINE_DB_POSTGRES: postgres
       REDMINE_DB_DATABASE: ${POSTGRES_DB}
@@ -63,6 +63,7 @@ services:
     volumes:
       - ./nginx/redmine.conf:/etc/nginx/conf.d/redmine.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./themes/gidas/images:/usr/share/nginx/html/theme-assets:ro
     depends_on:
       redmine:
         condition: service_healthy
@@ -76,8 +77,6 @@ volumes:
     name: redmine_files
   redmine_plugins:
     name: redmine_plugins
-  redmine_themes:
-    name: redmine_themes
 
 networks:
   redmine-net:
