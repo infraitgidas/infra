@@ -61,6 +61,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/redmine.conf:/etc/nginx/conf.d/redmine.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/dashboard:/usr/share/nginx/html/dashboard:ro
