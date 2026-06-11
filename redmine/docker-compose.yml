@@ -63,6 +63,7 @@ services:
     volumes:
       - ./nginx/redmine.conf:/etc/nginx/conf.d/redmine.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/dashboard:/usr/share/nginx/html/dashboard:ro
       - ./themes/gidas/images:/usr/share/nginx/html/theme-assets:ro
     depends_on:
       redmine:
