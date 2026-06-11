@@ -1,19 +1,8 @@
 /* ================================================================
    Redmine Theme: GIDAS
-   Only color overrides — preserves default layout and spacing
+   Ultra-minimal — only header color and logo
+   Everything else uses default Redmine styles
    ================================================================ */
-
-/* --- Palette ---
-   Primary red:       #c0392b
-   Dark red:          #a93226
-   Very light red:    #fdedec
-   Dark bg:           #2c3e50
-   ================================================================ */
-
-/* Top menu — dark bar */
-#top-menu { background: #2c3e50; }
-#top-menu a { color: #bdc3c7; }
-#top-menu a:hover { color: #fff; background: #c0392b; }
 
 /* Header — red gradient */
 #header {
@@ -22,18 +11,17 @@
   color: #fff;
 }
 #header a { color: #fff; }
+#header h1 a { color: #fff; }
 
+/* GIDAS logo in header */
 #header h1 {
   background: url(../images/logo-gidas.png) no-repeat left center;
   background-size: auto 32px;
   padding-left: 150px;
-  padding-top: 4px;
   min-height: 36px;
 }
-#header h1 a { color: #fff; }
-#header h1 a:hover { opacity: 0.9; }
 
-/* Quick search */
+/* Quick search — adapt to dark header */
 #quick-search input {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.3);
@@ -50,76 +38,4 @@
 #main-menu a { color: rgba(255,255,255,0.85); }
 #main-menu a:hover { color: #fff; background: rgba(255,255,255,0.12); }
 #main-menu li.selected a,
-#main-menu a.selected {
-  background: #fff;
-  color: #c0392b;
-}
-
-/* Links */
-a { color: #c0392b; }
-a:hover { color: #a93226; }
-
-/* Buttons */
-input[type="submit"], input[type="button"] {
-  background: #c0392b;
-  border-color: #a93226;
-  color: #fff;
-}
-input[type="submit"]:hover, input[type="button"]:hover {
-  background: #a93226;
-}
-
-/* Contextual / action links */
-.contextual a {
-  background: #fff;
-  color: #c0392b;
-  border: 1px solid #c0392b;
-}
-.contextual a:hover {
-  background: #c0392b;
-  color: #fff;
-}
-
-/* Table headers */
-table.list th { border-bottom: 2px solid #c0392b; }
-
-/* Selected row highlight */
-table.list tr:hover td { background: #fdedec; }
-
-/* Sidebar headings */
-#sidebar h3 { color: #c0392b; }
-
-/* Flash errors */
-.flash.error {
-  background: #fdedec;
-  border-color: #fadbd8;
-  color: #c0392b;
-}
-
-/* Progress bars */
-.progress .done { background: #c0392b; }
-
-/* Pagination */
-.pagination .current { background: #c0392b; color: #fff; }
-
-/* Calendar */
-.ui-datepicker .ui-state-active {
-  background: #c0392b !important;
-  border-color: #c0392b !important;
-  color: #fff !important;
-}
-.ui-datepicker .ui-state-hover {
-  background: #fdedec !important;
-  border-color: #c0392b !important;
-}
-
-/* Wiki headings */
-.wiki h2 { border-bottom: 2px solid #fadbd8; }
-.wiki code { color: #c0392b; }
-
-/* Footer */
-#footer { border-top: 3px solid #c0392b; }
-
-/* Login page button */
-#login-form input[type="submit"] { background: #c0392b; border-color: #a93226; }
-#login-form input[type="submit"]:hover { background: #a93226; }
+#main-menu a.selected { background: #fff; color: #c0392b; }
