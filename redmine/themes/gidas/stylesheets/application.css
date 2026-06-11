@@ -1,3 +1,7 @@
-/* GIDAS theme placeholder — intentionally empty.
-   Logo and favicon are handled by nginx at /theme-assets/
-   and in the dashboard at /dashboard/ */
+/* GIDAS theme — logo only. No color changes to default layout. */
+#header h1 {
+  background: url(../images/logo-gidas.png) no-repeat left center;
+  background-size: auto 32px;
+  padding-left: 150px;
+  min-height: 36px;
+}
