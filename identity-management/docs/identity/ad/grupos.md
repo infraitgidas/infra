@@ -1,7 +1,7 @@
 # Grupos de Seguridad — Active Directory
 
 > **OU destino**: `OU=Groups,DC=GDC01,DC=local`
-> **Última actualización**: 2026-06-03
+> **Última actualización**: 2026-06-11
 
 ## Convención de Nomenclatura
 
@@ -10,6 +10,7 @@
 | `G-` | Grupo por rol funcional | `G-Direccion`, `G-Coordinadores` |
 | `PROY-` | Proyecto de investigación | `PROY-Telepark`, `PROY-CAPNEE` |
 | `SRV-` | Servicio/aplicación | `SRV-PVEAdmin`, `SRV-InfraITAdmin` |
+| `APP-` | Acceso a aplicación | `APP-Redmine` |
 
 ---
 
@@ -40,7 +41,7 @@
 | Sudo (FreeIPA) | Sin sudo |
 | HBAC | Hosts del proyecto asignado |
 | PVE Role | PVEViewer |
-| Miembros | Rafael Cáceres Petckowicz, Juan Ignacio Etcheverry, Romeo Monfroglio, Cintia Valero |
+| Miembros | Rafael Cáceres Petckowicz, Juan Ignacio Etcheverry, Romeo Monfroglio, Federico Blanco Cavallero, Santiago Montanari, Tiago Ibañez, Cintia Valero |
 
 ### G-IdentityAdmins
 | Atributo | Valor |
@@ -65,7 +66,7 @@ Reservado.
 |-------|----------|
 | PROY-Telepark | (a definir) |
 | PROY-CAPNEE | (a definir) |
-| PROY-INFRAiT | (a definir — incluye miembros con rol sysadmin) |
+| PROY-INFRAiT | errodriguez (Coordinador), rmonfroglio, fblancocavallero, smontanari, tiago.ibanez (Becarios) |
 | PROY-GMET | (a definir) |
 | PROY-GIS | (a definir) |
 
@@ -88,6 +89,17 @@ Los miembros se asignan cuando los responsables definen los integrantes de cada 
 ### SRV-Monitoring
 | Propósito | Monitoreo (solo lectura) |
 | Miembros | (a definir — coordinador: Emanuel Rodriguez Rodriguez) |
+
+### APP-Redmine
+| Atributo | Valor |
+|----------|-------|
+| Propósito | Access gate para Redmine — solo miembros de este grupo pueden autenticarse |
+| Tipo | Security Group (Global) |
+| Miembros | G-Direccion, G-Coordinadores, G-Becarios, G-IdentityAdmins |
+| Nota | Grupo contenedor (nested). Los grupos `G-*` son miembros, no usuarios directos |
+
+El filtro LDAP en Redmine usa `(memberOf=CN=APP-Redmine,OU=Groups,DC=GDC01,DC=local)`.
+Al agregar un nuevo grupo `G-*` o cuando un grupo deba tener acceso a Redmine, se agrega como miembro de `APP-Redmine`.
 
 ---
 
@@ -113,3 +125,64 @@ Los miembros se asignan cuando los responsables definen los integrantes de cada 
 | SRV-Monitoring | ALL (RO) | Plugins monitoreo, ping |
 
 **Regla**: Deny by default.
+
+---
+
+## Mapeo a Redmine
+
+Redmine usa un **approach híbrido** para sincronizar usuarios, grupos y roles desde AD:
+
+| Capa | Mecanismo | Descripción |
+|------|-----------|-------------|
+| **Auth (access gate)** | LDAP AuthSource | Filtro `(memberOf=CN=APP-Redmine,OU=Groups,DC=GDC01,DC=local)` + onthefly_register |
+| **Grupos** | LDAP Group Sync nativo | Sincroniza grupos `G-*`, `PROY-*`, `SRV-*` → grupos Redmine |
+| **Roles finos por proyecto** | Script `redmine/scripts/sync-ad-members.sh` | Lee membresía AD via `ldapsearch` y asigna roles vía REST API de Redmine |
+
+### Lógica del Script de Sync
+
+```
+Por cada proyecto P en Redmine:
+  Por cada usuario U donde U ∈ G-Coordinadores ∩ PROY-P:
+    Asignar U como Coordinador en P
+
+  Por cada usuario U donde U ∈ G-Becarios ∩ PROY-P:
+    Asignar U como Becario en P
+
+  Por cada usuario U donde U ∈ G-Direccion (sin intersección):
+    Asignar U como Director en P
+
+Directores y Coordinadores también se asignan a los proyectos Dirección y Administración.
+```
+
+### Proyectos Redmine y Grupos AD Correspondientes
+
+| Proyecto Redmine | Grupo AD PROY- | Coordinador | Becarios |
+|-----------------|----------------|-------------|----------|
+| CAPNEE | PROY-CAPNEE | aalvarezf | rcaceresp, jetcheverry, cvalero |
+| TELEPARK | PROY-Telepark | mpenalva | *(a definir)* |
+| GMET | PROY-GMET | zquiroz | *(a definir)* |
+| GIS | PROY-GIS | jmarchesini | *(a definir)* |
+| INFRAiT | PROY-INFRAiT | errodriguez | rmonfroglio, fblancocavallero, smontanari, tiago.ibanez |
+| Dirección | — | Todos los coordinadores | — |
+| Administración | — | Todos los coordinadores | — |
+
+### Roles Redmine vs. Grupos AD
+
+| Rol Redmine | Grupo(s) AD | Permisos Clave |
+|-------------|-------------|----------------|
+| Director | G-Direccion | Gestión total del proyecto (9 permisos) |
+| Coordinador | G-Coordinadores ∩ PROY-* | Gestión de issues, miembros, roadmap (7 permisos) |
+| Becario | G-Becarios ∩ PROY-* | Crear y ver issues, sin administrar |
+| Graduado | G-Graduados (futuro) | *(a definir)* |
+| Pasante | G-Practicas (futuro) | *(a definir)* |
+
+### Scripts Relacionados
+
+- `redmine/scripts/sync-ad-members.sh` — Sync principal (cron cada 15 min)
+- `identity-management/scripts/verify-redmine-sync.sh` — Verificación del sync
+
+### Referencias
+
+- `staff.md` — Staff completo del grupo (fuente de verdad)
+- `redmine/scripts/sync-ad-members.sh` — Script de sync
+- `openspec/specs/infra/redmine/spec.md` — Spec de Redmine

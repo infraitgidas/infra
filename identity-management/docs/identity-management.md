@@ -63,8 +63,9 @@ GDC01.local
 
 ## Documentos Relacionados
 
-- `docs/identity/ad/ous.md` — Estructura de OUs
-- `docs/identity/ad/grupos.md` — Definición de grupos
-- `docs/identity/ad/usuarios.md` — Usuarios
+- `docs/identity/ad/ous.md` — Estructura de OUs de AD
+- `docs/identity/ad/grupos.md` — Definición de grupos de AD
+- `docs/identity/ad/usuarios.md` — Usuarios de AD
+- `docs/identity/estructura-grupos-apps.md` — **Modelo reutilizable** para integrar cualquier aplicación (Redmine, GitLab, Proxmox, Keycloak, WiFi, etc.)
 - `docs/identity/onboarding.md` — Alta de usuarios
 - `docs/identity/offboarding.md` — Baja de usuarios

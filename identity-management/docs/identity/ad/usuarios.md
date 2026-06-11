@@ -1,7 +1,7 @@
 # Usuarios — Active Directory
 
 > **Fuente**: `identity-management/docs/estructura-user-organizacion.md`
-> **Última actualización**: 2026-06-03
+> **Última actualización**: 2026-06-11
 
 ## Convención de Nombres
 
@@ -43,7 +43,10 @@
 |---------|---------------|--------|----|
 | Rafael Cáceres Petckowicz | rcaceresp | G-Becarios | `OU=Becarios,DC=GDC01,DC=local` |
 | Juan Ignacio Etcheverry | jetcheverry | G-Becarios | `OU=Becarios,DC=GDC01,DC=local` |
-| Romeo Monfroglio | rmonfroglio | G-Becarios | `OU=Becarios,DC=GDC01,DC=local` |
+| Romeo Monfroglio | rmonfroglio | G-Becarios, PROY-INFRAiT | `OU=Becarios,DC=GDC01,DC=local` |
+| Federico Blanco Cavallero | fblancocavallero | G-Becarios, PROY-INFRAiT | `OU=Becarios,DC=GDC01,DC=local` |
+| Santiago Montanari | smontanari | G-Becarios, PROY-INFRAiT | `OU=Becarios,DC=GDC01,DC=local` |
+| Tiago Ibañez | tiago.ibanez | G-Becarios, PROY-INFRAiT | `OU=Becarios,DC=GDC01,DC=local` |
 | Cintia Valero | cvalero | G-Becarios | `OU=Becarios,DC=GDC01,DC=local` |
 
 > Los becarios pueden pertenecer a múltiples proyectos (grupos `PROY-*`). Pendiente de asignación.
@@ -66,6 +69,6 @@
 |----|----------|
 | Direccion | 2 |
 | Direccion/Coordinadores | 6 |
-| Becarios | 4 |
+| Becarios | 7 |
 | ServiceAccounts | 1 |
-| **Total** | **13** |
+| **Total** | **16** |

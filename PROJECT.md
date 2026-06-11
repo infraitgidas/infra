@@ -29,10 +29,21 @@
 ### Feature 1: Gestor de Proyecto — Redmine
 
 - **Objetivo**: Instalar y configurar Redmine como gestor de proyectos open source
-- **Componentes**: redmine:6.1 + postgres:16 + nginx en Docker Compose, CT en pve-ad
-- **Estado SDD**: 🛠️ Implementación ✅ — 14/14 tareas
-- **Tareas Completadas**: Scripts de deploy (00-env, 01-create-ct, 02-deploy-stack, 03-configure-ssl, 04-backup, 05-verify), docker-compose.yml, nginx config, .gitignore
+- **Componentes**: redmine:6.1 + postgres:16 + nginx en Docker Compose, VM en pve-desa04
+- **Estado SDD**: 📦 Archivado ✅ — Ciclo completo
+- **Tareas Completadas**:
+  - Scripts de deploy (00-env a 06-restore), docker-compose.yml, nginx SSL, backups
+  - Autenticación LDAP contra AD GDC01 (filtro grupo `redmine`, onthefly_register)
+  - 7 proyectos: Dirección, Administración, CAPNEE, INFRAiT, TELEPARK, GMET, GIS
+  - 6 roles: Director, Coordinador, Graduado, Becario, Pasante, Externo
+  - Workflow: Nueva → Iniciada → En Revisión → En Espera → Terminada → Cerrada
+  - SMTP Outlook configurado (infrait@frlp.utn.edu.ar)
+  - Notificaciones por mail: nueva issue → todos los miembros, asignación → asignado
+  - Dashboard público `/dashboard/` con tabla dinámica, colores y alertas en tiempo real
+  - 12 usuarios AD habilitados con password Gidas2026
+  - Correos de bienvenida con credenciales de primer login enviados
 - **Archivos**: `redmine/`
+- **Archivo SDD**: `openspec/changes/redmine/`
 
 ---
 

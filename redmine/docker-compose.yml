@@ -1,0 +1,86 @@
+# ================================================================
+# Redmine Stack — docker-compose.yml
+# ================================================================
+# Deploy: docker compose up -d
+# Stack: redmine:6.1 + postgres:16 + nginx:1.27-alpine
+# ================================================================
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-16}
+    container_name: redmine-postgres
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-redmine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - redmine-net
+
+  redmine:
+    image: redmine:${REDMINE_VERSION:-6.1}
+    container_name: redmine-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - redmine_files:/usr/src/redmine/files
+      - ./plugins:/usr/src/redmine/plugins
+      - ./themes:/usr/src/redmine/themes
+      - ./themes/gidas/stylesheets:/usr/src/redmine/public/themes/gidas/stylesheets
+      - ./themes/gidas/images:/usr/src/redmine/public/themes/gidas/images
+    environment:
+      REDMINE_DB_POSTGRES: postgres
+      REDMINE_DB_DATABASE: ${POSTGRES_DB}
+      REDMINE_DB_USER: ${POSTGRES_USER}
+      REDMINE_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDMINE_SECRET_KEY: ${REDMINE_SECRET_KEY}
+    healthcheck:
+      # Use Ruby's built-in net/http (no curl/wget dependency in slim image)
+      test: ["CMD-SHELL", "ruby -e \"require 'net/http'; exit Net::HTTP.get_response(URI('http://localhost:3000/')).code.to_i / 100 == 2 ? 0 : 1\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - redmine-net
+
+  nginx:
+    image: nginx:${NGINX_VERSION:-1.27-alpine}
+    container_name: redmine-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/redmine.conf:/etc/nginx/conf.d/redmine.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/dashboard:/usr/share/nginx/html/dashboard:ro
+      - ./themes/gidas/images:/usr/share/nginx/html/theme-assets:ro
+    depends_on:
+      redmine:
+        condition: service_healthy
+    networks:
+      - redmine-net
+
+volumes:
+  pgdata:
+    name: redmine_pgdata
+  redmine_files:
+    name: redmine_files
+
+networks:
+  redmine-net:
+    name: redmine-net
+    driver: bridge
