@@ -35,7 +35,7 @@ services:
         condition: service_healthy
     volumes:
       - redmine_files:/usr/src/redmine/files
-      - redmine_plugins:/usr/src/redmine/plugins
+      - ./plugins:/usr/src/redmine/plugins
       - ./themes:/usr/src/redmine/themes
       - ./themes/gidas/stylesheets:/usr/src/redmine/public/themes/gidas/stylesheets
       - ./themes/gidas/images:/usr/src/redmine/public/themes/gidas/images
@@ -79,8 +79,6 @@ volumes:
     name: redmine_pgdata
   redmine_files:
     name: redmine_files
-  redmine_plugins:
-    name: redmine_plugins
 
 networks:
   redmine-net:
