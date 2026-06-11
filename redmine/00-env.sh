@@ -22,7 +22,7 @@ VM_PASS="hlsv.2025"
 VM_HOSTNAME="redmine"
 VM_DOMAIN="gidas.local"
 VM_FQDN="${VM_HOSTNAME}.${VM_DOMAIN}"
-VM_TEMPLATE="rocky-10-template"
+VM_TEMPLATE="rocky-10-standard"
 
 # --- Network ---
 VM_GATEWAY="192.168.1.1"
