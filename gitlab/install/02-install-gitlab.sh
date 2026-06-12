@@ -16,7 +16,7 @@ source "${SCRIPT_DIR}/00-env.sh"
 
 VM_SSH="ssh ${SSH_OPTS} root@${VM_IP%/*}"
 
-echo "=== Installing GitLab CE Omnibus on ${VM_NAME} (${VM_IP%/*}) ==="
+echo "=== Installing GitLab CE Omnibus on ${VM_HOSTNAME:-gitlab} (${VM_IP%/*}) ==="
 echo ""
 
 # ---------------------------------------------------------------

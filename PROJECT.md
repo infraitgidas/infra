@@ -38,11 +38,22 @@
 ### Feature 2: VCS On-Premise — GitLab
 
 - **Objetivo**: Instalar y configurar GitLab como sistema de control de versiones on-premise
-- **Componentes**: GitLab CE Omnibus en VM dedicada (Rocky Linux 10)
-- **Estado SDD**: 📦 Archivado ✅ — 19/19 tareas, PASS verify (12/15 COMPLIANT, 3 PARTIAL)
-- **Tareas Completadas**: Scripts de provision VM, instalación, HTTPS, SSH, firewall, backups, snapshot PVE, restore, runbook, verification
-- **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/docs/`
-- **Archivo SDD**: `openspec/changes/archive/2026-06-02-gitlab/`
+- **Componentes**: GitLab CE Omnibus en VM dedicada (Rocky Linux 10), pve-desa04, 4vCPU/8GB/80G, OVMF UEFI, IP 192.168.1.41
+- **Estado SDD**: 🛠️ Implementación — GitLab 19.0.2 operativo, pendiente password bind LDAP
+- **Tareas Completadas**:
+  - Migración pve-desa01 → pve-desa04
+  - VM con OVMF UEFI, 80G, 4vCPU/8GB
+  - IP 192.168.1.41/24 estática
+  - DNS MikroTik: `gitlab.gidas.local`
+  - GitLab CE 19.0.2 Omnibus instalado (17/17 servicios)
+  - HTTPS self-signed + SSH Git puerto 2222 DNAT
+  - Firewall PVE host (80, 443, 2222)
+  - Integración LDAP configurada en gitlab.rb
+  - Script `gitlab/scripts/sync-ad-members.sh` (sync AD → GitLab)
+  - Runbook actualizado, informe de avance
+- **Pendiente**: Password bind `infrait` para activar LDAP, token API GitLab, backups cron
+- **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/scripts/`, `gitlab/docs/`
+- **Archivo SDD**: `openspec/changes/gitlab-deploy/`
 
 ---
 
@@ -66,4 +77,4 @@
 
 ---
 
-*Última actualización: 2026-06-02*
+*Última actualización: 2026-06-12*
