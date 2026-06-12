@@ -22,10 +22,9 @@ declare -a NODE_NAMES=(
 )
 
 # --- CT sg-monitoring (pve-ad) ---
-CT_MONITORING_IP="192.168.1.31"   # Jump host (pve-ad Proxmox node)
-CT_MONITORING_HOST="sg-monitoring" # LXC CT name
-CT_MONITORING_ID="205"             # LXC CT ID
-CT_MONITORING_LXC_IP="192.168.1.205"  # Direct CT IP
+CT_MONITORING_IP="192.168.1.31"
+CT_MONITORING_HOST="sg-monitoring"
+CT_MONITORING_ID="205"
 
 # --- Ports ---
 PROMETHEUS_PORT="9090"
@@ -63,22 +62,6 @@ ALERTMANAGER_EMAIL_FROM="alertmanager@pve-gidas.local"
 ALERTMANAGER_SMTP_HOST="localhost"
 ALERTMANAGER_SMTP_PORT="25"
 
-# --- SNMP ---
-SNMP_EXPORTER_VERSION="0.28.0"
-SNMP_EXPORTER_PORT="9116"
-SNMP_EXPORTER_BIN="/usr/local/bin/snmp_exporter"
-SNMP_EXPORTER_CONF="/etc/snmp_exporter/snmp.yml"
-
-# --- SNMP Community Strings (set per environment) ---
-# These are the auth names used in snmp.yml; change the actual community values there.
-SNMP_AUTH_MONITORING="monitoring_v2"
-SNMP_AUTH_PUBLIC="public_v2"
-
-# --- SNMP Targets ---
-SNMP_MIKROTIK="192.168.1.1"
-SNMP_PROXMOX_NODES=("192.168.1.11" "192.168.1.12" "192.168.1.13" "192.168.1.14" "192.168.1.31")
-SNMP_TARGETS_OTHER=("192.168.1.117" "192.168.1.118")
-
 # --- Thresholds ---
 DISK_USAGE_WARN=80   # Alert when disk usage exceeds this percent
 
@@ -86,12 +69,9 @@ DISK_USAGE_WARN=80   # Alert when disk usage exceeds this percent
 SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes"
 
 # --- Architecture ---
-# Prometheus + Grafana + Alertmanager + snmp_exporter + blackbox_exporter
-# on CT sg-monitoring (pve-ad host, CT 205, Rocky Linux 10)
+# Prometheus + Grafana + Alertmanager on CT sg-monitoring (pve-ad, CT 205)
 # PVE Exporter (:9221) + Node Exporter (:9100) on each PVE node
-# snmp_exporter proxies SNMP polls to targets via single :9116 endpoint
 # Outside the cluster — survives cluster failure
-# NOTE: CT runs Rocky Linux 10 (dnf/yum), NOT Debian (scripts use apt — OBSOLETE)
 
 echo "[00-env] Loaded F5 monitoring environment"
 echo "[00-env] CT sg-monitoring: ${CT_MONITORING_IP} (${CT_MONITORING_HOST})"
@@ -100,4 +80,3 @@ echo "[00-env] Prometheus ${PROMETHEUS_VERSION} :${PROMETHEUS_PORT}"
 echo "[00-env] Grafana ${GRAFANA_VERSION} :${GRAFANA_PORT}"
 echo "[00-env] Alertmanager ${ALERTMANAGER_VERSION} :${ALERTMANAGER_PORT}"
 echo "[00-env] PVE Exporter :${PVE_EXPORTER_PORT} + Node Exporter :${NODE_EXPORTER_PORT} por nodo"
-echo "[00-env] SNMP Exporter ${SNMP_EXPORTER_VERSION} :${SNMP_EXPORTER_PORT}"

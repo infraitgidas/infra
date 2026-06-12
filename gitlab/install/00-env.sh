@@ -12,8 +12,7 @@ VM_NAME="gitlab"
 VM_IP="192.168.1.41/24"
 VM_GATEWAY="192.168.1.1"
 VM_BRIDGE="vmbr0"
-VM_STORAGE="shared-gitlab"   # NFS shared storage (f3-shared-storage)
-VM_STORAGE_LOCAL="local-zfs"  # Local storage for snippets/ISOs
+VM_STORAGE="local-zfs"
 
 # --- VM Resources ---
 VM_CORES=4
@@ -23,8 +22,7 @@ VM_DISK_SIZE="80G"
 
 # --- OS ---
 VM_OSTYPE="l26"
-VM_TEMPLATE="rocky-10-standard"  # cloud-init template name en pve-desa01
-VM_TEMPLATE_ID=9000              # Template VM ID (verificar en PVE)
+VM_TEMPLATE="rocky-10-standard"  # cloud-init template en pve-desa01
 VM_CIUSER="root"
 
 # --- GitLab Configuration ---

@@ -2,35 +2,28 @@
 
 ## Propósito
 
-Desplegar y operar Redmine como gestor de proyectos open source en una VM de
-`pve-desa`, siguiendo el patrón Docker Compose del stack `sg-monitoring`.
+Desplegar y operar Redmine como gestor de proyectos open source en un LXC de
+`pve-ad`, siguiendo el patrón Docker Compose del stack `sg-monitoring`.
 
 ## Requisitos
 
-### Requisito: Infraestructura de la VM
+### Requisito: Infraestructura del contenedor
 
-El sistema DEBE crear una VM QEMU/KVM dedicada (ID ~206) en `pve-desa` con
-2 vCPU, 4 GB RAM, 20 GB disco y Rocky Linux 10 como sistema operativo.
+El sistema DEBE crear un contenedor LXC dedicado (CT ~206) en `pve-ad` con
+2 vCPU, 4 GB RAM y 20 GB disco.
 
-#### Escenario: Creación de VM desde scripts
+#### Escenario: Creación de CT desde scripts
 
-- DADO `pve-desa` operativo con recursos disponibles
-- CUANDO se ejecuta el script de aprovisionamiento (`qm create`)
-- ENTONCES la VM DEBE crearse con Rocky Linux 10, 2 vCPU, 4 GB RAM y 20 GB disco
-- Y la VM DEBE tener conectividad a Internet para pulling de imágenes Docker
+- DADO `pve-ad` operativo con recursos disponibles
+- CUANDO se ejecuta el script de creación del CT
+- ENTONCES el CT DEBE crearse con Ubuntu LTS, 2 vCPU, 4 GB RAM y 20 GB disco
+- Y el CT DEBE tener conectividad a Internet para pulling de imágenes Docker
 
-#### Escenario: VM ID libre
+#### Escenario: CT ID libre
 
-- DADO un VM ID propuesto (ej: 206)
-- CUANDO se verifica disponibilidad en `pve-desa` vía `qm list`
+- DADO un CT ID propuesto (ej: 206)
+- CUANDO se verifica disponibilidad en `pve-ad`
 - ENTONCES el script DEBE confirmar que el ID no está en uso antes de crear
-
-#### Escenario: Usuario de acceso
-
-- DADO la VM creada con Rocky Linux 10
-- CUANDO se completa el primer boot con cloud-init
-- ENTONCES el usuario `infra` DEBE existir con contraseña configurada
-- Y DEBE permitir acceso SSH para los pasos de bootstrap
 
 ### Requisito: Despliegue del stack Redmine
 
@@ -39,15 +32,15 @@ Docker Compose.
 
 #### Escenario: Stack completo funcionando
 
-- DADO la VM con Docker Engine instalado (repos oficiales Rocky Linux)
+- DADO el CT creado con Docker Engine instalado
 - CUANDO se ejecuta `docker compose up -d`
 - ENTONCES los tres servicios DEBEN estar en estado running
-- Y Redmine DEBE ser accesible en `http://localhost:3000` dentro de la VM
+- Y Redmine DEBE ser accesible en `http://localhost:3000` dentro del CT
 
 #### Escenario: Persistencia de datos
 
 - DADO el stack desplegado
-- CUANDO se reinicia la VM o los contenedores
+- CUANDO se reinicia el CT o los contenedores
 - ENTONCES las bases de datos y archivos subidos DEBEN persistir en volúmenes
   Docker
 
@@ -59,7 +52,8 @@ El sistema DEBE exponer Redmine vía HTTPS mediante nginx reverse proxy.
 
 - DADO nginx configurado como reverse proxy hacia `redmine:3000`
 - CUANDO se accede a `https://redmine.gidas.local` desde la red interna
-- ENTONCES nginx DEBE responder con certificado válido (auto-firmado)
+- ENTONCES nginx DEBE responder con certificado válido (auto-firmado o
+  Let's Encrypt)
 
 #### Escenario: Redirección HTTP a HTTPS
 
@@ -69,180 +63,20 @@ El sistema DEBE exponer Redmine vía HTTPS mediante nginx reverse proxy.
 
 ### Requisito: Autenticación local
 
-Redmine DEBE usar autenticación local como mecanismo de respaldo.
+Redmine DEBE usar autenticación local como mecanismo primario.
 
 #### Escenario: Login de administrador
 
 - DADO Redmine desplegado con configuración por defecto
-- CUANDO se accede a `/login` con credenciales admin
+- CUANDO se accede a `/login` con credenciales admin por defecto
 - ENTONCES el sistema DEBE permitir el ingreso
 - Y DEBE solicitar cambio de contraseña en el primer login
 
-### Requisito: Autenticación LDAP contra AD
+#### Escenario: Creación de usuario local
 
-Redmine DEBE autenticar usuarios contra Active Directory (GDC01.local) mediante LDAP.
-
-#### Escenario: Configuración del servidor LDAP
-
-- DADO un servidor AD accesible (192.168.1.117, puerto 389)
-- CUANDO se configura un AuthSource LDAP en Redmine
-- ENTONCES el servidor DEBE ser `192.168.1.117`
-- Y DEBE usar filtro `(memberOf=CN=APP-Redmine,OU=Groups,DC=GDC01,DC=local)`
-- Y DEBE tener `onthefly_register` habilitado
-
-#### Escenario: Login con usuario AD
-
-- DADO un usuario miembro del grupo `APP-Redmine` en AD
-- CUANDO ingresa a Redmine con su usuario AD y contraseña
-- ENTONCES el sistema DEBE autenticarlo
-- Y DEBE crear su cuenta local automáticamente (onthefly_register)
-
-#### Escenario: Restricción por grupo
-
-- DADO un usuario NO miembro del grupo `APP-Redmine` en AD
-- CUANDO intenta autenticarse en Redmine
-- ENTONCES el sistema DEBE rechazar el acceso
-
-### Requisito: Sincronización LDAP de Grupos
-
-Redmine DEBE sincronizar grupos desde AD mediante LDAP Group Sync nativo.
-
-#### Escenario: Configuración del Group Sync
-
-- DADO el AuthSource LDAP configurado con onthefly_register
-- CUANDO se configura LDAP Group Sync en Redmine
-- ENTONCES DEBE sincronizar grupos desde `OU=Groups,DC=GDC01,DC=local`
-- Y DEBE crear grupos Redmine con los mismos nombres que los grupos AD
-- Y DEBE actualizar la membresía de los grupos automáticamente
-
-#### Escenario: Nuevo grupo en AD
-
-- DADO un nuevo grupo `PROY-GMET` creado en AD
-- CUANDO se ejecuta el Group Sync
-- ENTONCES DEBE aparecer como grupo en Redmine
-- Y DEBE contener a los mismos miembros que el grupo AD
-
-### Requisito: Sync Fino de Roles por Proyecto (Hybrid Approach)
-
-Redmine DEBE usar un script complementario para asignar roles finos por proyecto según la membresía de grupos AD, siguiendo el approach híbrido documentado en `staff.md`.
-
-#### Escenario: Script de sync ejecutado
-
-- DADO el script `redmine/scripts/sync-ad-members.sh`
-- CUANDO se ejecuta (manual o por cron)
-- ENTONCES DEBE consultar AD vía LDAP
-- Y DEBE consultar Redmine vía REST API
-- Y DEBE aplicar la lógica de mapping definida en staff.md
-
-#### Escenario: Lógica de mapping aplicada
-
-- DADO un usuario en `G-Direccion`
-- CUANDO se ejecuta el sync
-- ENTONCES DEBE tener rol Director en TODOS los proyectos
-
-- DADO un usuario en `G-Coordinadores` Y `PROY-CAPNEE`
-- CUANDO se ejecuta el sync
-- ENTONCES DEBE tener rol Coordinador en el proyecto CAPNEE
-
-- DADO un usuario en `G-Becarios` Y `PROY-CAPNEE`
-- CUANDO se ejecuta el sync
-- ENTONCES DEBE tener rol Becario en el proyecto CAPNEE
-
-- DADO un usuario en `G-Coordinadores`
-- CUANDO se ejecuta el sync
-- ENTONCES DEBE tener rol Coordinador en los proyectos Dirección y Administración
-
-#### Escenario: Script configurado en cron
-
-- DADO el script instalado en `/opt/infra/redmine/scripts/sync-ad-members.sh`
-- CUANDO se configura cron
-- ENTONCES DEBE ejecutarse cada 15 minutos
-- Y DEBE tener flag `--dry-run` para pruebas
-
-### Requisito: Estructura de proyectos
-
-Redmine DEBE contener los proyectos del laboratorio con roles y workflow definidos.
-
-#### Escenario: Proyectos creados
-
-- DADO Redmine operativo
-- CUANDO se listan los proyectos
-- ENTONCES DEBEN existir: Dirección, Administración, CAPNEE, INFRAiT, TELEPARK, GMET, GIS
-- Y todos DEBEN ser privados
-
-#### Escenario: Roles definidos
-
-- DADO la administración de roles
-- CUANDO se listan los roles disponibles
-- ENTONCES DEBEN existir: Director, Coordinador, Graduado, Becario, Pasante, Externo
-- Y Director DEBE tener permisos totales (9 permisos)
-- Y Coordinador DEBE tener permisos de gestión (7 permisos)
-- Y Becario DEBE tener permisos limitados (crear/ver issues)
-
-#### Escenario: Workflow de issues
-
-- DADO la configuración de workflow
-- CUANDO se crea una issue
-- ENTONCES los estados DEBEN ser: Nueva → Iniciada → En Revisión → En Espera → Terminada → Cerrada
-- Y cada rol DEBE poder avanzar la issue hacia adelante en el flujo
-- Y DEBE haber 126 transiciones configuradas
-
-#### Escenario: Asignación de miembros (vía sync AD → Redmine)
-
-- DADO los grupos de AD como fuente de verdad
-- CUANDO se ejecuta `sync-ad-members.sh`
-- ENTONCES la membresía se asigna AUTOMÁTICAMENTE según la intersección de grupos AD:
-  - CAPNEE DEBE tener a aalvarezf (Coordinador), rcaceresp, jetcheverry, cvalero (Becarios)
-  - TELEPARK DEBE tener a mpenalva (Coordinador)
-  - GMET DEBE tener a zquiroz (Coordinador)
-  - GIS DEBE tener a jmarchesini (Coordinador)
-  - INFRAiT DEBE tener a errodriguez (Coordinador), rmonfroglio (Becario)
-  - Dirección y Administración DEBEN tener a Directores + Coordinadores
-- Y NO DEBE requerir intervención manual en Redmine para miembros nuevos
-
-### Requisito: Correo electrónico SMTP
-
-Redmine DEBE enviar notificaciones por correo electrónico vía SMTP Outlook.
-
-#### Escenario: Configuración SMTP
-
-- DADO el servidor SMTP de Outlook
-- CUANDO se envía un correo desde Redmine
-- ENTONCES DEBE usar `smtp.office365.com:587` con STARTTLS
-- Y DEBE autenticar como `infrait@frlp.utn.edu.ar`
-- Y DEBE poder enviar correos a cualquier destinatario
-
-### Requisito: Notificaciones por evento
-
-Redmine DEBE notificar a los usuarios según eventos en las issues.
-
-#### Escenario: Nueva issue notifica a todos los miembros
-
-- DADO una issue creada en un proyecto
-- CUANDO se guarda la issue
-- ENTONCES TODOS los miembros del proyecto DEBEN recibir un mail de notificación
-- Y los usuarios DEBEN tener `mail_notification = "all"`
-
-#### Escenario: Asignación notifica al usuario
-
-- DADO una issue asignada a un usuario
-- CUANDO se guarda la asignación
-- ENTONCES el usuario asignado DEBE recibir notificación por mail
-- Y el evento `issue_assigned_to_changed` DEBE estar en la lista de notificables
-
-### Requisito: Dashboard público
-
-Redmine DEBE exponer un dashboard público con el estado de las peticiones.
-
-#### Escenario: Acceso al dashboard
-
-- DADO un navegador sin autenticación
-- CUANDO se accede a `http://redmine.gidas.local/dashboard/`
-- ENTONCES DEBE mostrar una tabla con todas las issues
-- Y DEBE tener código de colores por estado (azul, naranja, púrpura, gris, verde, oscuro)
-- Y DEBE actualizarse automáticamente cada 10 segundos
-- Y DEBE mostrar alertas visuales cuando ocurren cambios de estado
-- Y DEBE permitir filtrar por proyecto, estado y búsqueda textual
+- DADO un administrador autenticado en la interfaz de Redmine
+- CUANDO crea un nuevo usuario con email y contraseña
+- ENTONCES el usuario DEBE poder iniciar sesión con sus credenciales
 
 ### Requisito: Backup de PostgreSQL
 
@@ -250,7 +84,7 @@ El sistema DEBE ejecutar backups diarios de la base PostgreSQL.
 
 #### Escenario: Dump programado
 
-- DADO un cron configurado en la VM host
+- DADO un cron configurado en el CT host
 - CUANDO se ejecuta diariamente el script de backup
 - ENTONCES `pg_dump` DEBE generar un archivo `.sql.gz` en `/var/backups/redmine/`
 
@@ -267,78 +101,26 @@ plugins, themes).
 
 #### Escenario: Backup de volúmenes
 
-- DADO la VM con volúmenes Docker de Redmine
+- DADO el contenedor con volúmenes Docker de Redmine
 - CUANDO se ejecuta el script de backup
 - ENTONCES los directorios DEBEN comprimirse en un tarball
 - Y el tarball DEBE copiarse al storage interno de backups
 
 ### Requisito: Scripts reproducibles
 
-Los scripts de deploy DEBEN ser ejecutables en orden numerado desde una VM
-limpia.
+Los scripts de deploy DEBEN ser ejecutables en orden numerado desde un CT
+limpio.
 
 #### Escenario: Deploy desde cero
 
-- DADO una VM Rocky Linux 10 recién creada sin Docker
-- CUANDO se ejecutan los scripts en orden (`01-provision-vm.sh`,
-  `02-bootstrap-vm.sh`, `03-deploy-stack.sh`, `04-configure-ssl.sh`)
+- DADO un CT Ubuntu LTS recién creado sin Docker
+- CUANDO se ejecutan los scripts en orden (`00-env.sh`, `01-create-ct.sh`,
+  `02-deploy-stack.sh`, `03-configure-ssl.sh`)
 - ENTONCES el stack DEBE quedar operativo sin intervención manual
 
 #### Escenario: Rollback completo
 
 - DADO el stack desplegado
-- CUANDO se ejecuta `docker compose down` y se destruye la VM (`qm stop && qm
-  destroy`)
-- ENTONCES el script DEBE liberar el VM ID y los recursos asociados
+- CUANDO se ejecuta `docker compose down` y se destruye el CT
+- ENTONCES el script DEBE liberar el CT ID y los recursos asociados
 - Y los backups previos DEBEN estar disponibles para restauración futura
-
-### Requisito: Personalización de interfaz
-
-Redmine DEBE tener una interfaz personalizada con la imagen institucional de GIDAS y UTN.
-
-#### Escenario: Tema GIDAS seleccionable
-
-- DADO el theme `gidas` instalado en `/usr/src/redmine/themes/gidas/`
-- CUANDO se accede a Administración > Configuración > Pantalla > Tema
-- ENTONCES DEBE aparecer "Gidas" como opción seleccionable
-- Y DEBE aplicar colores rojos suaves (#c0392b, #e74c3c) en header, menú y botones
-- Y DEBE mostrar el logo de GIDAS en el header
-
-#### Escenario: Dashboard público con branding
-
-- DADO nginx sirviendo el dashboard estático
-- CUANDO se accede a `https://redmine.gidas.local/dashboard/`
-- ENTONCES DEBE mostrar el header con el logo de GIDAS
-- Y DEBE mostrar el footer con el logo de UTN La Plata
-- Y DEBE tener una paleta de colores rojo suave
-
-#### Escenario: Favicon institucional
-
-- DADO nginx configurado para servir assets estáticos
-- CUANDO se solicita `/favicon.ico`
-- ENTONCES DEBE redirigir a `/theme-assets/favicon_utn.png`
-
-#### Escenario: Resolución DNS
-
-- DADO la entrada DNS configurada en MikroTik (192.168.1.1)
-- CUANDO se consulta `redmine.gidas.local`
-- ENTONCES DEBE resolver a `192.168.1.20`
-
-### Requisito: Plugins instalados
-
-Redmine DEBE tener plugins para tablero Kanban y gestión de presupuesto.
-
-#### Escenario: Plugin Kanban instalado
-
-- DADO el plugin `kanban` instalado en `/usr/src/redmine/plugins/kanban/`
-- CUANDO se accede a Administración > Plugins
-- ENTONCES DEBE listar "Kanban plugin v0.0.12"
-- Y los proyectos DEBEN poder habilitar el módulo "Kanban" en sus módulos
-
-#### Escenario: Plugin Budget instalado
-
-- DADO el plugin `redmineup_projects_time_tracking` instalado
-- CUANDO se accede a Administración > Plugins
-- ENTONCES DEBE listar "Projects Time Tracking v0.8.0"
-- Y DEBE mostrar métricas de presupuesto (CPI, EAC, Variance) en la lista de proyectos
-- Y DEBE requerir migraciones de base de datos (6 migraciones ejecutadas)

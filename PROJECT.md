@@ -8,7 +8,6 @@
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
-| 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 
 ## Leyenda de Estados SDD
 
@@ -29,21 +28,10 @@
 ### Feature 1: Gestor de Proyecto — Redmine
 
 - **Objetivo**: Instalar y configurar Redmine como gestor de proyectos open source
-- **Componentes**: redmine:6.1 + postgres:16 + nginx en Docker Compose, VM en pve-desa04
-- **Estado SDD**: 📦 Archivado ✅ — Ciclo completo
-- **Tareas Completadas**:
-  - Scripts de deploy (00-env a 06-restore), docker-compose.yml, nginx SSL, backups
-  - Autenticación LDAP contra AD GDC01 (filtro grupo `redmine`, onthefly_register)
-  - 7 proyectos: Dirección, Administración, CAPNEE, INFRAiT, TELEPARK, GMET, GIS
-  - 6 roles: Director, Coordinador, Graduado, Becario, Pasante, Externo
-  - Workflow: Nueva → Iniciada → En Revisión → En Espera → Terminada → Cerrada
-  - SMTP Outlook configurado (infrait@frlp.utn.edu.ar)
-  - Notificaciones por mail: nueva issue → todos los miembros, asignación → asignado
-  - Dashboard público `/dashboard/` con tabla dinámica, colores y alertas en tiempo real
-  - 12 usuarios AD habilitados con password Gidas2026
-  - Correos de bienvenida con credenciales de primer login enviados
+- **Componentes**: redmine:6.1 + postgres:16 + nginx en Docker Compose, CT en pve-ad
+- **Estado SDD**: 🛠️ Implementación ✅ — 14/14 tareas
+- **Tareas Completadas**: Scripts de deploy (00-env, 01-create-ct, 02-deploy-stack, 03-configure-ssl, 04-backup, 05-verify), docker-compose.yml, nginx config, .gitignore
 - **Archivos**: `redmine/`
-- **Archivo SDD**: `openspec/changes/redmine/`
 
 ---
 
@@ -78,21 +66,4 @@
 
 ---
 
-### Feature 5: Identidad AD+FreeIPA — identity-dashboard
-
-- **Objetivo**: Herramienta unificada CLI + TUI para gestión de usuarios en Active Directory y FreeIPA
-- **Componentes**: Python/Click (CLI), Python/rich+questionary (TUI), SOPS secrets, Makefile
-- **Estado SDD**: 🛠️ Implementación ✅
-- **Tareas Completadas**:
-  - CLI completo: user CRUD, grupos, HBAC, password reset con rollback
-  - TUI interactivo con menú de 7 opciones
-  - Creación de usuarios con email, selector de proyectos y grupos desde AD
-  - SMTP Outlook configurado (infrait@frlp.utn.edu.ar)
-  - Welcome email al nuevo usuario + notificación al admin
-  - Makefile para comandos rápidos
-  - Documentación en `docs/identity-dashboard.md`
-- **Archivos**: `identity-dashboard/`, `secrets/identity.yaml`, `docs/identity-dashboard.md`, `Makefile`
-
----
-
-*Última actualización: 2026-06-10*
+*Última actualización: 2026-06-02*
