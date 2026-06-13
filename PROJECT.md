@@ -50,11 +50,26 @@
 ### Feature 2: VCS On-Premise — GitLab
 
 - **Objetivo**: Instalar y configurar GitLab como sistema de control de versiones on-premise
-- **Componentes**: GitLab CE Omnibus en VM dedicada (Rocky Linux 10)
-- **Estado SDD**: 📦 Archivado ✅ — 19/19 tareas, PASS verify (12/15 COMPLIANT, 3 PARTIAL)
-- **Tareas Completadas**: Scripts de provision VM, instalación, HTTPS, SSH, firewall, backups, snapshot PVE, restore, runbook, verification
-- **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/docs/`
-- **Archivo SDD**: `openspec/changes/archive/2026-06-02-gitlab/`
+- **Componentes**: GitLab CE Omnibus en VM dedicada (Rocky Linux 10), pve-desa04, 4vCPU/8GB/80G, OVMF UEFI, IP 192.168.1.41
+- **Estado SDD**: 🛠️ Implementación ✅ — GitLab 19.0.2 operativo con integración AD completa
+- **Tareas Completadas**:
+  - Migración pve-desa01 → pve-desa04
+  - VM con OVMF UEFI, 80G, 4vCPU/8GB
+  - IP 192.168.1.41/24 estática
+  - DNS MikroTik: `gitlab.gidas.local`
+  - GitLab CE 19.0.2 Omnibus instalado (17/17 servicios)
+  - HTTPS self-signed + SSH Git puerto 2222 DNAT (→ VM:2222, gitlab-sshd)
+  - Firewall PVE host (80, 443, 2222)
+  - Integración LDAP activada (`infrait / Gidas2026!`)
+  - Token API generado (`sync-ad-members`)
+  - 17 usuarios AD importados a GitLab
+  - 7 grupos GitLab creados con mapeo AD (G-Direccion→Owner, G-Coordinadores→Maintainer, G-Becarios→Developer)
+  - Script `gitlab/scripts/sync-ad-members.sh` (sync AD → GitLab)
+  - Backup diario (cron 02:00) + snapshot semanal PVE (dom 03:00)
+  - Runbook actualizado, informe de avance
+- **Pendiente**: Probar restore de backup
+- **Archivos**: `gitlab/install/`, `gitlab/backup/`, `gitlab/scripts/`, `gitlab/docs/`
+- **Archivo SDD**: `openspec/changes/archive/2026-06-13-gitlab-deploy/`
 
 ---
 
@@ -95,4 +110,4 @@
 
 ---
 
-*Última actualización: 2026-06-10*
+*Última actualización: 2026-06-13*
