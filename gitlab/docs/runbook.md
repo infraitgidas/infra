@@ -1,7 +1,6 @@
 # GitLab CE — Runbook Operativo
 
 > **VM**: `gitlab` (ID 201) en `pve-desa01`
-> **Storage**: `shared-gitlab` (NFS exports desde pve-desa03, f3-shared-storage)
 > **Dominio**: `https://gitlab.gidas.local`
 > **SSH Git**: `ssh://git@pve-desa01:2222/grupo/repo.git`
 > **OS**: Rocky Linux 10 — GitLab CE (Omnibus)
@@ -21,14 +20,9 @@
 
 ### Prerequisitos
 
-- Cloud-init template `rocky-10-standard` (ID 9000) en pve-desa01
-- Storage NFS `shared-gitlab` desplegado (f3-shared-storage)
+- Cloud-init template `rocky-10-standard` en storage `local-zfs`
 - IP `192.168.1.41/24` disponible
 - DNS: `gitlab.gidas.local` → `192.168.1.41`
-- Snippet subido al PVE host:
-  ```bash
-  scp gitlab/snippets/gitlab-cloudinit.yml root@pve-desa01:/var/lib/vz/snippets/
-  ```
 
 ### Pasos
 
@@ -36,10 +30,10 @@
 cd gitlab/install
 source 00-env.sh
 
-# 1. Clonar template + cloud-init
+# 1. Crear VM
 ./01-provision-vm.sh
 
-# 2. Instalar GitLab CE
+# 2. Instalar GitLab
 ./02-install-gitlab.sh
 
 # 3. Configurar HTTPS
@@ -226,16 +220,13 @@ cd gitlab/backup
 
 ### Falla de disco VM
 
-> Si el disco está en `shared-gitlab` (NFS), la VM puede migrarse en caliente a otro nodo.
-> Si el storage NFS está caído, contactar al failover de f3-shared-storage.
-
 ```bash
-# Opción 1: Migrar VM a otro nodo (el disco NFS es accesible desde cualquier nodo)
-qm migrate 201 pve-desa02 --online
-
-# Opción 2: Re-crear VM desde template
+# 1. Crear nueva VM con mismo IP
 cd gitlab/install
 ./01-provision-vm.sh
+
+# 2. Instalar GitLab (misma versión)
+./02-install-gitlab.sh
 
 # 3. Restaurar backup
 cd gitlab/backup
