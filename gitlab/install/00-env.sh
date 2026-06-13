@@ -53,12 +53,12 @@ SECRETS_FILE="/etc/gitlab/gitlab-secrets.json"
 AD_HOST="${AD_HOST:-192.168.1.117}"
 AD_PORT="${AD_PORT:-389}"
 AD_BIND_DN="${AD_BIND_DN:-CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local}"
-AD_BIND_PASS="${AD_BIND_PASS:-}"
+AD_BIND_PASS="${AD_BIND_PASS:-Gidas2026!}"
 AD_GROUPS_DN="${AD_GROUPS_DN:-OU=Groups,DC=GDC01,DC=local}"
 
 # --- GitLab API (para scripts de sync) ---
 GITLAB_API_URL="https://${GITLAB_DOMAIN}/api/v4"
-GITLAB_API_TOKEN="${GITLAB_API_TOKEN:-}"
+GITLAB_API_TOKEN="${GITLAB_API_TOKEN:-2d35b533814b8da73a797901eb4d2480b33b0c36}"
 
 echo "[00-env] GitLab VM Environment loaded (Rocky Linux 10)"
 echo "[00-env] VM ${VM_ID} on ${PM_NODE} (${PM_IP}) — ${VM_FQDN} (${VM_IP})"

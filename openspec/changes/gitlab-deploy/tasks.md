@@ -30,18 +30,18 @@
 - [x] 4.6 Verificar 17 servicios activos (gitlab-ctl status)
 - [x] 4.7 Verificar Web UI HTTPS (HTTP 200)
 
-## Phase 5: Configuración de Red (Pendiente)
+## Phase 5: Configuración de Red
 
-- [ ] 5.1 Configurar DNAT 2222 → VM:22 en pve-desa04 (iptables)
-- [ ] 5.2 Configurar firewall PVE host (puertos 80, 443, 2222)
-- [ ] 5.3 Probar clone SSH via puerto 2222
+- [x] 5.1 Configurar DNAT 2222 → VM:2222 en pve-desa04 (iptables)
+- [x] 5.2 Configurar firewall PVE host (puertos 80, 443, 2222)
+- [x] 5.3 Probar clone SSH via puerto 2222
 
-## Phase 6: Integración AD (Pendiente)
+## Phase 6: Integración AD
 
-- [ ] 6.1 Activar LDAP en `/etc/gitlab/gitlab.rb` (config AD)
-- [ ] 6.2 Crear script `sync-ad-members.sh` para GitLab (basado en Redmine)
-- [ ] 6.3 Configurar mapeo grupos AD → roles GitLab
-- [ ] 6.4 Probar sincronización y acceso
+- [x] 6.1 Activar LDAP en `/etc/gitlab/gitlab.rb` (config AD)
+- [x] 6.2 Crear script `sync-ad-members.sh` para GitLab (basado en Redmine)
+- [x] 6.3 Configurar mapeo grupos AD → roles GitLab
+- [x] 6.4 Probar sincronización y acceso
 
 ## Phase 7: Documentación
 
@@ -49,8 +49,8 @@
 - [x] 7.2 Crear change proposal (`openspec/changes/gitlab-deploy/proposal.md`)
 - [x] 7.3 Actualizar `PROJECT.md` con estado actual
 
-## Phase 8: Backups (Pendiente)
+## Phase 8: Backups
 
-- [ ] 8.1 Configurar cron de backup diario (`gitlab-backup create`)
-- [ ] 8.2 Configurar snapshot semanal PVE
+- [x] 8.1 Configurar cron de backup diario (`gitlab-backup create`)
+- [x] 8.2 Configurar snapshot semanal PVE
 - [ ] 8.3 Probar restore

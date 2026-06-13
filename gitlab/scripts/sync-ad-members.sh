@@ -9,8 +9,8 @@
 #   G-Coordinadores ∩ PROY-X → Maintainer en grupo GitLab del proyecto X
 #   G-Becarios     ∩ PROY-X → Developer  en grupo GitLab del proyecto X
 #
-# Dependencias: ldap-utils, curl, jq
-#   dnf install ldap-utils curl jq
+# Dependencias: openldap-clients, curl, jq
+#   dnf install openldap-clients curl jq
 #
 # Uso:
 #   ./sync-ad-members.sh                    # Sync completo
@@ -62,7 +62,6 @@ ACCESS_MAINTAINER=40
 ACCESS_DEVELOPER=30
 
 # --- Grupos GitLab (path → nombre) ---
-# Los paths coinciden con los identifiers de proyectos en Redmine
 declare -A GITLAB_GROUPS=(
     ["direccion"]="Dirección"
     ["administracion"]="Administración"
@@ -101,198 +100,94 @@ fail() {
     exit 1
 }
 
-api() {
+# ================================================================
+# AD: Consultar miembros de grupo LDAP
+# ================================================================
+
+# Retorna lista de sAMAccountName (uno por línea) de un grupo AD
+query_ad_group_members() {
+    local group_cn="$1"
+    local ldap_filter="(&(objectClass=group)(cn=${group_cn}))"
+
+    ldapsearch -H "ldap://${AD_HOST}:${AD_PORT}" -x \
+        -D "${AD_BIND_DN}" -w "${AD_BIND_PASS}" \
+        -b "${AD_GROUPS_DN}" \
+        -LLL "$ldap_filter" member 2>/dev/null | \
+        grep '^member:' | sed 's/^member: //' | sort -u
+}
+
+# Retorna sAMAccountName dado un CN de un user en AD
+get_sam_from_cn() {
+    local cn="$1"
+    ldapsearch -H "ldap://${AD_HOST}:${AD_PORT}" -x \
+        -D "${AD_BIND_DN}" -w "${AD_BIND_PASS}" \
+        -b "${AD_BASE_DN}" \
+        -LLL "(&(objectClass=user)(cn=${cn}))" \
+        sAMAccountName 2>/dev/null | \
+        grep '^sAMAccountName:' | sed 's/^sAMAccountName: //' | head -1
+}
+
+# Retorna todos los sAMAccountName de un grupo AD
+get_ad_group_sams() {
+    local group_cn="$1"
+    local sams=()
+
+    while IFS= read -r dn; do
+        [ -z "$dn" ] && continue
+        local cn_part
+        cn_part=$(echo "$dn" | grep -oP 'CN=[^,]+' | head -1 | sed 's/^CN=//')
+        local sam
+        sam=$(get_sam_from_cn "$cn_part")
+        if [ -n "$sam" ]; then
+            sams+=("$sam")
+            verbose "  Miembro AD: ${sam} (${cn_part})"
+        fi
+    done < <(query_ad_group_members "$group_cn")
+
+    echo "${sams[@]}"
+}
+
+# ================================================================
+# GitLab API Helpers
+# ================================================================
+
+gitlab_api() {
     local method="$1" endpoint="$2" data="${3:-}"
-    local curl_cmd="curl -sf --connect-timeout 10"
-    curl_cmd="$curl_cmd --header \"PRIVATE-TOKEN: ${GITLAB_API_TOKEN}\""
-    curl_cmd="$curl_cmd --header \"Content-Type: application/json\""
-    curl_cmd="$curl_cmd --request ${method}"
-    [ -n "$data" ] && curl_cmd="$curl_cmd --data '${data}'"
-    curl_cmd="$curl_cmd \"${GITLAB_URL}/api/v4${endpoint}\""
-    
+
     if [ "$DRY_RUN" = true ]; then
         echo "[DRY-RUN] curl -X ${method} ${GITLAB_URL}/api/v4${endpoint}"
         [ -n "$data" ] && echo "[DRY-RUN] data: ${data}"
         return
     fi
-    
-    eval "$curl_cmd" 2>/dev/null || return 1
+
+    curl -sfk --connect-timeout 10 \
+        --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --request "${method}" \
+        ${data:+--data "${data}"} \
+        "${GITLAB_URL}/api/v4${endpoint}" 2>/dev/null || true
 }
 
-# ================================================================
-# Prerequisitos
-# ================================================================
-
-check_prereqs() {
-    for cmd in ldapsearch curl jq; do
-        if ! command -v "$cmd" &>/dev/null; then
-            fail "Requerido: $cmd. Instalar con: dnf install ldap-utils curl jq"
-        fi
-    done
-    verbose "Prerequisitos OK — ldapsearch, curl, jq disponibles"
-
-    if [ -z "$GITLAB_API_TOKEN" ]; then
-        fail "GITLAB_API_TOKEN no configurado. Generar token en GitLab Web UI: User → Preferences → Access Tokens"
-    fi
-    
-    if [ -z "$AD_BIND_PASS" ]; then
-        fail "AD_BIND_PASS no configurado. Configurar AD_BIND_PASS en 00-env.sh o variable de entorno"
-    fi
+get_group_id() {
+    local path="$1"
+    gitlab_api GET "/groups?search=${path}" | \
+        jq -r ".[] | select(.path == \"${path}\") | .id // empty" 2>/dev/null || echo ""
 }
 
-# ================================================================
-# AD: Consultar miembros de grupo
-# ================================================================
-
-query_ad_group() {
-    local group_cn="$1"
-    local ldap_filter="(&(objectClass=group)(cn=${group_cn}))"
-    
-    ldapsearch -H "ldap://${AD_HOST}:${AD_PORT}" -x \
-        -D "${AD_BIND_DN}" -w "${AD_BIND_PASS}" \
-        -b "${AD_GROUPS_DN}" \
-        -LLL \
-        "$ldap_filter" \
-        member 2>/dev/null || echo ""
-}
-
-extract_members_from_ldap() {
-    grep '^member:' | sed 's/^member: //' | sort -u
-}
-
-get_ad_group_members() {
-    local group_cn="$1"
-    local members=()
-    
-    while IFS= read -r dn; do
-        [ -z "$dn" ] && continue
-        # Extraer sAMAccountName del DN
-        # Formato: CN=Leandro Rocca,OU=Direccion,DC=GDC01,DC=local
-        local cn_part
-        cn_part=$(echo "$dn" | grep -oP 'CN=[^,]+' | head -1 | sed 's/^CN=//')
-        
-        # Buscar sAMAccountName por CN
-        local sam
-        sam=$(ldapsearch -H "ldap://${AD_HOST}:${AD_PORT}" -x \
-            -D "${AD_BIND_DN}" -w "${AD_BIND_PASS}" \
-            -b "${AD_BASE_DN}" \
-            -LLL \
-            "(&(objectClass=user)(cn=${cn_part}))" \
-            sAMAccountName 2>/dev/null | grep '^sAMAccountName:' | sed 's/^sAMAccountName: //' | head -1)
-        
-        if [ -n "$sam" ]; then
-            members+=("$sam")
-            verbose "  Miembro AD: ${sam} (${cn_part})"
-        fi
-    done < <(query_ad_group "$group_cn" | extract_members_from_ldap)
-    
-    echo "${members[@]}"
-}
-
-# ================================================================
-# GitLab: Gestionar miembros de grupo
-# ================================================================
-
-get_gitlab_group_id() {
-    local group_path="$1"
-    api GET "/groups?search=${group_path}" 2>/dev/null | \
-        jq -r ".[] | select(.path == \"${group_path}\") | .id" 2>/dev/null || echo ""
-}
-
-get_gitlab_user_id() {
+get_user_id() {
     local username="$1"
-    api GET "/users?username=${username}" 2>/dev/null | \
-        jq -r ".[0].id" 2>/dev/null || echo ""
+    gitlab_api GET "/users?username=${username}" | \
+        jq -r '.[0].id // empty' 2>/dev/null || echo ""
 }
 
-get_gitlab_group_members() {
-    local group_id="$1"
-    api GET "/groups/${group_id}/members" 2>/dev/null | \
-        jq -r '.[] | "\(.id) \(.username) \(.access_level)"' 2>/dev/null || true
-}
-
-add_gitlab_member() {
-    local group_id="$1" user_id="$2" access_level="$3" username="$4" group_name="$5"
-    log "  Agregando ${username} (level ${access_level}) a grupo ${group_name}"
-    
+add_group_member() {
+    local gid="$1" uid="$2" level="$3" name="$4" username="$5"
+    log "  Agregando ${username} (level ${level}) a ${name}"
     if [ "$DRY_RUN" = false ]; then
-        api POST "/groups/${group_id}/members" \
-            "{\"user_id\": ${user_id}, \"access_level\": ${access_level}}" || \
-        log "  ⚠️  Error agregando ${username} a ${group_name} (puede ya existir)"
+        gitlab_api POST "/groups/${gid}/members" \
+            "{\"user_id\": ${uid}, \"access_level\": ${level}}" > /dev/null || \
+        log "  ⚠️  Error agregando ${username} a ${name} (puede ya existir)"
     fi
-}
-
-remove_gitlab_member() {
-    local group_id="$1" user_id="$2" username="$3" group_name="$4"
-    log "  Eliminando ${username} de grupo ${group_name}"
-    
-    if [ "$DRY_RUN" = false ]; then
-        api DELETE "/groups/${group_id}/members/${user_id}" || true
-    fi
-}
-
-sync_group_members() {
-    local group_path="$1" group_name="$2"
-    local expected_users="$3" expected_access="$4"
-    
-    log "Procesando grupo: ${group_name} (${group_path})"
-    
-    # Obtener ID del grupo en GitLab
-    local group_id
-    group_id=$(get_gitlab_group_id "$group_path")
-    if [ -z "$group_id" ]; then
-        log "  ⚠️  Grupo ${group_path} no existe en GitLab — saltando"
-        return
-    fi
-    log "  GitLab Group ID: ${group_id}"
-    
-    # Obtener miembros actuales en GitLab
-    local current_members
-    current_members=$(get_gitlab_group_members "$group_id")
-    
-    # Convertir miembros actuales a array asociativo: username → access_level
-    declare -A current_map
-    while IFS= read -r member_line; do
-        [ -z "$member_line" ] && continue
-        local uid uname level
-        read -r uid uname level <<< "$member_line"
-        current_map["$uname"]="$level"
-    done <<< "$current_members"
-    
-    # Agregar o actualizar miembros esperados
-    local added=0 removed=0
-    for username in $expected_users; do
-        local user_id
-        user_id=$(get_gitlab_user_id "$username")
-        if [ -z "$user_id" ]; then
-            log "  ⚠️  Usuario ${username} no existe en GitLab — saltando"
-            continue
-        fi
-        
-        if [ -z "${current_map[$username]:-}" ]; then
-            # Usuario no está en el grupo — agregar
-            add_gitlab_member "$group_id" "$user_id" "$expected_access" "$username" "$group_name"
-            added=$((added + 1))
-        elif [ "${current_map[$username]}" != "$expected_access" ]; then
-            # Usuario tiene nivel de acceso incorrecto — actualizar
-            log "  Actualizando ${username}: level ${current_map[$username]} → ${expected_access}"
-            if [ "$DRY_RUN" = false ]; then
-                api PUT "/groups/${group_id}/members/${user_id}" \
-                    "{\"access_level\": ${expected_access}}" || true
-            fi
-            added=$((added + 1))
-        fi
-        # Marcar como procesado
-        unset current_map["$username"]
-    done
-    
-    # Eliminar miembros que ya no deberían estar
-    for username in "${!current_map[@]}"; do
-        remove_gitlab_member "$group_id" "$(get_gitlab_user_id "$username")" "$username" "$group_name"
-        removed=$((removed + 1))
-    done
-    
-    log "  Resultado: +${added} agregados, -${removed} eliminados"
 }
 
 # ================================================================
@@ -305,76 +200,135 @@ main() {
     log "GitLab: ${GITLAB_URL}"
     [ "$DRY_RUN" = true ] && log "*** MODO DRY-RUN — no se realizarán cambios ***"
     echo ""
-    
-    check_prereqs
-    
-    # --- 1. Sincronizar Dirección (Owner en todos los grupos) ---
-    log "[1/3] Procesando G-Direccion (Owner en todos los grupos)..."
-    local direccion_members
-    direccion_members=$(get_ad_group_members "G-Direccion")
-    
+
+    # --- Prerequisitos ---
+    for cmd in ldapsearch curl jq; do
+        if ! command -v "$cmd" &>/dev/null; then
+            fail "Requerido: $cmd. Instalar con: dnf install openldap-clients curl jq"
+        fi
+    done
+    if [ -z "$GITLAB_API_TOKEN" ]; then
+        fail "GITLAB_API_TOKEN no configurado"
+    fi
+    if [ -z "$AD_BIND_PASS" ]; then
+        fail "AD_BIND_PASS no configurado"
+    fi
+    verbose "Prerequisitos OK"
+
+    # --- Obtener miembros de AD ---
+    log "Consultando grupos en AD..."
+    local direccion_sams=()
+    while IFS= read -r m; do [ -n "$m" ] && direccion_sams+=("$m"); done < <(echo "$(get_ad_group_sams 'G-Direccion')" | tr ' ' '\n')
+    log "  G-Direccion: ${direccion_sams[*]:-ninguno}"
+
+    local coordinadores_sams=()
+    while IFS= read -r m; do [ -n "$m" ] && coordinadores_sams+=("$m"); done < <(echo "$(get_ad_group_sams 'G-Coordinadores')" | tr ' ' '\n')
+    log "  G-Coordinadores: ${coordinadores_sams[*]:-ninguno}"
+
+    local becarios_sams=()
+    while IFS= read -r m; do [ -n "$m" ] && becarios_sams+=("$m"); done < <(echo "$(get_ad_group_sams 'G-Becarios')" | tr ' ' '\n')
+    log "  G-Becarios: ${becarios_sams[*]:-ninguno}"
+    echo ""
+
+    # --- Obtener IDs de usuarios GitLab ---
+    log "Obteniendo IDs de usuarios GitLab..."
+    declare -A USER_IDS
+    for u in "${direccion_sams[@]}" "${coordinadores_sams[@]}" "${becarios_sams[@]}"; do
+        [ -z "${USER_IDS[$u]:-}" ] || continue
+        local uid
+        uid=$(get_user_id "$u")
+        if [ -n "$uid" ]; then
+            USER_IDS["$u"]=$uid
+            verbose "  ${u} → ID ${uid}"
+        else
+            log "  ⚠️  Usuario ${u} no existe en GitLab — se creará en el primer login LDAP"
+        fi
+    done
+    echo ""
+
+    # --- Fase 1: Dirección como Owner en TODOS los grupos ---
+    log "[Fase 1] Sincronizando G-Direccion como Owner..."
     for group_path in "${!GITLAB_GROUPS[@]}"; do
-        sync_group_members "$group_path" "${GITLAB_GROUPS[$group_path]}" \
-            "$direccion_members" "$ACCESS_OWNER"
+        local group_name="${GITLAB_GROUPS[$group_path]}"
+        local gid
+        gid=$(get_group_id "$group_path")
+        if [ -z "$gid" ]; then
+            log "  ⚠️  Grupo ${group_path} no existe en GitLab — saltando"
+            continue
+        fi
+        for sam in "${direccion_sams[@]}"; do
+            local uid="${USER_IDS[$sam]:-}"
+            [ -n "$uid" ] && add_group_member "$gid" "$uid" "$ACCESS_OWNER" "$group_name" "$sam"
+        done
     done
     echo ""
-    
-    # --- 2. Sincronizar Coordinadores (Maintainer en su proyecto) ---
-    log "[2/3] Procesando G-Coordinadores (Maintainer por proyecto)..."
-    local coordinadores_all
-    coordinadores_all=$(get_ad_group_members "G-Coordinadores")
-    
+
+    # --- Fase 2: Coordinadores como Maintainer por proyecto ---
+    log "[Fase 2] Sincronizando G-Coordinadores como Maintainer..."
     for proy_group in "${!PROY_GROUPS[@]}"; do
         local gitlab_group="${PROY_GROUPS[$proy_group]}"
-        log "  Proyecto AD ${proy_group} → GitLab ${gitlab_group}"
-        
+        local group_name="${GITLAB_GROUPS[$gitlab_group]}"
+
         # Obtener miembros del grupo AD del proyecto
-        local proy_members
-        proy_members=$(get_ad_group_members "$proy_group")
-        
-        # Los coordinadores del proyecto son los que están en AMBOS grupos
+        local proy_members=()
+        while IFS= read -r m; do [ -n "$m" ] && proy_members+=("$m"); done < <(echo "$(get_ad_group_sams "$proy_group")" | tr ' ' '\n')
+
+        # Coordinadores del proyecto = en G-Coordinadores ∩ PROY-X
         local coord_proy=()
-        for coord in $coordinadores_all; do
-            for member in $proy_members; do
-                if [ "$coord" = "$member" ]; then
+        for coord in "${coordinadores_sams[@]}"; do
+            for pm in "${proy_members[@]}"; do
+                if [ "$coord" = "$pm" ]; then
                     coord_proy+=("$coord")
+                    verbose "  ${coord} → ${gitlab_group} (Maintainer)"
                 fi
             done
         done
-        
-        verbose "  Coordinadores en ${proy_group}: ${coord_proy[*]:-ninguno}"
-        sync_group_members "$gitlab_group" "${GITLAB_GROUPS[$gitlab_group]}" \
-            "${coord_proy[*]}" "$ACCESS_MAINTAINER"
+
+        if [ ${#coord_proy[@]} -gt 0 ]; then
+            local gid
+            gid=$(get_group_id "$gitlab_group")
+            if [ -n "$gid" ]; then
+                for sam in "${coord_proy[@]}"; do
+                    local uid="${USER_IDS[$sam]:-}"
+                    [ -n "$uid" ] && add_group_member "$gid" "$uid" "$ACCESS_MAINTAINER" "$group_name" "$sam"
+                done
+            fi
+        fi
     done
     echo ""
-    
-    # --- 3. Sincronizar Becarios (Developer en su proyecto) ---
-    log "[3/3] Procesando G-Becarios (Developer por proyecto)..."
-    local becarios_all
-    becarios_all=$(get_ad_group_members "G-Becarios")
-    
+
+    # --- Fase 3: Becarios como Developer por proyecto ---
+    log "[Fase 3] Sincronizando G-Becarios como Developer..."
     for proy_group in "${!PROY_GROUPS[@]}"; do
         local gitlab_group="${PROY_GROUPS[$proy_group]}"
-        log "  Proyecto AD ${proy_group} → GitLab ${gitlab_group}"
-        
-        local proy_members
-        proy_members=$(get_ad_group_members "$proy_group")
-        
+        local group_name="${GITLAB_GROUPS[$gitlab_group]}"
+
+        local proy_members=()
+        while IFS= read -r m; do [ -n "$m" ] && proy_members+=("$m"); done < <(echo "$(get_ad_group_sams "$proy_group")" | tr ' ' '\n')
+
         local beca_proy=()
-        for beca in $becarios_all; do
-            for member in $proy_members; do
-                if [ "$beca" = "$member" ]; then
+        for beca in "${becarios_sams[@]}"; do
+            for pm in "${proy_members[@]}"; do
+                if [ "$beca" = "$pm" ]; then
                     beca_proy+=("$beca")
+                    verbose "  ${beca} → ${gitlab_group} (Developer)"
                 fi
             done
         done
-        
-        verbose "  Becarios en ${proy_group}: ${beca_proy[*]:-ninguno}"
-        sync_group_members "$gitlab_group" "${GITLAB_GROUPS[$gitlab_group]}" \
-            "${beca_proy[*]}" "$ACCESS_DEVELOPER"
+
+        if [ ${#beca_proy[@]} -gt 0 ]; then
+            local gid
+            gid=$(get_group_id "$gitlab_group")
+            if [ -n "$gid" ]; then
+                for sam in "${beca_proy[@]}"; do
+                    local uid="${USER_IDS[$sam]:-}"
+                    [ -n "$uid" ] && add_group_member "$gid" "$uid" "$ACCESS_DEVELOPER" "$group_name" "$sam"
+                done
+            fi
+        fi
     done
-    
     echo ""
+
     log "=== Sync completado ==="
     [ "$DRY_RUN" = true ] && log "*** DRY-RUN — no se realizaron cambios ***"
 }

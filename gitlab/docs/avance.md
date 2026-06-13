@@ -11,7 +11,7 @@
 
 GitLab CE 19.0.2 se encuentra instalado y operativo en el nodo `pve-desa04` del cluster Proxmox, con almacenamiento local (80G LVM-thin), BIOS OVMF UEFI, 4vCPU/8GB RAM, IP estática 192.168.1.41, HTTPS self-signed, y SSH Git por puerto 2222 con DNAT. La VM anterior en `pve-desa01` fue destruida por configuración incorrecta (SeaBIOS, disco 10G, display serial0).
 
-**Estado**: Pendiente password de service account `infrait` para completar integración LDAP con AD.
+**Estado**: ✅ Integración LDAP completa con AD. Sincronización de grupos AD → GitLab operativa. Backups automáticos configurados.
 
 ---
 
@@ -87,15 +87,15 @@ GitLab CE 19.0.2 se encuentra instalado y operativo en el nodo `pve-desa04` del 
 
 | # | Tarea | Prioridad | Estado |
 |---|-------|-----------|--------|
-| 1 | Configurar password de `infrait` en gitlab.rb + reconfigure | **Alta** | ⏳ Pendiente |
-| 2 | Probar login LDAP con usuarios AD (`errodriguez`, etc.) | **Alta** | ⏳ Pendiente |
-| 3 | Generar token API de GitLab + configurar `GITLAB_API_TOKEN` | **Alta** | ⏳ Pendiente |
-| 4 | Ejecutar `sync-ad-members.sh` para mapear grupos AD | **Alta** | ⏳ Pendiente |
-| 5 | Configurar backup diario (cron) | Media | ⏳ Pendiente |
-| 6 | Configurar snapshot semanal PVE | Media | ⏳ Pendiente |
+| 1 | ✅ LDAP bind activado con `infrait / Gidas2026!` | Alta | ✅ Completado |
+| 2 | ✅ Login LDAP con usuarios AD verificado | Alta | ✅ Completado |
+| 3 | ✅ Token API generado y configurado | Alta | ✅ Completado |
+| 4 | ✅ `sync-ad-members.sh` ejecutado — 7 grupos sincronizados | Alta | ✅ Completado |
+| 5 | ✅ Backup diario configurado (cron 02:00) | Media | ✅ Completado |
+| 6 | ✅ Snapshot semanal PVE configurado (dom 03:00) | Media | ✅ Completado |
 | 7 | Probar restore | Media | ⏳ Pendiente |
-| 8 | Probar clone SSH vía puerto 2222 | Media | ⏳ Pendiente |
-| 9 | Crear grupos y proyectos iniciales en GitLab | Media | ⏳ Pendiente |
+| 8 | ✅ Clone SSH vía puerto 2222 verificado | Media | ✅ Completado |
+| 9 | ✅ Grupos y proyecto de prueba creados | Media | ✅ Completado |
 
 ---
 
