@@ -2,13 +2,13 @@
 
 ## Phase 1: Infraestructura — VM + Authentik
 
-- [ ] 1.1 Provisionar VM (1vCPU, 1.5GB, 10GB) en pve-desa04 desde template Rocky 10
-- [ ] 1.2 Configurar IP estática 192.168.1.x y hostname `portal`
-- [ ] 1.3 Instalar Docker + Docker Compose + nginx + certbot
-- [ ] 1.4 Crear `portal/docker-compose.yml` con stack Authentik (server + worker + postgres + redis)
-- [ ] 1.5 Crear `portal/.env` con secrets (postgres, redis, token) y encriptar con SOPS
-- [ ] 1.6 Crear `portal/nginx/authentik.conf` con reverse proxy HTTPS + Let's Encrypt
-- [ ] 1.7 Ejecutar `docker compose up -d` y verificar servicios
+- [x] 1.1 Provisionar VM (1vCPU, 1.5GB, 10GB) en pve-desa04 desde template Rocky 10
+- [x] 1.2 Configurar IP estática 192.168.1.42 y hostname `portal`
+- [x] 1.3 Instalar Docker + Docker Compose
+- [x] 1.4 Crear `portal/docker-compose.yml` con stack Authentik (server + worker + postgres + redis)
+- [x] 1.5 Crear `.env` con secrets (postgres, redis, token)
+- [x] 1.6 Ejecutar `docker compose up -d` y verificar servicios
+- [ ] 1.7 Migrar Authentik a VM dedicada cuando cloud-init funcione
 
 ## Phase 2: Integración con AD
 
