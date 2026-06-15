@@ -1,15 +1,15 @@
 # Informe de Avance — Portal de Acceso Unificado + SSO
 
 > **Feature**: Portal SSO (Feature #5)
-> **Fecha**: 2026-06-13
+> **Fecha**: 2026-06-14
 > **Rama**: `feat/portal-access-remoto`
-> **Estado SDD**: 🛠️ Implementación
+> **Estado SDD**: 🛠️ Implementación — Fases 1-3 completadas
 
 ---
 
 ## Resumen
 
-Se implementó Authentik 2026.5.3 como Identity Provider centralizado para el grupo GIDAS, desplegado en Docker Compose sobre la VM de GitLab (192.168.1.41). Pendiente: integración LDAP con AD, configuración de OIDC/OAuth providers, DNS y publicación.
+Authentik 2026.5.3 desplegado y operativo como Identity Provider centralizado. LDAP sincronizado con AD GDC01. Providers OIDC/OAuth creados para GitLab, Grafana y Redmine. GitLab ya configurado con SSO. Pendiente: Grafana, Redmine, Proxmox, DNS y publicación.
 
 ## Decisión Arquitectónica
 
@@ -25,15 +25,27 @@ Se implementó Authentik 2026.5.3 como Identity Provider centralizado para el gr
 
 | Componente | Estado | Detalle |
 |------------|--------|---------|
-| **Authentik** | ✅ Corriendo | 2026.5.3 en GitLab VM (temporal) |
+| **Authentik** | ✅ Corriendo | 2026.5.3 en GitLab VM |
 | **Admin** | ✅ Configurado | akadmin / hlvs.2025 |
-| **VM dedicada** | ⚠️ Creada | VM 207 en pve-desa04 — cloud-init no aplicó IP (fix pendiente) |
-| **LDAP con AD** | ⏳ Pendiente | Conectar Authentik → AD GDC01 |
-| **SSO GitLab** | ⏳ Pendiente | OIDC provider + config gitlab.rb |
-| **SSO Grafana** | ⏳ Pendiente | OAuth provider + config grafana.ini |
-| **SSO Redmine** | ⏳ Pendiente | Plugin openid_connect |
+| **Setup** | ✅ Completado | Bypass del initial-setup flow |
+| **LDAP con AD** | ✅ Conectado | Source `ad-gdc01` sincronizado con AD GDC01 |
+| **GitLab Provider** | ✅ Creado | OIDC Provider + Application en Authentik |
+| **Grafana Provider** | ✅ Creado | OAuth2 Provider + Application en Authentik |
+| **Redmine Provider** | ✅ Creado | OAuth2 Provider + Application en Authentik |
+| **SSO GitLab** | ✅ Configurado | Omniauth OIDC en gitlab.rb + reconfigure |
+| **SSO Grafana** | ⏳ Pendiente | Falta configurar grafana.ini en CT 205 |
+| **SSO Redmine** | ⏳ Pendiente | Falta instalar plugin openid_connect |
+| **LDAP Proxmox** | ⏳ Pendiente | Realm LDAP en PVE |
 | **DNS MikroTik** | ⏳ Pendiente | portal.gidas.local |
-| **Drupal** | ⏳ Pendiente | Link al portal |
+| **VM dedicada** | ⚠️ Creada | VM 207 en pve-desa04 — cloud-init fix pendiente |
+
+## Secrets de Integración
+
+| App | Client ID | Client Secret |
+|-----|-----------|---------------|
+| GitLab | `gitlab` | `0ca3f43271d9d50e1ba4b94e8a29d043b9ae4b5c3a53d49676cfdc718510a407` |
+| Grafana | `grafana` | `aecc51050fb80b844f68dd9b10baccd2c975afeed9596e0d71595a1e7a3430de` |
+| Redmine | `redmine` | `5abb6e3baadaaca8559029ff48b04af71fd8f094adc9a48929e5a118b871225d` |
 
 ## Artefactos SDD Generados
 
@@ -49,22 +61,51 @@ Se implementó Authentik 2026.5.3 como Identity Provider centralizado para el gr
 
 ## Acceso
 
-| Recurso | URL |
-|---------|-----|
+| Recurso | URL / Comando |
+|---------|--------------|
 | **Authentik Admin** | `http://192.168.1.41:9000/if/admin/` |
-| **Admin user** | akadmin / hlvs.2025 |
+| **Admin user** | `akadmin` / `hlvs.2025` |
 | **Docker Compose** | `/root/portal/` en GitLab VM |
+| **API Token** | `bddRcVFkoKzhC3PnqQYH73m04gYgqX3FX9ZYVmGmCTyk76mnqseMLRZvGd71` |
 
 ## Pendientes
 
 | # | Tarea | Prioridad | Estado |
 |---|-------|-----------|--------|
-| 1 | ✅ VM Authentik creada (ID 207, pve-desa04) | Alta | ✅ Completado |
-| 2 | ✅ Authentik Docker Compose desplegado | Alta | ✅ Completado |
-| 3 | Integrar LDAP con AD | **Alta** | ⏳ Pendiente |
-| 4 | Configurar SSO GitLab (OIDC) | **Alta** | ⏳ Pendiente |
-| 5 | Configurar SSO Grafana (OAuth) | **Alta** | ⏳ Pendiente |
-| 6 | Configurar SSO Redmine (OIDC) | **Alta** | ⏳ Pendiente |
-| 7 | Configurar LDAP Proxmox | Media | ⏳ Pendiente |
-| 8 | DNS MikroTik + link en Drupal | Media | ⏳ Pendiente |
-| 9 | Verificación y archivado SDD | Media | ⏳ Pendiente |
+| 1 | ✅ Authentik desplegado y setup completado | Alta | ✅ |
+| 2 | ✅ LDAP Source sincronizado con AD GDC01 | Alta | ✅ |
+| 3 | ✅ Providers OIDC/OAuth creados (GitLab, Grafana, Redmine) | Alta | ✅ |
+| 4 | ✅ SSO GitLab configurado (omniauth + reconfigure) | Alta | ✅ |
+| 5 | Configurar SSO Grafana (grafana.ini en CT 205) | **Alta** | ⏳ |
+| 6 | Instalar plugin OIDC en Redmine y configurar | **Alta** | ⏳ |
+| 7 | Configurar LDAP realm en Proxmox | Media | ⏳ |
+| 8 | DNS MikroTik portal.gidas.local + link en Drupal | Media | ⏳ |
+| 9 | Migrar Authentik a VM 207 dedicada | Media | ⏳ |
+
+## Configuración Pendiente — Detalle
+
+### Grafana (CT 205 — 192.168.1.205)
+Agregar a `/etc/grafana/grafana.ini`:
+```ini
+[auth.generic_oauth]
+enabled = true
+name = Authentik SSO
+allow_sign_up = true
+client_id = grafana
+client_secret = aecc51050fb80b844f68dd9b10baccd2c975afeed9596e0d71595a1e7a3430de
+scopes = openid profile email
+auth_url = http://192.168.1.41:9000/application/grafana/authorize/
+token_url = http://192.168.1.41:9000/application/grafana/token/
+api_url = http://192.168.1.41:9000/application/grafana/userinfo/
+```
+Reiniciar: `systemctl restart grafana-server`
+
+### Proxmox (pve-desa04)
+Datacenter → Authentication → Add → LDAP:
+```
+Host: 192.168.1.117
+Base DN: DC=GDC01,DC=local
+Bind DN: CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local
+Password: Gidas2026!
+User filter: (objectClass=user)
+```

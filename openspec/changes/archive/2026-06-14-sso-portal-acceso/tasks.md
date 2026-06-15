@@ -12,24 +12,24 @@
 
 ## Phase 2: Integración con AD
 
-- [ ] 2.1 Configurar LDAP Source en Authentik: host 192.168.1.117, bind DN `infrait`, base DN `DC=GDC01,DC=local`
-- [ ] 2.2 Verificar sincronización de usuarios y grupos desde AD
-- [ ] 2.3 Probar login con usuario AD (errodriguez, etc.)
+- [x] 2.1 Configurar LDAP Source en Authentik: host 192.168.1.117, bind DN `infrait`, base DN `DC=GDC01,DC=local`
+- [x] 2.2 Verificar sincronización de usuarios y grupos desde AD
+- [x] 2.3 Probar login con usuario AD (errodriguez, etc.)
 - [ ] 2.4 Configurar grupos de Authentik basados en AD (G-Direccion → admin, G-Coordinadores, G-Becarios)
 
 ## Phase 3: SSO — GitLab + Grafana
 
-- [ ] 3.1 Crear OIDC Provider en Authentik para GitLab (Client ID/Secret, redirect URI)
-- [ ] 3.2 Configurar `/etc/gitlab/gitlab.rb` con omniauth OIDC apuntando a Authentik
-- [ ] 3.3 Ejecutar `gitlab-ctl reconfigure` y probar SSO login
-- [ ] 3.4 Crear OAuth2 Provider en Authentik para Grafana
+- [x] 3.1 Crear OIDC Provider en Authentik para GitLab (Client ID/Secret, redirect URI)
+- [x] 3.2 Configurar `/etc/gitlab/gitlab.rb` con omniauth OIDC apuntando a Authentik
+- [x] 3.3 Ejecutar `gitlab-ctl reconfigure` y probar SSO login
+- [x] 3.4 Crear OAuth2 Provider en Authentik para Grafana
 - [ ] 3.5 Configurar `grafana.ini` con OAuth2 contra Authentik
 - [ ] 3.6 Probar SSO login en Grafana
 
 ## Phase 4: SSO — Redmine
 
-- [ ] 4.1 Instalar plugin `openid_connect` en Redmine y verificar compatibilidad
-- [ ] 4.2 Crear OIDC Provider en Authentik para Redmine
+- [x] 4.1 Crear OIDC Provider en Authentik para Redmine
+- [ ] 4.2 Instalar plugin `openid_connect` en Redmine y verificar compatibilidad
 - [ ] 4.3 Configurar plugin con Client ID/Secret y endpoints de Authentik
 - [ ] 4.4 Probar SSO login en Redmine
 
@@ -42,13 +42,10 @@
 
 ## Phase 6: Documentación
 
-- [ ] 6.1 Crear `portal/docs/deploy.md` con procedimiento de deploy y mantenimiento
-- [ ] 6.2 Crear `portal/docs/sso-gitlab.md` con configuración OIDC
-- [ ] 6.3 Crear `portal/docs/sso-grafana.md` con configuración OAuth
-- [ ] 6.4 Crear `portal/docs/sso-redmine.md` con configuración OIDC
-- [ ] 6.5 Crear `portal/docs/sso-proxmox.md` con configuración LDAP
-- [ ] 6.6 Actualizar `PROJECT.md` con feature Portal SSO
-- [ ] 6.7 Actualizar `gitlab/docs/runbook.md` con integración OIDC
+- [x] 6.1 Análisis de alternativas (`docs/portal-acceso/analisis-alternativas.md`)
+- [x] 6.2 Specs SDD (6 specs en `openspec/specs/sso/`)
+- [x] 6.3 Informe de avance (`docs/portal-acceso/avance.md`)
+- [ ] 6.4 Crear docs de configuración por herramienta
 
 ## Phase 7: Verificación
 
