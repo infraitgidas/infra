@@ -28,7 +28,7 @@ Authentik 2026.5.3 desplegado y operativo como Identity Provider centralizado. L
 | **Authentik** | ✅ Corriendo | 2026.5.3 en GitLab VM |
 | **Admin** | ✅ Configurado | akadmin / hlvs.2025 |
 | **Setup** | ✅ Completado | Bypass del initial-setup flow |
-| **LDAP con AD** | ✅ Conectado | Source `ad-gdc01` sincronizado con AD GDC01 |
+| **LDAP con AD** | ✅ Conectado y sincronizado | 17 usuarios AD importados a Authentik (sync vía ak shell, worker Dramatiq requiere fix) |
 | **GitLab Provider** | ✅ Creado | OIDC Provider + Application en Authentik |
 | **Grafana Provider** | ✅ Creado | OAuth2 Provider + Application en Authentik |
 | **Redmine Provider** | ✅ Creado | OAuth2 Provider + Application en Authentik |
@@ -73,7 +73,7 @@ Authentik 2026.5.3 desplegado y operativo como Identity Provider centralizado. L
 | # | Tarea | Prioridad | Estado |
 |---|-------|-----------|--------|
 | 1 | ✅ Authentik desplegado y setup completado | Alta | ✅ |
-| 2 | ✅ LDAP Source sincronizado con AD GDC01 | Alta | ✅ |
+| 2 | ✅ 17 usuarios AD importados a Authentik (fix sync vía ak shell) | Alta | ✅ |
 | 3 | ✅ Providers OIDC/OAuth creados (GitLab, Grafana, Redmine) | Alta | ✅ |
 | 4 | ✅ SSO GitLab configurado (omniauth + reconfigure) | Alta | ✅ |
 | 5 | Configurar SSO Grafana (grafana.ini en CT 205) | **Alta** | ⏳ |

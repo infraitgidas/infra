@@ -55,3 +55,12 @@
 - [ ] 7.4 Verificar LDAP Proxmox: login con credencial AD
 - [ ] 7.5 Verificar acceso WAN vía Twingate desde afuera
 - [ ] 7.6 Verificar que Drupal tiene link funcional al portal
+
+## Notas Técnicas
+
+### LDAP Sync Fix
+El worker Dramatiq de Authentik falla con `LDAPNoSuchObjectResult` al sincronizar AD. Solución temporal: importación directa desde `ak shell` usando `source.connection()` + creación manual de usuarios. Causa raíz probable: `raise_exceptions=True` en la conexión combinado con ServerPool y paginación.
+
+### Lo que hay que arreglar
+- `LDAPNoSuchObjectResult` en el worker (investigar si es bug de Authentik 2026.5.3 con AD Windows Server)
+- DNS de la máquina del usuario (gitlab.gidas.local y redmine.gidas.local resuelven desde MikroTik)
