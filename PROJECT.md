@@ -9,6 +9,7 @@
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
+| 6 | Portal SSO + Acceso Unificado | Authentik | `docs/portal-acceso/` | `feat/portal-access-remoto` | 🛠️ Implementación |
 
 ## Leyenda de Estados SDD
 
@@ -110,4 +111,45 @@
 
 ---
 
-*Última actualización: 2026-06-13*
+### Feature 6: Portal SSO + Acceso Unificado — Authentik
+
+- **Objetivo**: Proveer un punto único de acceso con autenticación centralizada (SSO) vía AD para todas las herramientas GIDAS, con acceso desde LAN e internet
+- **Componentes**: Authentik 2026.5.3 (Docker Compose server + worker + postgres + redis), VM en GitLab host, LDAP → AD GDC01, Twingate para acceso remoto
+- **Estado SDD**: 🛠️ Implementación — Fases 1-3 completadas
+- **Tareas Completadas**:
+  - Análisis de alternativas (Authentik vs Keycloak vs Authelia) — Authentik elegido por dashboard nativo + outposts
+  - Ciclo SDD completo: 6 specs (authentik, gitlab, grafana, redmine, proxmox, public-access), proposal, design, tasks
+  - Authentik 2026.5.3 desplegado y operativo (`http://192.168.1.41:9000`)
+  - LDAP sincronizado con AD GDC01.local — 17 usuarios importados (fix sync vía `ak shell`)
+  - Providers OIDC/OAuth creados: GitLab, Grafana, Redmine
+  - SSO GitLab configurado (omniauth OIDC + `gitlab-ctl reconfigure`)
+  - Secrets template: `secrets/portal.yaml.template`
+  - VM 207 creada en pve-desa04 (pendiente cloud-init)
+- **Pendientes**:
+  - SSO Grafana (grafana.ini en CT 205)
+  - SSO Redmine (plugin openid_connect)
+  - Realm LDAP en Proxmox
+  - DNS MikroTik `portal.gidas.local`
+  - Link en Drupal gidas.frlp.utn.edu.ar
+  - Migrar Authentik a VM 207 dedicada
+- **Archivos**: `docs/portal-acceso/`, `secrets/portal.yaml.template`
+- **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/`, `openspec/specs/sso/`, `openspec/specs/networking/public-access/`
+
+---
+
+### Rama: `gitlab-gidas` — Optimización del Cluster pve-gidas (en paralelo)
+
+> **Nota**: El trabajo de optimización del cluster Proxmox `pve-gidas` se desarrolla en la rama `gitlab-gidas` (divergida de `main`). No está mergeado aún.
+
+- **Fase 1** — Backups y PBS: scripts de backup automatizado, integración con Proxmox Backup Server
+- **Fase 2** — Storage ZFS: migración a ZFS con ashift=12, compression=zstd, atime=off, replicación asíncrona entre pares fijos
+- **Fase 3** — Red VLAN: bonding LACP, VLAN 10, corosync link1 redundante, reglas firewall de cluster, reinicio nodo por nodo
+- **Fase 4** — Optimización VMs: CPU host, NUMA, VirtIO SCSI Single con iothread, ballooning mínimo
+- **Fase 5** — Monitoreo: stack Prometheus + Grafana + Alertmanager
+- **Archivos**: `openspec/changes/network-proxmox/`, `scripts/f5-monitoring/`
+- **Commits**: 30+ commits con fases documentadas
+- **Pendiente**: Merge a `main` una vez completada la validación cruzada
+
+---
+
+*Última actualización: 2026-06-24*
