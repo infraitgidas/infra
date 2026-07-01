@@ -4,12 +4,12 @@
 
 | # | Feature | Herramienta | Directorio | Rama | Estado SDD |
 |---|---------|-------------|-----------|------|------------|
-| 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 🛠️ Implementación ✅ |
+| 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 📦 Archivado ✅ |
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
-| 6 | Portal SSO + Acceso Unificado | Authentik | `docs/portal-acceso/` | `feat/portal-access-remoto` | 🛠️ Implementación |
+| 6 | Portal de Acceso Unificado | Homer | `docs/portal-acceso/` | `feat/portal-access-remoto` | 🛠️ Implementación |
 
 ## Leyenda de Estados SDD
 
@@ -111,29 +111,24 @@
 
 ---
 
-### Feature 6: Portal SSO + Acceso Unificado — Authentik
+### Feature 6: Portal de Acceso Unificado — Homer
 
-- **Objetivo**: Proveer un punto único de acceso con autenticación centralizada (SSO) vía AD para todas las herramientas GIDAS, con acceso desde LAN e internet
-- **Componentes**: Authentik 2026.5.3 (Docker Compose server + worker + postgres + redis), VM en GitLab host, LDAP → AD GDC01, Twingate para acceso remoto
-- **Estado SDD**: 🛠️ Implementación — Fases 1-3 completadas
+- **Objetivo**: Proveer un punto único de acceso a todas las herramientas GIDAS con un dashboard visual, liviano y de mantenimiento cero
+- **Componentes**: Homer (dashboard estático Vue.js), nginx, CT Rocky Linux 9 en pve-desa04. Cada herramienta autentica directamente contra AD (sin IdP central).
+- **Estado SDD**: 🛠️ Implementación
 - **Tareas Completadas**:
-  - Análisis de alternativas (Authentik vs Keycloak vs Authelia) — Authentik elegido por dashboard nativo + outposts
-  - Ciclo SDD completo: 6 specs (authentik, gitlab, grafana, redmine, proxmox, public-access), proposal, design, tasks
-  - Authentik 2026.5.3 desplegado y operativo (`http://192.168.1.41:9000`)
-  - LDAP sincronizado con AD GDC01.local — 17 usuarios importados (fix sync vía `ak shell`)
-  - Providers OIDC/OAuth creados: GitLab, Grafana, Redmine
-  - SSO GitLab configurado (omniauth OIDC + `gitlab-ctl reconfigure`)
-  - Secrets template: `secrets/portal.yaml.template`
-  - VM 207 creada en pve-desa04 (pendiente cloud-init)
+  - Eliminado Authentik 2026.5.3 (containers, imágenes y datos) — reemplazado por Homer por ser más simple, portable y fácil de mantener
+  - CT 208 (portal) creado en pve-desa04: Rocky Linux 9, 512MB RAM, 1 vCPU, IP 192.168.1.43/24
+  - Homer v26.4.2 instalado y sirviendo en `http://192.168.1.43/`
+  - Dashboard configurado con 11 cards: GitLab, Redmine, Grafana, Proxmox VE, NetBox, GLPI, Identity Dashboard, MikroTik, Drupal, Correo UTN, Twingate
+  - Herramientas autentican contra AD GDC01 directo (Redmine ✅, GitLab ✅ — Pendiente: Grafana, Proxmox)
 - **Pendientes**:
-  - SSO Grafana (grafana.ini en CT 205)
-  - SSO Redmine (plugin openid_connect)
-  - Realm LDAP en Proxmox
-  - DNS MikroTik `portal.gidas.local`
+  - DNS MikroTik `portal.gidas.local → 192.168.1.43`
+  - SSO ya no aplica — se accede a cada herramienta con credencial AD (como venía funcionando)
   - Link en Drupal gidas.frlp.utn.edu.ar
-  - Migrar Authentik a VM 207 dedicada
-- **Archivos**: `docs/portal-acceso/`, `secrets/portal.yaml.template`
-- **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/`, `openspec/specs/sso/`, `openspec/specs/networking/public-access/`
+  - VM 207 portal (ex-Authentik) — decidir si parar/eliminar
+- **Archivos**: `docs/portal-acceso/`
+- **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/` (histórico Authentik)
 
 ---
 
@@ -152,4 +147,4 @@
 
 ---
 
-*Última actualización: 2026-06-24*
+*Última actualización: 2026-07-01*
