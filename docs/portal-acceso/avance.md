@@ -136,6 +136,6 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 2 | ✅ Login AD funcionando con RBAC | Alta | ✅ |
 | 3 | ✅ Documentación completa (diseño + manuales + SDD) | Alta | ✅ |
 | 4 | ✅ Vaultwarden desplegado y funcional | Alta | ✅ |
-| 5 | Configurar SMTP en Vaultwarden (mail de invitación) | Media | ⏳ |
+| 5 | ✅ SMTP configurado en Vaultwarden (Office 365) | Media | ✅ |
 | 6 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
 | 7 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
