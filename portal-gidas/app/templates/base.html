@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ config.portal.title }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/portal.css">
+  <link rel="icon" href="/static/img/{{ config.portal.logo }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="/static/img/{{ config.portal.logo }}" alt="GIDAS" class="navbar-logo">
+      <span class="navbar-title">{{ config.portal.title }}</span>
+    </div>
+    <div class="navbar-user">
+      {% if username is defined and username %}
+      <span class="navbar-username">{{ username }}</span>
+      <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>GIDAS — Grupo de Investigación y Desarrollo Aplicado en Sistemas — UTN La Plata</p>
+  </footer>
+</body>
+</html>
