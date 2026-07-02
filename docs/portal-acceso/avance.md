@@ -1,7 +1,7 @@
 # Informe de Avance — Portal de Acceso GIDAS
 
 > **Feature**: Portal de Acceso (Feature #6)
-> **Fecha**: 2026-07-02
+> **Fecha**: 2026-07-02 (actualizado 23:00)
 > **Rama**: `feat/portal-access-remoto`
 > **Estado SDD**: ✅ Implementado
 
@@ -16,6 +16,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 1. ❌ Authentik (IdP) — demasiado complejo, SSO incompleto, mantenimiento alto
 2. ❌ Homer (dashboard estático) — no tiene login ni RBAC
 3. ✅ **Portal custom FastAPI+LDAP** — login AD, dashboard filtrado por grupos, config YAML
+4. ✅ **Vaultwarden** — gestor de contraseñas con LDAP y SMTP, integrado al portal
 
 ---
 
@@ -52,7 +53,15 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 👤 Guía de Usuario | `docs/portal-acceso/manuales/guia-usuario.md` | Login, dashboard, errores comunes, FAQ |
 | 🔧 Guía de Administración | `docs/portal-acceso/manuales/guia-admin.md` | Config, mantenimiento, debug, rollback |
 
-### SDD (`openspec/changes/portal-custom/`)
+### Vaultwarden (`vaultwarden/`)
+
+| Documento | Archivo | Contenido |
+|-----------|---------|-----------|
+| 📋 Deploy | `vaultwarden/deploy.sh` | Script de deploy completo |
+| 🐳 Docker | `vaultwarden/docker-compose.yml` | Composición oficial |
+| 🔧 Config | `vaultwarden/.env.example` | Variables de entorno documentadas |
+| 📖 README | `vaultwarden/README.md` | Documentación de deploy y admin |
+| 📄 SDD | `openspec/changes/vaultwarden/` | Propuesta, especificación, diseño, tareas |
 
 | Artefacto | Archivo |
 |-----------|---------|
@@ -123,8 +132,12 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Portal** | `http://portal.gidas.local` (LAN) o `http://192.168.1.43` |
 | **Login** | Usuario y contraseña de AD GIDAS |
 | **Dashboard** | Cards filtradas según grupos AD del usuario |
-| **Admin SSH** | `pct enter 208` (desde pve-desa04) |
-| **Logs** | `journalctl -u portal-gidas -f` |
+| **Admin SSH portal** | `pct enter 208` (desde pve-desa04) |
+| **Admin SSH vault** | `pct enter 209` (desde pve-desa04) |
+| **Vaultwarden** | `https://vault.gidas.local` — login con email + master password |
+| **Admin panel** | `https://vault.gidas.local/admin` — token en secrets |
+| **Logs portal** | `journalctl -u portal-gidas -f` |
+| **Logs vault** | `docker logs vaultwarden -f` |
 
 ---
 

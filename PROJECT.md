@@ -159,4 +159,4 @@
 
 ---
 
-*Última actualización: 2026-07-02*
+*Última actualización: 2026-07-02 (23:00)*
