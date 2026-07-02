@@ -1,32 +1,65 @@
-# Informe de Avance — Portal de Acceso Unificado
+# Informe de Avance — Portal de Acceso GIDAS
 
 > **Feature**: Portal de Acceso (Feature #6)
 > **Fecha**: 2026-07-02
 > **Rama**: `feat/portal-access-remoto`
-> **Estado SDD**: 🛠️ Implementación
+> **Estado SDD**: ✅ Implementado
 
 ---
 
 ## Resumen
 
-Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de integrar con las herramientas GIDAS (problemas de sync LDAP, SSO incompleto). Reemplazado por **Homer** v26.4.2, un dashboard estático liviano que ofrece un punto único de acceso con cards visuales a todas las herramientas, sin depender de un IdP central. Cada herramienta sigue autenticando contra AD GDC01 directo, como ya venía funcionando.
+Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de GIDAS autenticarse con su usuario de AD y acceder solo a las herramientas correspondientes a sus grupos.
+
+**Evolución del proyecto**:
+
+1. ❌ Authentik (IdP) — demasiado complejo, SSO incompleto, mantenimiento alto
+2. ❌ Homer (dashboard estático) — no tiene login ni RBAC
+3. ✅ **Portal custom FastAPI+LDAP** — login AD, dashboard filtrado por grupos, config YAML
 
 ---
 
 ## Decisión Arquitectónica
 
-| Aspecto | Antes (Authentik) | Ahora (Homer) |
-|---------|-------------------|---------------|
-| **Portal** | Authentik IdP + dashboard nativo + SSO | Homer (Vue.js estático) servido por nginx |
-| **Autenticación** | LDAP → AD + OIDC/OAuth (SSO) | AD directo en cada herramienta |
-| **Complejidad** | 5 containers (server, worker, postgres, redis) | 1 CT + nginx (archivos estáticos) |
-| **Mantenimiento** | Alto (updates de seguridad, DB, workers) | Cero (no hay backend) |
-| **SSO** | Sí (vía OIDC/OAuth) | No (cada tool pide login AD) |
-| **Riesgo** | Single point of failure (si Authentik cae, no se accede a nada) | Ninguno (las tools andan independientes) |
-| **Recursos** | 1.5GB RAM + PostgreSQL + Redis | 512MB RAM, nada más |
-| **Acceso remoto** | Twingate | Twingate (sin cambios) |
+| Aspecto | Authentik | Homer | Portal Custom (actual) |
+|---------|-----------|-------|----------------------|
+| **Login** | SSO vía OIDC/OAuth | ❌ No tiene | ✅ LDAP directo contra AD |
+| **RBAC** | Por IdP | ❌ No tiene | ✅ Por grupos AD (memberOf) |
+| **Dashboard** | Cards nativas | Cards estáticas | ✅ SSR con Jinja2 |
+| **Config** | UI web + secrets | YAML | ✅ YAML versionable |
+| **Dependencias** | 4 containers + DB | nginx solo | ✅ FastAPI + ldap3 |
+| **Mantenimiento** | Alto | Cero | ✅ Bajo (sin DB, sin workers) |
+| **Recursos** | 1.5GB RAM | 512MB RAM | ✅ ~40MB RAM |
 
-**Motivo del cambio**: Authentik requería configuración OIDC/OAuth específica por herramienta, algunas con soporte incompleto (Redmine requería plugin, Proxmox no es compatible directamente). Homer es Plug & Play — un YAML, 5 minutos, y listo.
+---
+
+## Documentación Generada
+
+### Diseño (`docs/portal-acceso/diseno/`)
+
+| Documento | Archivo | Contenido |
+|-----------|---------|-----------|
+| 🏗️ Arquitectura | `docs/portal-acceso/diseno/arquitectura.md` | Stack, principios, componentes, flujo auth, modelo de datos |
+| 🔧 Diseño Técnico | `docs/portal-acceso/diseno/diseno-tecnico.md` | Rutas HTTP, templates, config.yaml, seguridad, deploy |
+| 📋 Lecciones Aprendidas | `docs/portal-acceso/diseno/lecciones-aprendidas.md` | Por qué Authentik y Homer no funcionaron |
+| 📊 Análisis Alternativas | `docs/portal-acceso/diseno/analisis-alternativas.md` | Evaluación original de opciones |
+| 🖼️ Capturas | `docs/portal-acceso/img/` | 3 screenshots del portal funcionando |
+
+### Manuales (`docs/portal-acceso/manuales/`)
+
+| Documento | Archivo | Contenido |
+|-----------|---------|-----------|
+| 👤 Guía de Usuario | `docs/portal-acceso/manuales/guia-usuario.md` | Login, dashboard, errores comunes, FAQ |
+| 🔧 Guía de Administración | `docs/portal-acceso/manuales/guia-admin.md` | Config, mantenimiento, debug, rollback |
+
+### SDD (`openspec/changes/portal-custom/`)
+
+| Artefacto | Archivo |
+|-----------|---------|
+| 📋 Propuesta | `openspec/changes/portal-custom/proposal.md` |
+| 📐 Especificación | `openspec/changes/portal-custom/specs/portal/spec.md` |
+| 🏗️ Diseño | `openspec/changes/portal-custom/design.md` |
+| 📝 Tareas | `openspec/changes/portal-custom/tasks.md` |
 
 ---
 
@@ -35,16 +68,11 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | Recurso | Detalle |
 |---------|---------|
 | **CT 208** | Rocky Linux 9, 512MB RAM, 1 vCPU, IP `192.168.1.43/24` |
-| **Servicio** | nginx 1.20.1 sirviendo Homer en `http://192.168.1.43/` |
-| **Dashboard** | Homer v26.4.2 con 11 cards (Font Awesome icons) |
-
-## Dashboard — Cards
-
-| Categoría | Herramientas |
-|-----------|-------------|
-| **Herramientas** | GitLab, Redmine, Grafana, Proxmox VE, NetBox, GLPI |
-| **Administración** | Identity Dashboard, MikroTik |
-| **Enlaces** | Drupal GIDAS, Correo UTN, Twingate |
+| **Servicio** | `portal-gidas.service` (uvicorn) en puerto 80 |
+| **App** | FastAPI + Jinja2 + ldap3 + JWT |
+| **Código** | `portal-gidas/` en el repo |
+| **Config** | `/opt/portal-gidas/config.yaml` (11 herramientas) |
+| **Logs** | `journalctl -u portal-gidas` |
 
 ---
 
@@ -52,24 +80,46 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 
 | Componente | Estado | Detalle |
 |------------|--------|---------|
-| **Authentik** | ❌ Reemplazado | Containers bajados, imágenes borradas (448MB liberados en GitLab VM), directorio `/root/portal/` eliminado. Reemplazado por Homer |
-| **CT 208** | ✅ Creado y operativo | Rocky 9, 512MB, IP `192.168.1.43` |
-| **Homer** | ✅ Instalado y sirviendo | v26.4.2 en `http://192.168.1.43/` |
-| **Dashboard** | ✅ Configurado | 11 cards con Font Awesome icons |
-| **SSO GitLab** | ⚠️ Ya no aplica | GitLab autentica contra AD directo (sigue funcionando) |
-| **Grafana** | ✅ AD directo | LDAP configurado, login verificado con `infrait` |
-| **Proxmox** | ✅ Realm LDAP | `gidas-ldap` creado, 17 usuarios sincronizados |
-| **DNS MikroTik** | ✅ Configurado | `portal.gidas.local → 192.168.1.43` en MikroTik (LAN). Twingate: pendiente agregar recurso |
-| **VM 207 portal** | ❌ Eliminada | Ex-Authentik VM, destruida de pve-desa04. Liberados 1.5GB RAM, 32GB disco |
+| **Authentik** | ❌ Eliminado | Containers, imágenes, datos borrados |
+| **Homer** | ❌ Reemplazado | Reemplazado por portal custom |
+| **CT 208** | ✅ Portal custom | FastAPI + LDAP + JWT en puerto 80 |
+| **Login AD** | ✅ Funcionando | Bind contra AD GDC01, verificación de password |
+| **RBAC** | ✅ Funcionando | Filtra tools según grupos AD del usuario |
+| **Dashboard** | ✅ 11 herramientas | Cards con Font Awesome, responsive |
+| **Grafana** | ✅ AD directo | LDAP configurado y verificado |
+| **Proxmox** | ✅ Realm LDAP | `gidas-ldap`, 17 usuarios sincronizados |
+| **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
+| **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
+
+---
+
+## Dashboard — Herramientas por Grupo
+
+| Herramienta | Grupos con acceso |
+|------------|------------------|
+| GitLab | Todos los grupos GIDAS |
+| Redmine | Dirección, Coordinadores, Becarios, Graduados, Pasantes |
+| Grafana | Dirección, Coordinadores |
+| Proxmox VE | Dirección, Coordinadores |
+| NetBox | Dirección, Coordinadores, Becarios |
+| GLPI | Dirección, Coordinadores |
+| MikroTik | Dirección, Coordinadores |
+| Identity Dashboard | Dirección, Coordinadores, IdentityAdmins |
+| Drupal GIDAS | Todos |
+| Correo UTN | Todos |
+| Twingate | Todos |
 
 ---
 
 ## Acceso
 
-| Recurso | URL |
-|---------|-----|
-| **Portal Homer** | `http://192.168.1.43/` |
-| **CT 208 SSH** | `root@192.168.1.43` (vía PVE host) |
+| Recurso | URL / Comando |
+|---------|--------------|
+| **Portal** | `http://portal.gidas.local` (LAN) o `http://192.168.1.43` |
+| **Login** | Usuario y contraseña de AD GIDAS |
+| **Dashboard** | Cards filtradas según grupos AD del usuario |
+| **Admin SSH** | `pct enter 208` (desde pve-desa04) |
+| **Logs** | `journalctl -u portal-gidas -f` |
 
 ---
 
@@ -77,34 +127,8 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 
 | # | Tarea | Prioridad | Estado |
 |---|-------|-----------|--------|
-| 1 | ✅ Authentik eliminado y reemplazado por Homer | Alta | ✅ |
-| 2 | ✅ CT 208 creado con Rocky 9, Homer instalado y sirviendo | Alta | ✅ |
-| 3 | ✅ Dashboard con 11 cards configurado | Alta | ✅ |
-| 4 | ✅ AD directo en Grafana configurado (LDAP) | **Alta** | ✅ |
-| 5 | ✅ Realm LDAP en Proxmox creado y usuarios sincronizados | **Alta** | ✅ |
-| 6 | ✅ DNS MikroTik `portal.gidas.local` | Alta | ✅ |
-| 7 | Link en Drupal gidas.frlp.utn.edu.ar | Media | ⏳ |
-| 8 | ✅ VM 207 ex-Authentik eliminada de pve-desa04 | Baja | ✅ |
-
----
-
-## Configuración Completada — Detalle
-
-### Grafana (CT 205 — 192.168.1.205)
-Autenticación LDAP contra AD GDC01 configurada:
-- `/etc/grafana/grafana.ini` — `[auth.ldap]` habilitado (backup: `grafana.ini.backup.20260702`)
-- `/etc/grafana/ldap.toml` — servidor 192.168.1.117, bind `CN=infrait,...`, search `sAMAccountName`
-- Admin password reseteado (cambiado del default)
-- ✅ Login LDAP verificado: `infrait` con credencial AD → sesión creada con label `LDAP`
-- **Rollback**: restaurar `grafana.ini.backup.20260702`, borrar `ldap.toml`, reiniciar grafana-server
-
-### Proxmox (pve-desa04)
-Realm LDAP `gidas-ldap` creado en pve-desa04:
-- Tipo: `ldap`, server: `192.168.1.117`, base DN: `DC=GDC01,DC=local`
-- Bind: `CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local`
-- Filtro sync: `(&(objectCategory=person)(objectClass=user))` — excluye cuentas de sistema
-- Realm seteado como default (`default 1`)
-- 17 usuarios AD sincronizados (excluidos: Administrator, Guest, krbtgt, IPA$, pvetest)
-- ✅ Login verificado: `infrait` con credencial AD
-- Nota: usuarios existentes en PVE pueden agregarse manualmente; la sincronización automática se ejecutó con `pveum realm sync`
-- **Rollback**: `pveum realm delete gidas-ldap`
+| 1 | ✅ Portal custom implementado y deployado | Alta | ✅ |
+| 2 | ✅ Login AD funcionando con RBAC | Alta | ✅ |
+| 3 | ✅ Documentación completa (diseño + manuales + SDD) | Alta | ✅ |
+| 4 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 5 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |

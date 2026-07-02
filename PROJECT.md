@@ -9,7 +9,7 @@
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
-| 6 | Portal de Acceso Unificado | Homer | `docs/portal-acceso/` | `feat/portal-access-remoto` | 🛠️ Implementación |
+| 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 
 ## Leyenda de Estados SDD
 
@@ -111,22 +111,34 @@
 
 ---
 
-### Feature 6: Portal de Acceso Unificado — Homer
+### Feature 6: Portal de Acceso Unificado — Portal Custom
 
-- **Objetivo**: Proveer un punto único de acceso a todas las herramientas GIDAS con un dashboard visual, liviano y de mantenimiento cero
-- **Componentes**: Homer (dashboard estático Vue.js), nginx, CT Rocky Linux 9 en pve-desa04. Cada herramienta autentica directamente contra AD (sin IdP central).
-- **Estado SDD**: 🛠️ Implementación
+- **Objetivo**: Proveer un punto único de acceso con login AD y dashboard filtrado por grupos
+- **Componentes**: FastAPI + Jinja2 + ldap3 + JWT. CT Rocky Linux 9 en pve-desa04. Sin IdP, sin DB, sin SSO.
+- **Estado SDD**: ✅ Implementado
+- **Evolución**:
+  - ❌ Authentik (IdP) — eliminado por complejidad excesiva
+  - ❌ Homer (dashboard estático) — reemplazado por no tener login ni RBAC
+  - ✅ **Portal custom** — login AD, dashboard filtrado por grupos, config YAML
 - **Tareas Completadas**:
-  - Eliminado Authentik 2026.5.3 (containers, imágenes y datos) — reemplazado por Homer por ser más simple, portable y fácil de mantener
-  - CT 208 (portal) creado en pve-desa04: Rocky Linux 9, 512MB RAM, 1 vCPU, IP 192.168.1.43/24
-  - Homer v26.4.2 instalado y sirviendo en `http://192.168.1.43/`
-  - Dashboard configurado con 11 cards: GitLab, Redmine, Grafana, Proxmox VE, NetBox, GLPI, Identity Dashboard, MikroTik, Drupal, Correo UTN, Twingate
-  - ✅ **Grafana**: AD directo configurado (LDAP contra GDC01)
-  - ✅ **Proxmox**: Realm LDAP `gidas-ldap` creado, 17 usuarios sincronizados
-  - ✅ **DNS MikroTik**: `portal.gidas.local → 192.168.1.43`
-  - ✅ **VM 207**: eliminada de pve-desa04 (ex-Authentik, liberados recursos)
+  - Portal custom FastAPI+LDAP desarrollado y deployado en CT 208
+  - Login AD contra GDC01 con verificación de password (ldap3)
+  - Dashboard SSR con Jinja2 y CSS vanilla responsive
+  - RBAC: filtra herramientas según grupos AD del usuario (intersección memberOf)
+  - 11 herramientas configuradas en YAML con mapeo a grupos AD
+  - Sesión JWT stateless (cookie HttpOnly, 8h expiración)
+  - Branding GIDAS: logo, colores rojos institucionales, UTN en footer
+  - DNS MikroTik: `portal.gidas.local → 192.168.1.43`
+  - Guías de usuario y administración con capturas de pantalla
+  - Documentación completa: arquitectura, diseño técnico, SDD
+  - Grafana AD directo (LDAP configurado y verificado)
+  - Proxmox realm LDAP (`gidas-ldap`, 17 usuarios sincronizados)
+  - Authentik eliminado, Homer reemplazado, VM 207 destruida
 - **Pendientes**:
+  - Twingate resource para `portal.gidas.local` (acceso remoto)
   - Link en Drupal gidas.frlp.utn.edu.ar
+- **Archivos**: `portal-gidas/` (código), `docs/portal-acceso/` (documentación)
+- **Archivos SDD**: `openspec/changes/portal-custom/`
 - **Archivos**: `docs/portal-acceso/`
 - **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/` (histórico Authentik)
 
@@ -147,4 +159,4 @@
 
 ---
 
-*Última actualización: 2026-07-01*
+*Última actualización: 2026-07-02*
