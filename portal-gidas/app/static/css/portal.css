@@ -4,16 +4,16 @@
 
 /* --- Variables --- */
 :root {
-  --color-primary: #1a3a5c;
-  --color-primary-dark: #0f2440;
-  --color-secondary: #2ecc71;
-  --color-accent: #3498db;
-  --color-bg: #f0f2f5;
+  --color-primary: #fa0000;
+  --color-primary-dark: #940000;
+  --color-primary-light: #ff4444;
+  --color-accent: #ff0000;
+  --color-bg: #f5f5f5;
   --color-card-bg: #ffffff;
-  --color-text: #2c3e50;
-  --color-text-light: #7f8c8d;
-  --color-border: #e1e4e8;
-  --color-error: #e74c3c;
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --color-border: #e0e0e0;
+  --color-error: #d32f2f;
   --color-error-bg: #fde8e8;
   --radius: 12px;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -49,6 +49,12 @@ body {
   justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
+}
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 0;
 }
 
 .navbar-brand {
@@ -189,9 +195,14 @@ body {
 }
 
 /* --- Buttons --- */
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
 .btn-primary {
   padding: 12px 24px;
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: white;
   border: none;
   border-radius: 8px;
@@ -203,11 +214,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-}
-
-.btn-primary:hover {
-  background: var(--color-primary-dark);
-  transform: translateY(-1px);
 }
 
 /* --- Alerts --- */
