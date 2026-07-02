@@ -29,9 +29,10 @@ Deploy de Vaultwarden 1.36.0 con Docker en CT Rocky Linux 9. Autenticación LDAP
 Vaultwarden usa variables de entorno para LDAP:
 
 ```bash
-SIGNUPS_ALLOWED=false          # Solo login AD
+SIGNUPS_ALLOWED=false          # Solo login AD (admin crea usuarios)
 INVITATIONS_ALLOWED=true       # Admins invitan usuarios
 DOMAIN=https://vault.gidas.local
+ADMIN_TOKEN=****               # Token para panel /admin
 
 # LDAP
 LDAP_URL=ldap://192.168.1.117
@@ -39,10 +40,18 @@ LDAP_START_TLS=false
 LDAP_BIND_DN=CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local
 LDAP_BIND_PASSWORD=****
 LDAP_SEARCH_BASE=DC=GDC01,DC=local
-LDAP_SEARCH_FILTER=(sAMAccountName={{username}})
+LDAP_SEARCH_FILTER=(|(mail={{username}})(sAMAccountName={{username}}))
 LDAP_MAIL_ATTRIBUTE=mail
 LDAP_USER_ATTRIBUTE=sAMAccountName
 ```
+
+**Importante**: El search filter acepta tanto email como sAMAccountName. El usuario puede loguearse con `email@frlp.utn.edu.ar` o con su nombre de usuario AD.
+
+**Creación de usuarios**: Un admin debe crear el usuario via API o panel `/admin` la primera vez. La password inicial es la del AD. Luego el usuario puede loguearse con su email y esa misma password.
+
+## Admin token
+
+El admin token se genera en deploy y permite acceder a `https://vault.gidas.local/admin`. Desde ahí se pueden invitar usuarios y gestionar configuración.
 
 ## Datos técnicos
 
