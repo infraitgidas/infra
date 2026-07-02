@@ -89,6 +89,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Grafana** | ✅ AD directo | LDAP configurado y verificado |
 | **Proxmox** | ✅ Realm LDAP | `gidas-ldap`, 17 usuarios sincronizados |
 | **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
+| **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80, impedía a GitLab nginx funcionar. Solucionado: system nginx detenido, GitLab nginx reiniciado. Login LDAP operativo. |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---

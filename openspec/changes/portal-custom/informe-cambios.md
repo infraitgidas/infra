@@ -93,10 +93,30 @@ Se desarrolló e implementó un portal de acceso custom (FastAPI + LDAP) para re
 | Sin sesión activa redirige a login | ✅ Probado con cookie expirada |
 | API `/api/me` devuelve datos del usuario | ✅ `{"username":"infrait","groups":["APP-Redmine","G-IdentityAdmins"]}` |
 | Portal responde en puerto 80 | ✅ nginx detenido, uvicorn en puerto 80 |
+| GitLab accesible | ✅ System nginx en puerto 80 impedía a GitLab nginx funcionar (loop de reinicios). Solucionado: system nginx detenido, GitLab nginx reiniciado. |
 
 ---
 
-## 6. Lecciones Aprendidas
+## 6. Incidencias Post-Implementación
+
+### GitLab no cargaba por conflicto de puertos
+
+**Síntoma**: `https://gitlab.gidas.local` no cargaba. HTTPS devolvía "Connection reset by peer".
+
+**Causa raíz**: El system nginx de Rocky Linux (que había quedado instalado de la etapa Homer) ocupaba el puerto 80. GitLab nginx intentaba bindear puerto 80 (para el redirect HTTP→HTTPS) pero fallaba porque ya estaba en uso. Esto causaba un loop de reinicios en GitLab nginx que también afectaba al puerto 443.
+
+**Solución**:
+```bash
+systemctl stop nginx        # detener system nginx
+systemctl disable nginx     # evitar que inicie en boot
+gitlab-ctl restart nginx    # reiniciar GitLab nginx
+```
+
+**Lección**: Al reemplazar Homer, el system nginx (instalado como dependencia) quedó corriendo. Debe siempre verificarse que no haya servicios legacy ocupando puertos necesarios para GitLab.
+
+---
+
+## 7. Lecciones Aprendidas
 
 Ver documento completo en `docs/portal-acceso/diseno/lecciones-aprendidas.md`.
 
