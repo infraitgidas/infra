@@ -121,10 +121,10 @@
   - CT 208 (portal) creado en pve-desa04: Rocky Linux 9, 512MB RAM, 1 vCPU, IP 192.168.1.43/24
   - Homer v26.4.2 instalado y sirviendo en `http://192.168.1.43/`
   - Dashboard configurado con 11 cards: GitLab, Redmine, Grafana, Proxmox VE, NetBox, GLPI, Identity Dashboard, MikroTik, Drupal, Correo UTN, Twingate
-  - Herramientas autentican contra AD GDC01 directo (Redmine ✅, GitLab ✅ — Pendiente: Grafana, Proxmox)
+  - ✅ **Grafana**: AD directo configurado (LDAP contra GDC01)
+  - ✅ **Proxmox**: Realm LDAP `gidas-ldap` creado, 17 usuarios sincronizados
 - **Pendientes**:
   - DNS MikroTik `portal.gidas.local → 192.168.1.43`
-  - SSO ya no aplica — se accede a cada herramienta con credencial AD (como venía funcionando)
   - Link en Drupal gidas.frlp.utn.edu.ar
   - VM 207 portal (ex-Authentik) — decidir si parar/eliminar
 - **Archivos**: `docs/portal-acceso/`

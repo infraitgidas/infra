@@ -1,7 +1,7 @@
 # Informe de Avance — Portal de Acceso Unificado
 
 > **Feature**: Portal de Acceso (Feature #6)
-> **Fecha**: 2026-07-01
+> **Fecha**: 2026-07-02
 > **Rama**: `feat/portal-access-remoto`
 > **Estado SDD**: 🛠️ Implementación
 
@@ -52,13 +52,13 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 
 | Componente | Estado | Detalle |
 |------------|--------|---------|
-| **Authentik** | ❌ Eliminado | Containers bajados, imágenes borradas (448MB liberados en GitLab VM), directorio `/root/portal/` eliminado |
+| **Authentik** | ❌ Reemplazado | Containers bajados, imágenes borradas (448MB liberados en GitLab VM), directorio `/root/portal/` eliminado. Reemplazado por Homer |
 | **CT 208** | ✅ Creado y operativo | Rocky 9, 512MB, IP `192.168.1.43` |
 | **Homer** | ✅ Instalado y sirviendo | v26.4.2 en `http://192.168.1.43/` |
 | **Dashboard** | ✅ Configurado | 11 cards con Font Awesome icons |
 | **SSO GitLab** | ⚠️ Ya no aplica | GitLab autentica contra AD directo (sigue funcionando) |
-| **SSO Grafana** | ⏳ Pendiente | Configurar AD directo en Grafana (ya no vía Authentik) |
-| **LDAP Proxmox** | ⏳ Pendiente | Realm LDAP en PVE (misma config, sin Authentik de por medio) |
+| **Grafana** | ✅ AD directo | LDAP configurado, login verificado con `infrait` |
+| **Proxmox** | ✅ Realm LDAP | `gidas-ldap` creado, 17 usuarios sincronizados |
 | **DNS MikroTik** | ⏳ Pendiente | `portal.gidas.local → 192.168.1.43` (necesita password admin) |
 | **VM 207 portal** | ⚠️ Detenida | Ex-Authentik VM, no responde. Decidir si eliminar |
 
@@ -80,30 +80,31 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | 1 | ✅ Authentik eliminado y reemplazado por Homer | Alta | ✅ |
 | 2 | ✅ CT 208 creado con Rocky 9, Homer instalado y sirviendo | Alta | ✅ |
 | 3 | ✅ Dashboard con 11 cards configurado | Alta | ✅ |
-| 4 | Configurar AD directo en Grafana (CT 205) | **Alta** | ⏳ |
-| 5 | Configurar realm LDAP en Proxmox | Media | ⏳ |
+| 4 | ✅ AD directo en Grafana configurado (LDAP) | **Alta** | ✅ |
+| 5 | ✅ Realm LDAP en Proxmox creado y usuarios sincronizados | **Alta** | ✅ |
 | 6 | DNS MikroTik `portal.gidas.local` | Media | ⏳ |
 | 7 | Link en Drupal gidas.frlp.utn.edu.ar | Media | ⏳ |
 | 8 | Decidir qué hacer con VM 207 (ex-Authentik) | Baja | ⏳ |
 
 ---
 
-## Configuración Pendiente — Detalle
+## Configuración Completada — Detalle
 
 ### Grafana (CT 205 — 192.168.1.205)
-Configurar autenticación LDAP directa contra AD GDC01 (sin Authentik):
-```ini
-[auth.ldap]
-enabled = true
-config_file = /etc/grafana/ldap.toml
-```
+Autenticación LDAP contra AD GDC01 configurada:
+- `/etc/grafana/grafana.ini` — `[auth.ldap]` habilitado (backup: `grafana.ini.backup.20260702`)
+- `/etc/grafana/ldap.toml` — servidor 192.168.1.117, bind `CN=infrait,...`, search `sAMAccountName`
+- Admin password reseteado a `hlvs.2025`
+- ✅ Login LDAP verificado: `infrait / Gidas2026!` → sesión creada con label `LDAP`
+- **Rollback**: restaurar `grafana.ini.backup.20260702`, borrar `ldap.toml`, reiniciar grafana-server
 
 ### Proxmox (pve-desa04)
-Datacenter → Authentication → Add → LDAP:
-```
-Host: 192.168.1.117
-Base DN: DC=GDC01,DC=local
-Bind DN: CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local
-Password: Gidas2026!
-User filter: (objectClass=user)
-```
+Realm LDAP `gidas-ldap` creado en pve-desa04:
+- Tipo: `ldap`, server: `192.168.1.117`, base DN: `DC=GDC01,DC=local`
+- Bind: `CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local`
+- Filtro sync: `(&(objectCategory=person)(objectClass=user))` — excluye cuentas de sistema
+- Realm seteado como default (`default 1`)
+- 17 usuarios AD sincronizados (excluidos: Administrator, Guest, krbtgt, IPA$, pvetest)
+- ✅ Login verificado: `infrait@gidas-ldap / Gidas2026!`
+- Nota: usuarios existentes en PVE pueden agregarse manualmente; la sincronización automática se ejecutó con `pveum realm sync`
+- **Rollback**: `pveum realm delete gidas-ldap`
