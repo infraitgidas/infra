@@ -60,7 +60,7 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | **Grafana** | ✅ AD directo | LDAP configurado, login verificado con `infrait` |
 | **Proxmox** | ✅ Realm LDAP | `gidas-ldap` creado, 17 usuarios sincronizados |
 | **DNS MikroTik** | ✅ Configurado | `portal.gidas.local → 192.168.1.43` en MikroTik (LAN). Twingate: pendiente agregar recurso |
-| **VM 207 portal** | ⚠️ Detenida | Ex-Authentik VM, no responde. Decidir si eliminar |
+| **VM 207 portal** | ❌ Eliminada | Ex-Authentik VM, destruida de pve-desa04. Liberados 1.5GB RAM, 32GB disco |
 
 ---
 
@@ -84,7 +84,7 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | 5 | ✅ Realm LDAP en Proxmox creado y usuarios sincronizados | **Alta** | ✅ |
 | 6 | ✅ DNS MikroTik `portal.gidas.local` | Alta | ✅ |
 | 7 | Link en Drupal gidas.frlp.utn.edu.ar | Media | ⏳ |
-| 8 | Decidir qué hacer con VM 207 (ex-Authentik) | Baja | ⏳ |
+| 8 | ✅ VM 207 ex-Authentik eliminada de pve-desa04 | Baja | ✅ |
 
 ---
 

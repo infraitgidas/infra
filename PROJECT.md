@@ -124,9 +124,9 @@
   - ✅ **Grafana**: AD directo configurado (LDAP contra GDC01)
   - ✅ **Proxmox**: Realm LDAP `gidas-ldap` creado, 17 usuarios sincronizados
   - ✅ **DNS MikroTik**: `portal.gidas.local → 192.168.1.43`
+  - ✅ **VM 207**: eliminada de pve-desa04 (ex-Authentik, liberados recursos)
 - **Pendientes**:
   - Link en Drupal gidas.frlp.utn.edu.ar
-  - VM 207 portal (ex-Authentik) — decidir si parar/eliminar
 - **Archivos**: `docs/portal-acceso/`
 - **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/` (histórico Authentik)
 
