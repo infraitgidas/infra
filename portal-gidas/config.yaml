@@ -122,3 +122,16 @@ tools:
       - "G-Graduados"
       - "G-Pasantes"
       - "G-Externos"
+
+  - name: "Vaultwarden"
+    url: "https://vault.gidas.local"
+    icon: "fas fa-key"
+    description: "Gestor de contraseñas"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "G-Externos"
+      - "G-IdentityAdmins"
