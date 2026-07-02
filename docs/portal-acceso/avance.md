@@ -73,6 +73,8 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Código** | `portal-gidas/` en el repo |
 | **Config** | `/opt/portal-gidas/config.yaml` (11 herramientas) |
 | **Logs** | `journalctl -u portal-gidas` |
+| **CT 209** | Rocky Linux 9, 512MB RAM, 1 vCPU, IP `192.168.1.44/24` |
+| **Vaultwarden** | Docker + LDAP + nginx SSL en `https://vault.gidas.local` |
 
 ---
 
@@ -85,11 +87,12 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **CT 208** | ✅ Portal custom | FastAPI + LDAP + JWT en puerto 80 |
 | **Login AD** | ✅ Funcionando | Bind contra AD GDC01, verificación de password |
 | **RBAC** | ✅ Funcionando | Filtra tools según grupos AD del usuario |
-| **Dashboard** | ✅ 11 herramientas | Cards con Font Awesome, responsive |
+| **Dashboard** | ✅ 12 herramientas | + Vaultwarden (gestor de contraseñas) |
 | **Grafana** | ✅ AD directo | LDAP configurado y verificado |
 | **Proxmox** | ✅ Realm LDAP | `gidas-ldap`, 17 usuarios sincronizados |
 | **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
-| **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80, impedía a GitLab nginx funcionar. Solucionado: system nginx detenido, GitLab nginx reiniciado. Login LDAP operativo. |
+| **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80. Solucionado: system nginx detenido, GitLab nginx reiniciado. |
+| **Vaultwarden** | ✅ Desplegado | CT 209, Docker, LDAP, SSL. Card en portal. |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---
@@ -106,6 +109,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | GLPI | Dirección, Coordinadores |
 | MikroTik | Dirección, Coordinadores |
 | Identity Dashboard | Dirección, Coordinadores, IdentityAdmins |
+| Vaultwarden | Dirección, Coordinadores, Becarios, Graduados, Pasantes, Externos, IdentityAdmins |
 | Drupal GIDAS | Todos |
 | Correo UTN | Todos |
 | Twingate | Todos |
@@ -131,5 +135,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 1 | ✅ Portal custom implementado y deployado | Alta | ✅ |
 | 2 | ✅ Login AD funcionando con RBAC | Alta | ✅ |
 | 3 | ✅ Documentación completa (diseño + manuales + SDD) | Alta | ✅ |
-| 4 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
-| 5 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
+| 4 | ✅ Vaultwarden desplegado y funcional | Alta | ✅ |
+| 5 | Configurar SMTP en Vaultwarden (mail de invitación) | Media | ⏳ |
+| 6 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 7 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
