@@ -16,7 +16,7 @@ ldap:
 tools:
   - name: "GitLab"
     url: "https://gitlab.gidas.local"
-    icon: "gitlab.png"
+    icon: "fab fa-gitlab"
     description: "Repositorios y CI/CD"
     groups:
       - "G-Direccion"
@@ -28,7 +28,7 @@ tools:
 
   - name: "Redmine"
     url: "https://redmine.gidas.local"
-    icon: "redmine.png"
+    icon: "fas fa-tasks"
     description: "Gestión de proyectos"
     groups:
       - "G-Direccion"
@@ -39,7 +39,7 @@ tools:
 
   - name: "Grafana"
     url: "http://192.168.1.205:3000"
-    icon: "grafana.png"
+    icon: "fas fa-chart-line"
     description: "Monitoreo y métricas"
     groups:
       - "G-Direccion"
@@ -47,7 +47,7 @@ tools:
 
   - name: "Proxmox VE"
     url: "https://192.168.1.14:8006"
-    icon: "proxmox.png"
+    icon: "fas fa-server"
     description: "Hipervisor"
     groups:
       - "G-Direccion"
@@ -55,7 +55,7 @@ tools:
 
   - name: "NetBox"
     url: "http://netbox.gidas.local"
-    icon: "netbox.png"
+    icon: "fas fa-sitemap"
     description: "CMDB - Inventario"
     groups:
       - "G-Direccion"
@@ -64,7 +64,7 @@ tools:
 
   - name: "GLPI"
     url: "http://glpi.gidas.local"
-    icon: "glpi.png"
+    icon: "fas fa-life-ring"
     description: "ITSM - Mesa de ayuda"
     groups:
       - "G-Direccion"
@@ -72,7 +72,7 @@ tools:
 
   - name: "MikroTik"
     url: "http://192.168.1.1"
-    icon: "mikrotik.png"
+    icon: "fas fa-network-wired"
     description: "Router y firewall"
     groups:
       - "G-Direccion"
@@ -80,15 +80,16 @@ tools:
 
   - name: "Identity Dashboard"
     url: "https://gitlab.gidas.local/infrait/identity-dashboard"
-    icon: "identity.png"
+    icon: "fas fa-users-cog"
     description: "Gestión de usuarios AD/FreeIPA"
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
+      - "G-IdentityAdmins"
 
   - name: "Drupal GIDAS"
     url: "https://gidas.frlp.utn.edu.ar"
-    icon: "drupal.png"
+    icon: "fas fa-globe"
     description: "Sitio institucional"
     groups:
       - "G-Direccion"
@@ -100,7 +101,7 @@ tools:
 
   - name: "Correo UTN"
     url: "https://outlook.office.com"
-    icon: "outlook.png"
+    icon: "fas fa-envelope"
     description: "Webmail institucional"
     groups:
       - "G-Direccion"
@@ -112,7 +113,7 @@ tools:
 
   - name: "Twingate"
     url: "https://portal.twingate.com"
-    icon: "twingate.png"
+    icon: "fas fa-shield-alt"
     description: "Acceso remoto seguro"
     groups:
       - "G-Direccion"
