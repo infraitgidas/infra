@@ -123,8 +123,8 @@
   - Dashboard configurado con 11 cards: GitLab, Redmine, Grafana, Proxmox VE, NetBox, GLPI, Identity Dashboard, MikroTik, Drupal, Correo UTN, Twingate
   - ✅ **Grafana**: AD directo configurado (LDAP contra GDC01)
   - ✅ **Proxmox**: Realm LDAP `gidas-ldap` creado, 17 usuarios sincronizados
+  - ✅ **DNS MikroTik**: `portal.gidas.local → 192.168.1.43`
 - **Pendientes**:
-  - DNS MikroTik `portal.gidas.local → 192.168.1.43`
   - Link en Drupal gidas.frlp.utn.edu.ar
   - VM 207 portal (ex-Authentik) — decidir si parar/eliminar
 - **Archivos**: `docs/portal-acceso/`

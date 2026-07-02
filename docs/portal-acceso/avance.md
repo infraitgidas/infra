@@ -59,7 +59,7 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | **SSO GitLab** | ⚠️ Ya no aplica | GitLab autentica contra AD directo (sigue funcionando) |
 | **Grafana** | ✅ AD directo | LDAP configurado, login verificado con `infrait` |
 | **Proxmox** | ✅ Realm LDAP | `gidas-ldap` creado, 17 usuarios sincronizados |
-| **DNS MikroTik** | ⏳ Pendiente | `portal.gidas.local → 192.168.1.43` (necesita password admin) |
+| **DNS MikroTik** | ✅ Configurado | `portal.gidas.local → 192.168.1.43` en MikroTik (LAN). Twingate: pendiente agregar recurso |
 | **VM 207 portal** | ⚠️ Detenida | Ex-Authentik VM, no responde. Decidir si eliminar |
 
 ---
@@ -82,7 +82,7 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 | 3 | ✅ Dashboard con 11 cards configurado | Alta | ✅ |
 | 4 | ✅ AD directo en Grafana configurado (LDAP) | **Alta** | ✅ |
 | 5 | ✅ Realm LDAP en Proxmox creado y usuarios sincronizados | **Alta** | ✅ |
-| 6 | DNS MikroTik `portal.gidas.local` | Media | ⏳ |
+| 6 | ✅ DNS MikroTik `portal.gidas.local` | Alta | ✅ |
 | 7 | Link en Drupal gidas.frlp.utn.edu.ar | Media | ⏳ |
 | 8 | Decidir qué hacer con VM 207 (ex-Authentik) | Baja | ⏳ |
 
