@@ -132,7 +132,7 @@ ldap:
   host: "192.168.1.117"
   port: 389
   bind_dn: "CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local"
-  bind_password: "Gidas2026!"  # o desde variable de entorno
+  bind_password: "cambiar-en-produccion"  # desde variable de entorno LDAP_BIND_PASSWORD
   base_dn: "DC=GDC01,DC=local"
   user_attr: "sAMAccountName"
   group_attr: "memberOf"

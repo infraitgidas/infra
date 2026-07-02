@@ -94,8 +94,8 @@ Se eliminó Authentik 2026.5.3 como Identity Provider por resultar complejo de i
 Autenticación LDAP contra AD GDC01 configurada:
 - `/etc/grafana/grafana.ini` — `[auth.ldap]` habilitado (backup: `grafana.ini.backup.20260702`)
 - `/etc/grafana/ldap.toml` — servidor 192.168.1.117, bind `CN=infrait,...`, search `sAMAccountName`
-- Admin password reseteado a `hlvs.2025`
-- ✅ Login LDAP verificado: `infrait / Gidas2026!` → sesión creada con label `LDAP`
+- Admin password reseteado (cambiado del default)
+- ✅ Login LDAP verificado: `infrait` con credencial AD → sesión creada con label `LDAP`
 - **Rollback**: restaurar `grafana.ini.backup.20260702`, borrar `ldap.toml`, reiniciar grafana-server
 
 ### Proxmox (pve-desa04)
@@ -105,6 +105,6 @@ Realm LDAP `gidas-ldap` creado en pve-desa04:
 - Filtro sync: `(&(objectCategory=person)(objectClass=user))` — excluye cuentas de sistema
 - Realm seteado como default (`default 1`)
 - 17 usuarios AD sincronizados (excluidos: Administrator, Guest, krbtgt, IPA$, pvetest)
-- ✅ Login verificado: `infrait@gidas-ldap / Gidas2026!`
+- ✅ Login verificado: `infrait` con credencial AD
 - Nota: usuarios existentes en PVE pueden agregarse manualmente; la sincronización automática se ejecutó con `pveum realm sync`
 - **Rollback**: `pveum realm delete gidas-ldap`

@@ -182,7 +182,7 @@ systemctl restart portal-gidas
 # Desde el CT
 ldapsearch -x -H ldap://192.168.1.117 \
   -D 'CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local' \
-  -w 'Gidas2026!' \
+  -w '$LDAP_BIND_PASSWORD' \
   -b 'DC=GDC01,DC=local' \
   "(sAMAccountName=infrait)" memberOf
 ```
@@ -192,7 +192,7 @@ ldapsearch -x -H ldap://192.168.1.117 \
 ```bash
 ldapsearch -x -H ldap://192.168.1.117 \
   -D 'CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local' \
-  -w 'Gidas2026!' \
+  -w '$LDAP_BIND_PASSWORD' \
   -b 'DC=GDC01,DC=local' \
   "(objectClass=group)" cn | grep '^cn:'
 ```
@@ -214,11 +214,9 @@ try:
     user, groups = authenticate(
         host='192.168.1.117', port=389,
         bind_dn='CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local',
-        bind_password='Gidas2026!',
-        base_dn='DC=GDC01,DC=local',
-        search_filter='(sAMAccountName={username})',
+        bind_password='$LDAP_BIND_PASSWORD',
         group_attribute='memberOf',
-        username='infrait', password='Gidas2026!'
+        username='infrait', password='$LDAP_BIND_PASSWORD'
     )
     print(f'OK: {user}, groups: {groups}')
 except Exception as e:

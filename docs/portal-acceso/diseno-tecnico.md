@@ -367,7 +367,7 @@ docker build -t portal-gidas .
 docker run -d --name portal-gidas \
   -p 80:80 \
   -e JWT_SECRET="$(openssl rand -hex 32)" \
-  -e LDAP_BIND_PASSWORD="Gidas2026!" \
+  -e LDAP_BIND_PASSWORD="cambiar-en-produccion" \
   -v $(pwd)/config.yaml:/app/config.yaml:ro \
   portal-gidas
 ```
@@ -378,7 +378,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 export JWT_SECRET="$(openssl rand -hex 32)"
-export LDAP_BIND_PASSWORD="Gidas2026!"
+export LDAP_BIND_PASSWORD="cambiar-en-produccion"
 uvicorn app.main:app --host 0.0.0.0 --port 80
 ```
 

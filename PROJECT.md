@@ -41,7 +41,7 @@
   - SMTP Outlook configurado (infrait@frlp.utn.edu.ar)
   - Notificaciones por mail: nueva issue → todos los miembros, asignación → asignado
   - Dashboard público `/dashboard/` con tabla dinámica, colores y alertas en tiempo real
-  - 12 usuarios AD habilitados con password Gidas2026
+  - 12 usuarios AD habilitados (password inicial documentado en secrets)
   - Correos de bienvenida con credenciales de primer login enviados
 - **Archivos**: `redmine/`
 - **Archivo SDD**: `openspec/changes/redmine/`
@@ -61,7 +61,7 @@
   - GitLab CE 19.0.2 Omnibus instalado (17/17 servicios)
   - HTTPS self-signed + SSH Git puerto 2222 DNAT (→ VM:2222, gitlab-sshd)
   - Firewall PVE host (80, 443, 2222)
-  - Integración LDAP activada (`infrait / Gidas2026!`)
+  - Integración LDAP activada (bind service account configurado)
   - Token API generado (`sync-ad-members`)
   - 17 usuarios AD importados a GitLab
   - 7 grupos GitLab creados con mapeo AD (G-Direccion→Owner, G-Coordinadores→Maintainer, G-Becarios→Developer)
