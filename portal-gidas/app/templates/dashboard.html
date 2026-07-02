@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Portal GIDAS — Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+  <h1>Bienvenido, <strong>{{ username }}</strong></h1>
+  {% if groups %}
+  <p class="dashboard-groups">
+    <i class="fas fa-tags"></i>
+    {% for group in groups %}
+    <span class="group-badge">{{ group }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+</div>
+
+{% if tools %}
+<div class="card-grid">
+  {% for tool in tools %}
+  <a href="{{ tool.url }}" target="_blank" rel="noopener noreferrer" class="card">
+    <div class="card-icon">
+      {% if tool.icon.endswith('.png') or tool.icon.endswith('.svg') or tool.icon.endswith('.jpg') %}
+      <img src="/static/img/tools/{{ tool.icon }}" alt="{{ tool.name }}" class="card-icon-img">
+      {% else %}
+      <i class="{{ tool.icon }}"></i>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <h3>{{ tool.name }}</h3>
+      {% if tool.description %}
+      <p>{{ tool.description }}</p>
+      {% endif %}
+    </div>
+    <div class="card-action">
+      <i class="fas fa-external-link-alt"></i>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-info-circle"></i>
+  <p>No tenés herramientas asignadas a tus grupos actuales.</p>
+  <p class="text-muted">Consultá con el administrador si deberías tener acceso a alguna herramienta.</p>
+</div>
+{% endif %}
+{% endblock %}

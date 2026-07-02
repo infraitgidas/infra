@@ -1,0 +1,124 @@
+portal:
+  title: "Portal GIDAS"
+  subtitle: "Grupo de Investigación y Desarrollo Aplicado en Sistemas"
+  logo: "logo-gidas.png"
+  session_duration_hours: 8
+
+ldap:
+  host: "192.168.1.117"
+  port: 389
+  use_ssl: false
+  bind_dn: "CN=infrait,OU=ServiceAccounts,DC=GDC01,DC=local"
+  base_dn: "DC=GDC01,DC=local"
+  user_search_filter: "(sAMAccountName={username})"
+  group_attribute: "memberOf"
+
+tools:
+  - name: "GitLab"
+    url: "https://gitlab.gidas.local"
+    icon: "fab fa-gitlab"
+    description: "Repositorios y CI/CD"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "G-Externos"
+
+  - name: "Redmine"
+    url: "https://redmine.gidas.local"
+    icon: "fas fa-tasks"
+    description: "Gestión de proyectos"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+
+  - name: "Grafana"
+    url: "http://192.168.1.205:3000"
+    icon: "fas fa-chart-line"
+    description: "Monitoreo y métricas"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+
+  - name: "Proxmox VE"
+    url: "https://192.168.1.14:8006"
+    icon: "fas fa-server"
+    description: "Hipervisor"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+
+  - name: "NetBox"
+    url: "http://netbox.gidas.local"
+    icon: "fas fa-sitemap"
+    description: "CMDB - Inventario"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+
+  - name: "GLPI"
+    url: "http://glpi.gidas.local"
+    icon: "fas fa-life-ring"
+    description: "ITSM - Mesa de ayuda"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+
+  - name: "MikroTik"
+    url: "http://192.168.1.1"
+    icon: "fas fa-network-wired"
+    description: "Router y firewall"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+
+  - name: "Identity Dashboard"
+    url: "https://gitlab.gidas.local/infrait/identity-dashboard"
+    icon: "fas fa-users-cog"
+    description: "Gestión de usuarios AD/FreeIPA"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-IdentityAdmins"
+
+  - name: "Drupal GIDAS"
+    url: "https://gidas.frlp.utn.edu.ar"
+    icon: "fas fa-globe"
+    description: "Sitio institucional"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "G-Externos"
+
+  - name: "Correo UTN"
+    url: "https://outlook.office.com"
+    icon: "fas fa-envelope"
+    description: "Webmail institucional"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "G-Externos"
+
+  - name: "Twingate"
+    url: "https://portal.twingate.com"
+    icon: "fas fa-shield-alt"
+    description: "Acceso remoto seguro"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "G-Externos"

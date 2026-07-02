@@ -1,0 +1,134 @@
+# Informe de Avance — Portal de Acceso GIDAS
+
+> **Feature**: Portal de Acceso (Feature #6)
+> **Fecha**: 2026-07-02
+> **Rama**: `feat/portal-access-remoto`
+> **Estado SDD**: ✅ Implementado
+
+---
+
+## Resumen
+
+Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de GIDAS autenticarse con su usuario de AD y acceder solo a las herramientas correspondientes a sus grupos.
+
+**Evolución del proyecto**:
+
+1. ❌ Authentik (IdP) — demasiado complejo, SSO incompleto, mantenimiento alto
+2. ❌ Homer (dashboard estático) — no tiene login ni RBAC
+3. ✅ **Portal custom FastAPI+LDAP** — login AD, dashboard filtrado por grupos, config YAML
+
+---
+
+## Decisión Arquitectónica
+
+| Aspecto | Authentik | Homer | Portal Custom (actual) |
+|---------|-----------|-------|----------------------|
+| **Login** | SSO vía OIDC/OAuth | ❌ No tiene | ✅ LDAP directo contra AD |
+| **RBAC** | Por IdP | ❌ No tiene | ✅ Por grupos AD (memberOf) |
+| **Dashboard** | Cards nativas | Cards estáticas | ✅ SSR con Jinja2 |
+| **Config** | UI web + secrets | YAML | ✅ YAML versionable |
+| **Dependencias** | 4 containers + DB | nginx solo | ✅ FastAPI + ldap3 |
+| **Mantenimiento** | Alto | Cero | ✅ Bajo (sin DB, sin workers) |
+| **Recursos** | 1.5GB RAM | 512MB RAM | ✅ ~40MB RAM |
+
+---
+
+## Documentación Generada
+
+### Diseño (`docs/portal-acceso/diseno/`)
+
+| Documento | Archivo | Contenido |
+|-----------|---------|-----------|
+| 🏗️ Arquitectura | `docs/portal-acceso/diseno/arquitectura.md` | Stack, principios, componentes, flujo auth, modelo de datos |
+| 🔧 Diseño Técnico | `docs/portal-acceso/diseno/diseno-tecnico.md` | Rutas HTTP, templates, config.yaml, seguridad, deploy |
+| 📋 Lecciones Aprendidas | `docs/portal-acceso/diseno/lecciones-aprendidas.md` | Por qué Authentik y Homer no funcionaron |
+| 📊 Análisis Alternativas | `docs/portal-acceso/diseno/analisis-alternativas.md` | Evaluación original de opciones |
+| 🖼️ Capturas | `docs/portal-acceso/img/` | 3 screenshots del portal funcionando |
+
+### Manuales (`docs/portal-acceso/manuales/`)
+
+| Documento | Archivo | Contenido |
+|-----------|---------|-----------|
+| 👤 Guía de Usuario | `docs/portal-acceso/manuales/guia-usuario.md` | Login, dashboard, errores comunes, FAQ |
+| 🔧 Guía de Administración | `docs/portal-acceso/manuales/guia-admin.md` | Config, mantenimiento, debug, rollback |
+
+### SDD (`openspec/changes/portal-custom/`)
+
+| Artefacto | Archivo |
+|-----------|---------|
+| 📋 Propuesta | `openspec/changes/portal-custom/proposal.md` |
+| 📐 Especificación | `openspec/changes/portal-custom/specs/portal/spec.md` |
+| 🏗️ Diseño | `openspec/changes/portal-custom/design.md` |
+| 📝 Tareas | `openspec/changes/portal-custom/tasks.md` |
+
+---
+
+## Infraestructura
+
+| Recurso | Detalle |
+|---------|---------|
+| **CT 208** | Rocky Linux 9, 512MB RAM, 1 vCPU, IP `192.168.1.43/24` |
+| **Servicio** | `portal-gidas.service` (uvicorn) en puerto 80 |
+| **App** | FastAPI + Jinja2 + ldap3 + JWT |
+| **Código** | `portal-gidas/` en el repo |
+| **Config** | `/opt/portal-gidas/config.yaml` (11 herramientas) |
+| **Logs** | `journalctl -u portal-gidas` |
+
+---
+
+## Estado de Implementación
+
+| Componente | Estado | Detalle |
+|------------|--------|---------|
+| **Authentik** | ❌ Eliminado | Containers, imágenes, datos borrados |
+| **Homer** | ❌ Reemplazado | Reemplazado por portal custom |
+| **CT 208** | ✅ Portal custom | FastAPI + LDAP + JWT en puerto 80 |
+| **Login AD** | ✅ Funcionando | Bind contra AD GDC01, verificación de password |
+| **RBAC** | ✅ Funcionando | Filtra tools según grupos AD del usuario |
+| **Dashboard** | ✅ 11 herramientas | Cards con Font Awesome, responsive |
+| **Grafana** | ✅ AD directo | LDAP configurado y verificado |
+| **Proxmox** | ✅ Realm LDAP | `gidas-ldap`, 17 usuarios sincronizados |
+| **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
+| **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
+
+---
+
+## Dashboard — Herramientas por Grupo
+
+| Herramienta | Grupos con acceso |
+|------------|------------------|
+| GitLab | Todos los grupos GIDAS |
+| Redmine | Dirección, Coordinadores, Becarios, Graduados, Pasantes |
+| Grafana | Dirección, Coordinadores |
+| Proxmox VE | Dirección, Coordinadores |
+| NetBox | Dirección, Coordinadores, Becarios |
+| GLPI | Dirección, Coordinadores |
+| MikroTik | Dirección, Coordinadores |
+| Identity Dashboard | Dirección, Coordinadores, IdentityAdmins |
+| Drupal GIDAS | Todos |
+| Correo UTN | Todos |
+| Twingate | Todos |
+
+---
+
+## Acceso
+
+| Recurso | URL / Comando |
+|---------|--------------|
+| **Portal** | `http://portal.gidas.local` (LAN) o `http://192.168.1.43` |
+| **Login** | Usuario y contraseña de AD GIDAS |
+| **Dashboard** | Cards filtradas según grupos AD del usuario |
+| **Admin SSH** | `pct enter 208` (desde pve-desa04) |
+| **Logs** | `journalctl -u portal-gidas -f` |
+
+---
+
+## Pendientes
+
+| # | Tarea | Prioridad | Estado |
+|---|-------|-----------|--------|
+| 1 | ✅ Portal custom implementado y deployado | Alta | ✅ |
+| 2 | ✅ Login AD funcionando con RBAC | Alta | ✅ |
+| 3 | ✅ Documentación completa (diseño + manuales + SDD) | Alta | ✅ |
+| 4 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 5 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
