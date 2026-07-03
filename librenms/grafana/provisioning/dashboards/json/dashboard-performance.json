@@ -1,0 +1,203 @@
+{
+  "title": "GIDAS — Rendimiento por Dispositivo",
+  "description": "Métricas de rendimiento detalladas por dispositivo: CPU, memoria, disco, temperatura, uptime",
+  "tags": ["librenms", "gidas", "performance"],
+  "timezone": "America/Argentina/Buenos_Aires",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "CPU Usage - $device",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "cpu_usage($device)", "legendFormat": "CPU"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          },
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Uso de CPU en el tiempo"
+    },
+    {
+      "id": 2,
+      "title": "Memory Usage - $device",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "memory_usage($device)", "legendFormat": "RAM"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          },
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Uso de memoria RAM en el tiempo"
+    },
+    {
+      "id": 3,
+      "title": "Disk Usage - $device",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "storage_usage($device)", "legendFormat": "{{mount}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          },
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Uso de disco por partición"
+    },
+    {
+      "id": 4,
+      "title": "Temperature - $device",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 24},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "temperature($device)", "legendFormat": "{{sensor}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "min": 0,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 45},
+              {"color": "red", "value": 60}
+            ]
+          },
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Sensores de temperatura del dispositivo"
+    },
+    {
+      "id": 5,
+      "title": "Uptime - $device",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 30},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "uptime($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 86400},
+              {"color": "green", "value": 604800}
+            ]
+          }
+        }
+      },
+      "description": "Tiempo desde último reinicio. Rojo < 1d, Naranja < 7d, Verde > 7d"
+    },
+    {
+      "id": 6,
+      "title": "Estado SNMP - $device",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 30},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "device_status($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "description": "Estado del dispositivo: UP (verde) o DOWN (rojo)"
+    },
+    {
+      "id": 7,
+      "title": "Último Poll - $device",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 30},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "last_polled($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 300},
+              {"color": "red", "value": 600}
+            ]
+          }
+        }
+      },
+      "description": "Segundos desde último polling exitoso"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "type": "query",
+        "datasource": "LibreNMS",
+        "query": "devices()",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false,
+        "description": "Seleccionar dispositivo"
+      }
+    ]
+  }
+}

@@ -51,10 +51,31 @@ services:
     networks:
       - librenms
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: librenms-grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=hlvs.2025
+      - GF_INSTALL_PLUGINS=librenms-datasource
+      - GF_SERVER_ROOT_URL=http://grafana.gidas.local
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - librenms
+    networks:
+      - librenms
+
 volumes:
   librenms_data:
   mysql_data:
   redis_data:
+  grafana_data:
 
 networks:
   librenms:
