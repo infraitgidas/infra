@@ -28,10 +28,10 @@ tools:
       - "G-Externos"
 
   - name: "Redmine"
-    url: "https://redmine.gidas.local"
+    url: "/redmine/"
     icon: "fas fa-tasks"
-    description: "Gestión de proyectos"
-    proxy: true
+    description: "Gestión de proyectos (acceso via tunnel)"
+    proxy: false
     groups:
       - "G-Direccion"
       - "G-Coordinadores"

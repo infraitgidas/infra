@@ -76,8 +76,8 @@
 | Portal (login AD) | `/` | ✅ Login + dashboard |
 | Grafana | `/grafana/` | ✅ Full, `root_url` config |
 | GitLab | `/gitlab/` | ✅ Login + assets, `external_url` config |
-| Redmine | `/redmine/` | ✅ Login + assets, `sub_filter` nginx |
-| LibreNMS | `/librenms/` | ⚠️ Sigue mostrando portal (proxy a portal) |
+| Redmine | `/redmine/` | ✅ Login + 33 assets OK, `proxy_redirect` post-login |
+| LibreNMS | `/librenms/` | ⚠️ Sigue con `proxy: true` (FastAPI) |
 
 ### Herramientas NO expuestas via tunnel
 - **Vaultwarden**: Gestor de contraseñas, solo via Twingate
