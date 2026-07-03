@@ -69,3 +69,36 @@ Para acceder a los servicios GIDAS desde fuera de la UTN:
 ---
 
 *Última actualización: 2026-07-03*
+
+---
+
+## Credenciales de Administración
+
+### Drupal (gidas.frlp.utn.edu.ar)
+
+| Campo | Valor |
+|-------|-------|
+| **URL** | `https://gidas.frlp.utn.edu.ar/user/login` |
+| **Usuario** | `administrador` |
+| **Password** | `Urbano2022*$` |
+| **Rol** | Administrador |
+| **Versión Drupal** | 7/8/9 (PHP 7.4.33 — obsoleto) |
+
+> ⚠️ **Importante**: El sitio corre PHP 7.4.33, que está End-of-Life desde noviembre de 2022. Drupal requiere PHP 8.1+. Sería recomendable planificar una migración o actualización.
+
+### Procedimiento para agregar enlaces al menú
+
+1. Ir a `https://gidas.frlp.utn.edu.ar/user/login`
+2. Iniciar sesión con las credenciales de arriba
+3. Estructura → Menús → Main navigation (o `/admin/structure/menu/manage/main`)
+4. Click "Añadir enlace"
+5. Completar:
+   - Título: `Portal GIDAS`
+   - Enlace: `https://portal.gidas.local`
+   - Descripción: `Acceso a herramientas del grupo`
+   - Activado: ☑
+   - Mostrar expandido: ☐
+   - Peso: `10`
+6. Guardar
+
+Repetir para cada enlace adicional que se quiera agregar (GitLab, Redmine, LibreNMS, etc.)

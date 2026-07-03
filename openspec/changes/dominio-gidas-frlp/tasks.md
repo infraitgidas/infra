@@ -2,26 +2,24 @@
 
 ## Fase 0: Exploración y Contacto
 
-- [ ] **0.1** Identificar administrador del sitio Drupal en UTN-FRLP
-  - Contactar al Departamento de Sistemas FRLP
-  - Preguntar quién maneja `gidas.frlp.utn.edu.ar`
-- [ ] **0.2** Determinar nivel de acceso del equipo GIDAS al Drupal
-  - ¿Podemos editar el menú? ¿Solo contenido? ¿Nada?
-  - ¿Hay usuario GIDAS con rol de editor/administrador?
-- [ ] **0.3** Evaluar posibilidad de subdominio `gidas.frlp.utn.edu.ar`
-  - ¿Se puede delegar? ¿Quién autoriza?
-  - ¿Hay un DNS manejable por GIDAS?
+- [x] **0.1** Identificar administrador del sitio Drupal en UTN-FRLP
+  → El administrador anterior ya no está. Se obtuvo acceso directo como administrador.
+- [x] **0.2** Determinar nivel de acceso del equipo GIDAS al Drupal
+  → Acceso completo como administrador (`administrador` / `Urbano2022*$`)
+- [x] **0.3** Evaluar posibilidad de subdominio `gidas.frlp.utn.edu.ar`
+  → El sitio corre en servidores de UTN-FRLP con PHP 7.4.33 (obsoleto)
 - [ ] **0.4** Evaluar dominio propio `gidas.com.ar`
   - Costo, disponibilidad, gestión
 
 ## Fase 1: Enlaces en Drupal
 
-- [ ] **1.1** Solicitar alta de enlaces en menú principal de Drupal
-  - Enlace "Portal GIDAS" → `https://portal.gidas.local`
-  - Enlace "GitLab" → `https://gitlab.gidas.local`
-  - Enlace "Redmine" → `https://redmine.gidas.local`
-  - Enlace "LibreNMS" → `https://nms.gidas.local`
-  - Enlace "Grafana" → `http://192.168.1.205:3000`
+- [ ] **1.1** Agregar enlaces al menú principal de Drupal
+  - ⚠️ No se pudo agregar via API (bug de Drupal con formularios anidados)
+  - ✅ Credenciales documentadas en `docs/gidas-frlp-dominio.md`
+  - **Pendiente**: Agregar manualmente desde la UI del navegador:
+    1. Ir a `https://gidas.frlp.utn.edu.ar/user/login` (admin / Urbano2022*$)
+    2. Estructura → Menús → Main navigation → Añadir enlace
+    3. Agregar: Portal GIDAS (`https://portal.gidas.local`), LibreNMS, etc.
 - [ ] **1.2** Agregar página/artículo en Drupal con descripción de cada servicio
   - Qué ofrece cada herramienta
   - Cómo obtener acceso (contactar a admin GIDAS)
