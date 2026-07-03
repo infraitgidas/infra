@@ -15,10 +15,10 @@ ldap:
 
 tools:
   - name: "GitLab"
-    url: "https://gitlab.gidas.local"
+    url: "/gitlab/"
     icon: "fab fa-gitlab"
     description: "Repositorios y CI/CD"
-    proxy: true
+    proxy: false
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -40,10 +40,10 @@ tools:
       - "G-Pasantes"
 
   - name: "Grafana"
-    url: "http://192.168.1.205:3000"
+    url: "/grafana/"
     icon: "fas fa-chart-line"
     description: "Monitoreo y métricas"
-    proxy: true
+    proxy: false
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
