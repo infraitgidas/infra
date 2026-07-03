@@ -28,11 +28,26 @@
 - [x] **2.2** SDD completo: spec, design, tasks, informe
 - [x] **2.3** Plan de rollback documentado
 
-## Fase 3: Análisis de Opciones Futuras — Pendiente
+## Fase 3: Fixes Post-Implementación — ✅ COMPLETADA
 
-- [ ] **3.1** Evaluar VPS cloud como reverse proxy permanente
-- [ ] **3.2** Contactar UTN Sistemas para subdominio o proxy nativo
-- [ ] **3.3** Evaluar Twingate como solución definitiva
+- [x] **3.1** Fix #1: Botón Drupal responsive (CSS mobile-first)
+- [x] **3.2** Fix #2: Redmine assets rotos + redirect post-login
+  - sub_filter + proxy_redirect en nginx
+  - 33/33 assets con prefijo /redmine/ ✅
+- [x] **3.3** Fix #3: GitLab "Not found /"
+  - external_url + proxy_redirect
+- [x] **3.4** Fix #4: `{url}` literal en Drupal (pagina no encontrada)
+- [x] **3.5** Fix #5: Agregar "Portal GIDAS" al navbar de Drupal
+  - Enlace visible en el menú principal del sitio
+  - Sin necesidad de escribir la URL completa
+
+## Fase 4: Análisis de Opciones Futuras — Pendiente
+
+- [ ] **4.1** Evaluar VPS cloud como reverse proxy permanente
+- [ ] **4.2** Contactar UTN Sistemas para subdominio o proxy nativo
+- [ ] **4.3** Evaluar Twingate como solución definitiva
+- [ ] **4.4** Migrar a Cloudflare Named Tunnel (URL estable)
+- [ ] **4.5** Comprar dominio propio (gidas.com.ar)
 
 ## Rollback Plan
 

@@ -109,7 +109,12 @@ No relacionado con tunnel. Ver ADR-003.
 | `portal-gidas/config.yaml` | Tools URLs (nginx subpath) |
 | `docs/gidas-frlp-dominio.md` | Documentación del dominio |
 | `site-tunnel-portal/fixes.md` | Registro de fixes |
+| `site-tunnel-portal/feats.md` | Próximas features planificadas |
 | `docs/runbooks/gidas-tunnel-maintenance.md` | Mantenimiento del tunnel |
+| `docs/runbooks/howto-add-service-tunnel.md` | Guía para agregar servicios al tunnel |
+| `docs/runbooks/tunnel-migration-roadmap.md` | Roadmap de migración a soluciones estables |
+| `docs/runbooks/cloudflare-tunnel-analysis.md` | Análisis de Cloudflare Tunnel y limitaciones |
+| `docs/portal-acceso/propuesta-direccion.md` | Propuesta ejecutiva para dirección |
 
 ---
 
@@ -125,6 +130,9 @@ No relacionado con tunnel. Ver ADR-003.
 | Grafana via tunnel | ✅ 200 (58899b) assets OK |
 | GitLab via tunnel | ✅ 200 (14365b) assets OK |
 | Redmine via tunnel | ✅ 200 (9930b) 33/33 assets OK |
+| Portal en navbar Drupal | ✅ Visible en menú principal (Inicio → Portal GIDAS) |
+| Redmine redirect post-login | ✅ `proxy_redirect` → `/redmine/my/page` |
+| GitLab redirect loop | ✅ `external_url` + `proxy_redirect` corregido |
 
 ---
 
@@ -132,8 +140,14 @@ No relacionado con tunnel. Ver ADR-003.
 
 | Tarea | Prioridad | Estado |
 |-------|-----------|--------|
+| ✅ Fix #1: Botón Drupal responsive | 🟡 Media | ✅ |
+| ✅ Fix #2: Redmine subpath + redirect | 🔴 Alta | ✅ |
+| ✅ Fix #3: GitLab "Not found /" | 🔴 Alta | ✅ |
+| ✅ Fix #4: `{url}` literal en Drupal | 🔴 Alta | ✅ |
+| ✅ Fix #5: Portal GIDAS en navbar | 🟡 Media | ✅ |
 | Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |
-| Configurar LibreNMS para subpath /librenms/ | 🟢 Baja | ⏳ |
-| Configurar Redmine para subpath /redmine/ | 🟡 Media | ✅ |
 | Agregar HTTPS a nginx CT 208 (Let's Encrypt) | 🟢 Baja | ⏳ |
+| Monitoreo del tunnel (LibreNMS/Grafana) | 🟡 Media | ⏳ |
+| Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ⏳ |
+| Página de solicitud de acceso para becarios | 🟢 Baja | ⏳ |
