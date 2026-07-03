@@ -133,6 +133,7 @@ No relacionado con tunnel. Ver ADR-003.
 | Portal en navbar Drupal | ✅ Visible en menú principal (Inicio → Portal GIDAS) |
 | Redmine redirect post-login | ✅ `proxy_redirect` → `/redmine/my/page` |
 | GitLab redirect loop | ✅ `external_url` + `proxy_redirect` corregido |
+| Solicitud de acceso nuevos usuarios | ✅ Sección en Drupal con mailto e instrucciones |
 
 ---
 
@@ -145,9 +146,10 @@ No relacionado con tunnel. Ver ADR-003.
 | ✅ Fix #3: GitLab "Not found /" | 🔴 Alta | ✅ |
 | ✅ Fix #4: `{url}` literal en Drupal | 🔴 Alta | ✅ |
 | ✅ Fix #5: Portal GIDAS en navbar | 🟡 Media | ✅ |
+| ✅ Fix #6: Página solicitud acceso becarios | 🟢 Baja | ✅ |
 | Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |
 | Agregar HTTPS a nginx CT 208 (Let's Encrypt) | 🟢 Baja | ⏳ |
 | Monitoreo del tunnel (LibreNMS/Grafana) | 🟡 Media | ⏳ |
 | Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ⏳ |
-| Página de solicitud de acceso para becarios | 🟢 Baja | ⏳ |
+
