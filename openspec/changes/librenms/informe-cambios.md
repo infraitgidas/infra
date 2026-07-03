@@ -2,8 +2,8 @@
 
 **Feature branch**: `feat/monitoreo-red`
 **Versión**: 26.6.1 (librenms/librenms:fixed)
-**Fecha**: 2026-07-03 (v3)
-**Estado**: ✅ OPERATIVO — 3 bugs críticos corregidos + 18 alertas + integración Grafana
+**Fecha**: 2026-07-03 (v4 — FINAL)
+**Estado**: ✅ COMPLETO — 3 bugs críticos corregidos + 18 alertas + Grafana en CT 205
 
 ---
 
@@ -304,39 +304,55 @@ Todas las reglas están mapeadas al transporte **Telegram GIDAS** (chat @sistEma
 
 ## 10. Integración con Grafana
 
-### Opciones de Integración
+### Arquitectura Final
 
-| Método | Plugin | Descripción | Estado |
-|--------|--------|-------------|--------|
-| **Datasource nativo** | `librenms-datasource` | Plugin oficial de Grafana para LibreNMS | ✅ Script listo |
-| **Prometheus endpoint** | `/api/v0/metrics/prometheus` | Endpoint Prometheus-compatible en LibreNMS | ⏳ Pendiente verificar |
-| **MySQL directo** | Grafana MySQL datasource | Consultas directas a la DB de LibreNMS (solo lectura) | ⏳ Alternativa |
-
-### Método recomendado: Plugin LibreNMS Datasource
-
-1. **Instalar plugin en Grafana** (CT donde corra Grafana):
-```bash
-grafana-cli plugins install librenms-datasource
-systemctl restart grafana-server
+```
+┌─ CT 205 (pve-ad / sg-monitoring) ──┐     ┌─ CT 210 (pve-desa04 / librenms) ──┐
+│  192.168.1.205                       │     │  192.168.1.45                       │
+│                                      │     │                                      │
+│  ┌─ Grafana 13.0.1 ───────────────┐  │     │  ┌─ LibreNMS ────────────────────┐  │
+│  │  Datasources:                  │  │     │  │  API: 8080→8000                │  │
+│  │  ├── Prometheus :9090          │  │     │  │  Token: ec82d9e...             │  │
+│  │  └── LibreNMS → 192.168.1.45  │  │     │  └────────────────────────────────┘  │
+│  │                                │  │     │                                      │
+│  │  Dashboards:                   │  │     │  ┌─ MariaDB ──────────────────────┐  │
+│  │  ├── Overview                  │  │     │  │  12 dispositivos              │  │
+│  │  ├── Performance               │  │     │  │  18 alert rules               │  │
+│  │  └── Network                   │  │     │  └────────────────────────────────┘  │
+│  └────────────────────────────────┘  │     └──────────────────────────────────────┘
+└──────────────────────────────────────┘
 ```
 
-2. **Crear API token en LibreNMS** (ejecutar desde PVE host):
-```bash
-pct exec 210 -- docker exec librenms-db mysql -u librenms -p \
-  librenms -e "INSERT INTO api_tokens (user_id, token_hash, description) \
-  VALUES (1, '\''$(openssl rand -hex 32)'\'', '\''Grafana integration'\'');"
+### Conexión
+
+| Componente | Origen | Destino | Puerto | Estado |
+|-----------|--------|---------|--------|--------|
+| Grafana Web | Cualquier navegador | CT 205 (192.168.1.205) | 3000 | ✅ |
+| Datasource LibreNMS | CT 205 → CT 210 | 192.168.1.45 | 8080 | ✅ |
+| API Token auth | Grafana → LibreNMS | ec82d9e6a7903137... | — | ✅ |
+
+### Datasource: `librenms-datasource` (built-in)
+
+Grafana 13 incluye el tipo `librenms-datasource` de forma nativa — **no requiere instalación de plugin externo**.
+
+**Configuración actual**:
+```yaml
+URL:    http://192.168.1.45:8080
+Access: proxy
+Token:  ec82d9e6a79031378428652b4ab4cdaabba9fde50dc0d17675b21bce650903d6
 ```
 
-3. **Configurar datasource en Grafana**:
-   - URL: `https://nms.gidas.local`
-   - Access: `Proxy`
-   - Token: el generado en el paso 2
+### Dashboards importados (3)
 
-4. **Script automatizado**: `librenms/scripts/setup-grafana.sh` — hace los pasos 2-3 automáticamente.
+Los 3 dashboards se crearon como código JSON en `librenms/grafana/` y están **importados y operativos** en Grafana:
 
-### Queries disponibles
+| Dashboard | UID | Slug | URL relativa |
+|-----------|-----|------|-------------|
+| **GIDAS — LibreNMS Overview** | `73c254d6-09cd-4977-bbe8-ab70ceaec371` | `gidas-librenms-overview` | `/d/73c254d6...` |
+| **GIDAS — Rendimiento por Dispositivo** | `710ca974-f6bb-42a6-8421-4d177f41597f` | `gidas-rendimiento-por-dispositivo` | `/d/710ca974...` |
+| **GIDAS — Red y Tráfico** | `09b262d6-eac5-4a9f-b05e-41c7210a9e38` | `gidas-red-y-trafico` | `/d/09b262d6...` |
 
-Una vez conectado el datasource, se pueden crear paneles con queries como:
+### Queries disponibles (datasource LibreNMS)
 
 | Query | Descripción |
 |-------|-------------|
@@ -349,29 +365,9 @@ Una vez conectado el datasource, se pueden crear paneles con queries como:
 | `storage_usage(hostname)` | Uso de disco |
 | `uptime(hostname)` | Uptime del dispositivo |
 
-### Dashboards disponibles (en el repo)
+### Nota: Grafana Docker eliminado de CT 210
 
-Se crearon 3 dashboards como código JSON en `librenms/grafana/`:
-
-| Dashboard | Archivo | Contenido |
-|-----------|---------|-----------|
-| **Visión General** | `dashboard-overview.json` | Estado dispositivos, alertas activas, top CPU, uptime, alertas recientes |
-| **Rendimiento** | `dashboard-performance.json` | CPU, RAM, disco, temperatura, uptime por dispositivo (con selector) |
-| **Red y Tráfico** | `dashboard-network.json` | Tráfico bps, errores, utilización ancho de banda, top puertos (con selectores) |
-
-### Importar dashboards a Grafana
-
-**Automático** (cuando Grafana esté accesible):
-```bash
-bash librenms/scripts/deploy-grafana-dashboards.sh [grafana_url] [auth]
-# Ej: bash librenms/scripts/deploy-grafana-dashboards.sh http://192.168.1.205:3000 admin:admin
-```
-
-**Manual**:
-1. Grafana → Create → Import
-2. Subir archivo JSON o pegar el contenido
-3. Seleccionar datasource "LibreNMS"
-4. Importar
+Inicialmente se desplegó Grafana como container Docker en CT 210 (junto a LibreNMS). Al descubrir que CT 205 (sg-monitoring) ya tenía Grafana 13.0.1 con 2GB RAM, se migró la integración allí y se eliminó el container de CT 210 para liberar ~300MB de RAM en el CT de monitoreo.
 
 ---
 
@@ -401,12 +397,10 @@ bash librenms/scripts/deploy-grafana-dashboards.sh [grafana_url] [auth]
 | Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para admin completo | 🔴 Alta | ⏳ |
 | Verificar dispositivos 7-12 (status=0, sin reverse DNS) | 🟡 Media | ⏳ |
 | Verificar alertas activas (High Temperature en pve-desa01) | 🟡 Media | ⏳ |
-| Ejecutar `scripts/setup-grafana.sh` para completar integración | 🟡 Media | ⏳ |
-| Instalar plugin librenms-datasource en Grafana | 🟡 Media | ⏳ |
-| Crear dashboard Grafana con métricas de LibreNMS | 🟡 Media | ⏳ |
+| ✅ Integración Grafana completada (CT 205, dashboards importados) | 🟡 Media | ✅ |
+| ✅ LibreNMS agregado al portal GIDAS (card visible para 4 grupos) | 🟡 Media | ✅ |
 | Ajustar thresholds de reglas según necesidad | 🟢 Baja | ⏳ |
 | Activar SNMP trap receiver (puertos 162/514 ya expuestos) | 🟡 Media | ⏳ |
 | Schedulear backup automático (cron CT o PVE host) | 🟡 Media | ⏳ |
 | Migrar passwords a secrets Docker o SOPS | 🟢 Baja | ⏳ |
-| Agregar card al portal GIDAS | 🟢 Baja | ⏳ |
 | Merge rama `gitlab-gidas` → `main` | 🟢 Baja | ⏳ |

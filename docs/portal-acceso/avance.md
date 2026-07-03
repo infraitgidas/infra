@@ -105,7 +105,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
 | **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80. Solucionado: system nginx detenido, GitLab nginx reiniciado. |
 | **Vaultwarden** | ✅ Desplegado | CT 209, Docker, LDAP, SSL. Card en portal. |
-| **LibreNMS** | ✅ Desplegado | CT 210, Docker Compose, LDAP, SSL. Alertas email configuradas. |
+| **LibreNMS** | ✅ Desplegado + integrado | CT 210, Docker Compose, 12 dispositivos, 18 alertas, Telegram + Grafana en CT 205 |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---
@@ -123,6 +123,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | MikroTik | Dirección, Coordinadores |
 | Identity Dashboard | Dirección, Coordinadores, IdentityAdmins |
 | Vaultwarden | Dirección, Coordinadores, Becarios, Graduados, Pasantes, Externos, IdentityAdmins |
+| **LibreNMS** | **Dirección, Coordinadores, Becarios, Graduados** |
 | Drupal GIDAS | Todos |
 | Correo UTN | Todos |
 | Twingate | Todos |
@@ -142,9 +143,11 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Vaultwarden** | `https://vault.gidas.local` — login con email + master password |
 | **Admin panel vault** | `https://vault.gidas.local/admin` — token en secrets |
 | **LibreNMS** | `https://nms.gidas.local` — login con usuario AD |
+| **Grafana** | `http://192.168.1.205:3000` — admin / hlvs.2025 |
 | **Logs portal** | `journalctl -u portal-gidas -f` |
 | **Logs vault** | `docker logs vaultwarden -f` |
 | **Logs librenms** | `docker compose -f /opt/librenms/docker-compose.yml logs -f` |
+| **Logs grafana** | `journalctl -u grafana-server -f` (CT 205) |
 | **Telegram** | @GiDAS_alertbot — bot operativo para alertas de red |
 
 ---
@@ -160,5 +163,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 5 | ✅ SMTP configurado en Vaultwarden (Office 365) | Media | ✅ |
 | 6 | ✅ LibreNMS desplegado y funcional | Alta | ✅ |
 | 7 | ✅ Telegram Bot configurado para alertas de LibreNMS | Media | ✅ |
-| 8 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
-| 9 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
+| 8 | ✅ LibreNMS integrado al portal GIDAS | Media | ✅ |
+| 9 | ✅ Grafana en CT 205 con dashboards LibreNMS | Media | ✅ |
+| 10 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 11 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |

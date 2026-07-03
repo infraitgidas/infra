@@ -142,6 +142,7 @@
 - **Archivos SDD**: `openspec/changes/portal-custom/`
 - **Archivos**: `docs/portal-acceso/`
 - **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/` (histórico Authentik)
+- **Tools totales**: 13 (incluye LibreNMS incorporado en esta sesión)
 
 ---
 

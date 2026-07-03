@@ -135,3 +135,13 @@ tools:
       - "G-Pasantes"
       - "G-Externos"
       - "G-IdentityAdmins"
+
+  - name: "LibreNMS"
+    url: "https://nms.gidas.local"
+    icon: "fas fa-eye"
+    description: "Monitoreo de red"
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
