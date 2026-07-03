@@ -22,3 +22,6 @@ __pycache__/
 *~
 
 secrets/vaultwarden.md
+CREDENCIALES.md
+credenciales/
+*.sen
