@@ -270,6 +270,9 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 | `librenms/grafana/dashboard-overview.json` | Dashboard visión general (nuevo) |
 | `librenms/grafana/dashboard-performance.json` | Dashboard rendimiento x dispositivo (nuevo) |
 | `librenms/grafana/dashboard-network.json` | Dashboard red y tráfico (nuevo) |
+| `docs/librenms/avance.md` | Informe de avance completo (nuevo) |
+| `docs/librenms/manuales/guia-admin.md` | Guía de administración (nuevo) |
+| `docs/librenms/manuales/guia-usuario.md` | Guía de usuario (nuevo) |
 
 ---
 
