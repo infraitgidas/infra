@@ -259,7 +259,25 @@ pct exec 210 -- docker exec librenms-db mysql -u librenms -p \
 | `storage_usage(hostname)` | Disco |
 | `uptime(hostname)` | Uptime |
 
+### Dashboards disponibles (en el repo `librenms/grafana/`)
+
+| Dashboard | Archivo | Paneles |
+|-----------|---------|---------|
+| **Overview** | `dashboard-overview.json` | Estado dispositivos, alertas activas, top CPU, uptime, alertas recientes |
+| **Performance** | `dashboard-performance.json` | CPU, RAM, disco, temperatura, uptime, estado SNMP por dispositivo |
+| **Network** | `dashboard-network.json` | Tráfico bps, errores, utilización ancho de banda, top puertos |
+
+Importar a Grafana:
+```bash
+# Automático
+bash /opt/librenms/scripts/deploy-grafana-dashboards.sh
+
+# Manual: Grafana → Create → Import → upload JSON
+```
+
 ---
+
+
 
 ## 8. Troubleshooting
 

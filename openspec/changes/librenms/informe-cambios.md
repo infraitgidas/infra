@@ -266,6 +266,10 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 | `librenms/scripts/backup.sh` | Backup DB + config (nuevo) |
 | `librenms/scripts/setup-telegram.sh` | Guía para configurar Telegram Bot |
 | `librenms/scripts/setup-grafana.sh` | Script de integración Grafana (nuevo) |
+| `librenms/scripts/deploy-grafana-dashboards.sh` | Importa dashboards JSON a Grafana (nuevo) |
+| `librenms/grafana/dashboard-overview.json` | Dashboard visión general (nuevo) |
+| `librenms/grafana/dashboard-performance.json` | Dashboard rendimiento x dispositivo (nuevo) |
+| `librenms/grafana/dashboard-network.json` | Dashboard red y tráfico (nuevo) |
 
 ---
 
@@ -345,16 +349,29 @@ Una vez conectado el datasource, se pueden crear paneles con queries como:
 | `storage_usage(hostname)` | Uso de disco |
 | `uptime(hostname)` | Uptime del dispositivo |
 
-### Dashboard recomendado
+### Dashboards disponibles (en el repo)
 
-Se puede importar el dashboard oficial de LibreNMS para Grafana desde:
-`https://grafana.com/grafana/dashboards/` (buscar "LibreNMS")
+Se crearon 3 dashboards como código JSON en `librenms/grafana/`:
 
-O construir uno custom con los queries de arriba agrupando:
-- Visión general: dispositivos UP/DOWN, alertas activas
-- Rendimiento: CPU, memoria, disco por dispositivo
-- Red: tráfico por puerto, errores
-- Uptime: dispositivos con menos de 24h de uptime
+| Dashboard | Archivo | Contenido |
+|-----------|---------|-----------|
+| **Visión General** | `dashboard-overview.json` | Estado dispositivos, alertas activas, top CPU, uptime, alertas recientes |
+| **Rendimiento** | `dashboard-performance.json` | CPU, RAM, disco, temperatura, uptime por dispositivo (con selector) |
+| **Red y Tráfico** | `dashboard-network.json` | Tráfico bps, errores, utilización ancho de banda, top puertos (con selectores) |
+
+### Importar dashboards a Grafana
+
+**Automático** (cuando Grafana esté accesible):
+```bash
+bash librenms/scripts/deploy-grafana-dashboards.sh [grafana_url] [auth]
+# Ej: bash librenms/scripts/deploy-grafana-dashboards.sh http://192.168.1.205:3000 admin:admin
+```
+
+**Manual**:
+1. Grafana → Create → Import
+2. Subir archivo JSON o pegar el contenido
+3. Seleccionar datasource "LibreNMS"
+4. Importar
 
 ---
 
