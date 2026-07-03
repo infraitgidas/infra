@@ -170,6 +170,11 @@
 - **URL**: `https://nms.gidas.local`
 - **Infra**: CT 210 (pve-desa04), Docker compose, nginx + php-fpm internos
 
+### Alert Rules Configuradas (18 reglas)
+- 🔴 Device Down, Device Not Polled, High CPU/Memory/Disk (critical), SNMP Disabled, Port Down
+- 🟡 Device Rebooted, High CPU/Memory/Disk (warning), High Latency, Slow Polling, Bandwidth Saturation, High Interface Errors, Unclassified Device, High Temperature
+- Todas mapeadas a Telegram Bot GIDAS Alertas (@GiDAS_alertbot)
+
 ### Tareas Completadas
 - ✅ Deploy Docker con volúmenes nombrados (librenms_data, mysql_data, redis_data)
 - ✅ APP_KEY y NODE_ID generados

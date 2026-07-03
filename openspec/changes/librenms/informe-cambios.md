@@ -2,8 +2,8 @@
 
 **Feature branch**: `feat/monitoreo-red`
 **Versión**: 26.6.1 (librenms/librenms:fixed)
-**Fecha**: 2026-07-03
-**Estado**: ✅ OPERATIVO — 3 bugs críticos corregidos
+**Fecha**: 2026-07-03 (v2)
+**Estado**: ✅ OPERATIVO — 3 bugs críticos corregidos + 18 alert rules creadas
 
 ---
 
@@ -268,7 +268,36 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 
 ---
 
-## 8. Verificación Final
+## 8. Reglas de Alerta Creadas
+
+Todas las reglas se crearon usando el builder JSON nativo de LibreNMS (`QueryBuilderParser::fromJson()` → `toSql()`), que genera SQL con placeholders correctos para evitar errores HY093.
+
+| # | Regla | Severidad | Condición | Delay | Intervalo |
+|---|-------|-----------|-----------|-------|-----------|
+| 1 | **Device Down** | 🔴 critical | `status=0` + `ignore=0` + `disabled=0` | 120s | 300s |
+| 2 | **Device Rebooted** | 🟡 warning | `uptime < 600s` (10 min) | 60s | 300s |
+| 3 | **High CPU (Critical)** | 🔴 critical | `processor_usage > 95%` | 300s | 300s |
+| 4 | **High CPU (Warning)** | 🟡 warning | `processor_usage > 85%` | 300s | 600s |
+| 5 | **High Memory (Critical)** | 🔴 critical | `mempool_perc > 95%` | 300s | 300s |
+| 6 | **High Memory (Warning)** | 🟡 warning | `mempool_perc > 85%` | 300s | 600s |
+| 7 | **High Disk (Critical)** | 🔴 critical | `storage_perc > 95%` | 300s | 300s |
+| 8 | **High Disk (Warning)** | 🟡 warning | `storage_perc > 85%` | 300s | 600s |
+| 9 | **High Latency (Warning)** | 🟡 warning | `last_ping_timetaken > 500ms` | 600s | 600s |
+| 10 | **High Latency (Critical)** | 🔴 critical | `last_ping_timetaken > 2000ms` | 300s | 300s |
+| 11 | **Slow SNMP Polling** | 🟡 warning | `last_polled_timetaken > 30s` | 600s | 600s |
+| 12 | **Port Down** | 🔴 critical | `ifOperStatus=down` + `ignore=0` | 300s | 300s |
+| 13 | **High Interface Errors** | 🟡 warning | `ifInErrors_rate > 100` | 600s | 600s |
+| 14 | **Bandwidth Saturation** | 🟡 warning | `ifInOctets_rate > 900Mbps` en ports de 1Gbps+ | 600s | 600s |
+| 15 | **SNMP Disabled** | 🔴 critical | `snmp_disable=1` + `disabled=0` | 300s | 600s |
+| 16 | **Unclassified Device** | 🟡 warning | `type=""` (dispositivo sin clasificar) | 0s | 3600s |
+| 17 | **High Temperature** | 🟡 warning | `sensor_class="temperature"` + `current > 45°C` + `alert=1` | 600s | 600s |
+| 18 | **Device Not Polled** | 🔴 critical | `last_polled` contiene "1970" (nunca polleado) | 600s | 600s |
+
+Todas las reglas están mapeadas al transporte **Telegram GIDAS** (chat @sistEma_lp).
+
+---
+
+## 9. Verificación Final
 
 | Criterio | Resultado |
 |----------|-----------|
@@ -281,7 +310,8 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 | Poller manual (`device:poll all`) | ✅ 12/12 dispositivos en 23.137s |
 | Transports | ✅ SMTP Office 365 — enviado OK |
 | Transports | ✅ Telegram Bot \"GIDAS Alertas\" (@GiDAS_alertbot) — enviado OK |
-| Rules de alerta | ⚠️ Creadas desde la UI (el builder JSON debe poblarse) |
+| Rules de alerta | ✅ 18 reglas creadas via builder JSON nativo |
+| Alertas activas | 🔴 2 activas (High Temperature en pve-desa01) |
 | RRD actualizándose | ✅ 544 updates en último poll |
 
 ---
@@ -292,7 +322,8 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 |-------|-----------|--------|
 | Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para admin completo | 🔴 Alta | ⏳ |
 | Verificar dispositivos 7-12 (status=0, sin reverse DNS) | 🟡 Media | ⏳ |
-| Configurar alert rules desde la UI (builder JSON requerido) | 🟡 Media | ⏳ |
+| Verificar alertas activas (High Temperature en pve-desa01) | 🟡 Media | ⏳ |
+| Ajustar thresholds de reglas según necesidad | 🟢 Baja | ⏳ |
 | Activar SNMP trap receiver (puertos 162/514 ya expuestos) | 🟡 Media | ⏳ |
 | Schedulear backup automático (cron CT o PVE host) | 🟡 Media | ⏳ |
 | Migrar passwords a secrets Docker o SOPS | 🟢 Baja | ⏳ |
