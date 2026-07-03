@@ -208,7 +208,60 @@ docker compose restart
 
 ---
 
-## 7. Troubleshooting
+## 7. Integración con Grafana
+
+### Requisitos
+- Grafana accesible desde la red (ej: `http://192.168.1.205:3000`)
+- Conexión HTTP desde Grafana a `https://nms.gidas.local`
+
+### Método 1: Script automatizado
+```bash
+# Desde PVE host o CT con acceso a Grafana
+bash /opt/librenms/scripts/setup-grafana.sh [grafana_url] [user] [pass]
+
+# Ejemplo:
+bash /opt/librenms/scripts/setup-grafana.sh http://192.168.1.205:3000 admin admin
+```
+
+### Método 2: Manual
+
+**1. Instalar plugin en Grafana:**
+```bash
+grafana-cli plugins install librenms-datasource
+systemctl restart grafana-server
+```
+
+**2. Crear API token en LibreNMS:**
+```bash
+pct exec 210 -- docker exec librenms-db mysql -u librenms -p \
+  librenms -e "INSERT INTO api_tokens (user_id, token_hash, description) \
+  VALUES (1, '$(openssl rand -hex 32)', 'Grafana integration');"
+```
+
+**3. Configurar datasource en Grafana:**
+- Configuration → Data Sources → Add data source
+- Buscar "LibreNMS" y seleccionar
+- URL: `https://nms.gidas.local`
+- Access: `Proxy`
+- Token: el generado en el paso 2
+- Save & Test
+
+### Queries disponibles en Grafana
+
+| Query | Descripción |
+|-------|-------------|
+| `devices()` | Lista todos los dispositivos |
+| `device(hostname)` | Métricas de un dispositivo |
+| `ports(hostname)` | Puertos de un dispositivo |
+| `port_traffic(hostname, ifName)` | Tráfico (bps) |
+| `cpu_usage(hostname)` | CPU |
+| `memory_usage(hostname)` | RAM |
+| `storage_usage(hostname)` | Disco |
+| `uptime(hostname)` | Uptime |
+
+---
+
+## 8. Troubleshooting
 
 ### Síntoma: "No roles!" o "No access!"
 
@@ -274,7 +327,7 @@ docker exec librenms nginx -t
 
 ---
 
-## 8. Referencia Rápida
+## 9. Referencia Rápida
 
 ```bash
 # === DOCKER ===
@@ -301,6 +354,18 @@ docker exec librenms su -s /bin/bash librenms -c \
 docker exec librenms su -s /bin/bash librenms -c \
   'php artisan permission:assign-role admin <id>'  # Asignar rol
 
+# === API ===
+docker exec librenms-db mysql -u librenms -p librenms -e \
+  "SELECT token_hash FROM api_tokens WHERE description='Grafana integration';"  # Ver token Grafana
+docker exec librenms-db mysql -u librenms -p librenms -e \
+  "INSERT INTO api_tokens (user_id, token_hash, description) VALUES (1, 'TOKEN', 'name');"  # Crear token
+
+# === GRAFANA INTEGRACION ===
+# Plugin LibreNMS datasource (en servidor Grafana)
+grafana-cli plugins install librenms-datasource
+# Script de integración
+bash /opt/librenms/scripts/setup-grafana.sh [grafana_url]
+
 # === MANTENIMIENTO ===
 docker exec librenms su -s /bin/bash librenms -c \
   'php artisan schedule:list'           # Ver tareas programadas
@@ -310,7 +375,7 @@ docker exec librenms su -s /bin/bash librenms -c \
 
 ---
 
-## 9. Credenciales
+## 10. Credenciales
 
 > Las credenciales están documentadas en los secrets del proyecto.
 

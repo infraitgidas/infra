@@ -175,6 +175,11 @@
 - 🟡 Device Rebooted, High CPU/Memory/Disk (warning), High Latency, Slow Polling, Bandwidth Saturation, High Interface Errors, Unclassified Device, High Temperature
 - Todas mapeadas a Telegram Bot GIDAS Alertas (@GiDAS_alertbot)
 
+### Integración Grafana (Pendiente)
+- Script `librenms/scripts/setup-grafana.sh` listo para crear API token y datasource
+- Plugin `librenms-datasource` para Grafana (instalar vía grafana-cli)
+- Queries disponibles: devices, ports, cpu, memory, storage, uptime, traffic
+
 ### Tareas Completadas
 - ✅ Deploy Docker con volúmenes nombrados (librenms_data, mysql_data, redis_data)
 - ✅ APP_KEY y NODE_ID generados

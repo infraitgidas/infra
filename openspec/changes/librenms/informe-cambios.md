@@ -2,8 +2,8 @@
 
 **Feature branch**: `feat/monitoreo-red`
 **Versión**: 26.6.1 (librenms/librenms:fixed)
-**Fecha**: 2026-07-03 (v2)
-**Estado**: ✅ OPERATIVO — 3 bugs críticos corregidos + 18 alert rules creadas
+**Fecha**: 2026-07-03 (v3)
+**Estado**: ✅ OPERATIVO — 3 bugs críticos corregidos + 18 alertas + integración Grafana
 
 ---
 
@@ -265,6 +265,7 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 | `librenms/.env.example` | Template de variables de entorno |
 | `librenms/scripts/backup.sh` | Backup DB + config (nuevo) |
 | `librenms/scripts/setup-telegram.sh` | Guía para configurar Telegram Bot |
+| `librenms/scripts/setup-grafana.sh` | Script de integración Grafana (nuevo) |
 
 ---
 
@@ -297,7 +298,67 @@ Todas las reglas están mapeadas al transporte **Telegram GIDAS** (chat @sistEma
 
 ---
 
-## 9. Verificación Final
+## 10. Integración con Grafana
+
+### Opciones de Integración
+
+| Método | Plugin | Descripción | Estado |
+|--------|--------|-------------|--------|
+| **Datasource nativo** | `librenms-datasource` | Plugin oficial de Grafana para LibreNMS | ✅ Script listo |
+| **Prometheus endpoint** | `/api/v0/metrics/prometheus` | Endpoint Prometheus-compatible en LibreNMS | ⏳ Pendiente verificar |
+| **MySQL directo** | Grafana MySQL datasource | Consultas directas a la DB de LibreNMS (solo lectura) | ⏳ Alternativa |
+
+### Método recomendado: Plugin LibreNMS Datasource
+
+1. **Instalar plugin en Grafana** (CT donde corra Grafana):
+```bash
+grafana-cli plugins install librenms-datasource
+systemctl restart grafana-server
+```
+
+2. **Crear API token en LibreNMS** (ejecutar desde PVE host):
+```bash
+pct exec 210 -- docker exec librenms-db mysql -u librenms -p \
+  librenms -e "INSERT INTO api_tokens (user_id, token_hash, description) \
+  VALUES (1, '\''$(openssl rand -hex 32)'\'', '\''Grafana integration'\'');"
+```
+
+3. **Configurar datasource en Grafana**:
+   - URL: `https://nms.gidas.local`
+   - Access: `Proxy`
+   - Token: el generado en el paso 2
+
+4. **Script automatizado**: `librenms/scripts/setup-grafana.sh` — hace los pasos 2-3 automáticamente.
+
+### Queries disponibles
+
+Una vez conectado el datasource, se pueden crear paneles con queries como:
+
+| Query | Descripción |
+|-------|-------------|
+| `devices()` | Lista todos los dispositivos |
+| `device(hostname)` | Métricas de un dispositivo específico |
+| `ports(hostname)` | Puertos de un dispositivo |
+| `port_traffic(hostname, ifName)` | Tráfico de un puerto (bps) |
+| `cpu_usage(hostname)` | CPU de un dispositivo |
+| `memory_usage(hostname)` | Memoria RAM |
+| `storage_usage(hostname)` | Uso de disco |
+| `uptime(hostname)` | Uptime del dispositivo |
+
+### Dashboard recomendado
+
+Se puede importar el dashboard oficial de LibreNMS para Grafana desde:
+`https://grafana.com/grafana/dashboards/` (buscar "LibreNMS")
+
+O construir uno custom con los queries de arriba agrupando:
+- Visión general: dispositivos UP/DOWN, alertas activas
+- Rendimiento: CPU, memoria, disco por dispositivo
+- Red: tráfico por puerto, errores
+- Uptime: dispositivos con menos de 24h de uptime
+
+---
+
+## 11. Verificación Final
 
 | Criterio | Resultado |
 |----------|-----------|
@@ -316,13 +377,16 @@ Todas las reglas están mapeadas al transporte **Telegram GIDAS** (chat @sistEma
 
 ---
 
-## 9. Trabajo Futuro
+## 12. Trabajo Futuro
 
 | Tarea | Prioridad | Estado |
 |-------|-----------|--------|
 | Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para admin completo | 🔴 Alta | ⏳ |
 | Verificar dispositivos 7-12 (status=0, sin reverse DNS) | 🟡 Media | ⏳ |
 | Verificar alertas activas (High Temperature en pve-desa01) | 🟡 Media | ⏳ |
+| Ejecutar `scripts/setup-grafana.sh` para completar integración | 🟡 Media | ⏳ |
+| Instalar plugin librenms-datasource en Grafana | 🟡 Media | ⏳ |
+| Crear dashboard Grafana con métricas de LibreNMS | 🟡 Media | ⏳ |
 | Ajustar thresholds de reglas según necesidad | 🟢 Baja | ⏳ |
 | Activar SNMP trap receiver (puertos 162/514 ya expuestos) | 🟡 Media | ⏳ |
 | Schedulear backup automático (cron CT o PVE host) | 🟡 Media | ⏳ |
