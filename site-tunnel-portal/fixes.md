@@ -19,13 +19,15 @@
 
 ## [✅] Fix #2: Redmine no carga bien / redirect loop al hacer login
 
-**Problema**: Redmine cargaba vía tunnel pero con assets rotos. El formulario de login tenía `action="/search"` sin el prefijo `/redmine/`.
+**Problema**: Redmine cargaba vía tunnel pero con assets rotos. El formulario de login tenía `action="/search"` sin el prefijo `/redmine/`. Además, después del login redirigía a `https://redmine.gidas.local/my/page` (URL interna, no accesible desde el tunnel).
 
 **Solución**: 
 1. Agregado `location /redmine/` en el nginx de Redmine (`redmine/nginx/redmine.conf`):
    - `rewrite ^/redmine(/.*)$ $1 break;` — quita el prefijo al pasar al backend
-   - `sub_filter` para reescribir `href="/` → `href="/redmine/"`, `src="/` → `src="/redmine/"`, `action="/search` → `action="/redmine/search"`
-2. Configurado el nginx de CT 208 para que pase `Host: redmine.gidas.local`
+   - `sub_filter` para reescribir `href="/` → `href="/redmine/"`, `src="/` → `src="/redmine/"`, `action="/login` → `action="/redmine/login"`, etc.
+2. En CT 208 nginx:
+   - `proxy_set_header Host redmine.gidas.local;`
+   - `proxy_redirect https://redmine.gidas.local/ /redmine/;` — reescribe redirects post-login
 
 **Archivos**: `redmine/nginx/redmine.conf`, `/etc/nginx/nginx.conf` (CT 208)
 
@@ -83,5 +85,3 @@
 - **Identity Dashboard**: Subpath de GitLab, accesible via GitLab proxy
 
 ---
-
-[ ] boton drupal de acceso a portal da error en drupal "Pagina no encontrada"
