@@ -31,6 +31,7 @@ class ToolItem(BaseModel):
     description: str = ""
     groups: List[str]
     proxy: bool = False
+    slug: str = ""  # URL path for proxy (defaults to name.lower())
 
 
 class AppConfig(BaseModel):

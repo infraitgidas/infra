@@ -53,6 +53,7 @@ tools:
     icon: "fas fa-server"
     description: "Hipervisor"
     proxy: true
+    slug: "proxmox"
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -89,7 +90,7 @@ tools:
     url: "https://gitlab.gidas.local/infrait/identity-dashboard"
     icon: "fas fa-users-cog"
     description: "Gestión de usuarios AD/FreeIPA"
-    proxy: true
+    proxy: false
     groups:
       - "G-Direccion"
       - "G-Coordinadores"

@@ -17,10 +17,7 @@
 <div class="card-grid">
   {% for tool in tools %}
   {% if tool.proxy %}
-  {% set tool_url = "/proxy/" + tool.name.lower() + "/" %}
-  {% else %}
-  {% set tool_url = tool.url %}
-  {% endif %}
+  {% set tool_url = tool.proxy and ("/proxy/" + (tool.slug or tool.name.lower()) + "/") or tool.url %}
   <a href="{{ tool_url }}" target="_blank" rel="noopener noreferrer" class="card">
     <div class="card-icon">
       {% if tool.icon.endswith('.png') or tool.icon.endswith('.svg') or tool.icon.endswith('.jpg') %}
