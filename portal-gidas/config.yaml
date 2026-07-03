@@ -17,7 +17,7 @@ tools:
   - name: "GitLab"
     url: "/gitlab/"
     icon: "fab fa-gitlab"
-    description: "Repositorios y CI/CD"
+    description: "Repositorios y CI/CD (acceso via tunnel)"
     proxy: false
     groups:
       - "G-Direccion"
@@ -42,7 +42,7 @@ tools:
   - name: "Grafana"
     url: "/grafana/"
     icon: "fas fa-chart-line"
-    description: "Monitoreo y métricas"
+    description: "Monitoreo y métricas (acceso via tunnel)"
     proxy: false
     groups:
       - "G-Direccion"
