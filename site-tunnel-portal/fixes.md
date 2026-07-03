@@ -47,7 +47,17 @@
 
 ---
 
-## [🔄] Fix #4: Tunnel URL cambia al reiniciar (en progreso)
+## [✅] Fix #4: `{url}` literal en Drupal — botón "Pagina no encontrada"
+
+**Problema**: Al actualizar el contenido de Drupal para el botón responsive, se escribió literalmente `{url}` en vez de la URL real del tunnel. El botón apuntaba a `{url}` que Drupal interpretaba como ruta relativa → página no encontrada.
+
+**Solución**: Reemplazar `{url}` por la URL real del tunnel en el contenido de `/node/40`. El script `auto-tunnel.py` hace esto automáticamente, pero la edición manual rompió el placeholder.
+
+**Archivo**: Contenido de `/node/40` en Drupal
+
+---
+
+## [🔄] Fix #5: Tunnel URL cambia al reiniciar (pendiente)
 
 **Problema**: La URL de trycloudflare cambia cada vez que se reinicia el tunnel.
 
@@ -71,3 +81,7 @@
 - **Vaultwarden**: Gestor de contraseñas, solo via Twingate
 - **MikroTik**: No accesible desde CT 208
 - **Identity Dashboard**: Subpath de GitLab, accesible via GitLab proxy
+
+---
+
+[ ] boton drupal de acceso a portal da error en drupal "Pagina no encontrada"
