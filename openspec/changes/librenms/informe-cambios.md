@@ -279,7 +279,9 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 | Roles persistidos tras login | ✅ `syncRoles` ahora asigna correctamente |
 | Poller automático via cron | ✅ `schedule:run` cada minuto como librenms |
 | Poller manual (`device:poll all`) | ✅ 12/12 dispositivos en 23.137s |
-| Alertas sin errores | ✅ Rules vacías eliminadas, Device Down deshabilitada |
+| Transports | ✅ SMTP Office 365 — enviado OK |
+| Transports | ✅ Telegram Bot \"GIDAS Alertas\" (@GiDAS_alertbot) — enviado OK |
+| Rules de alerta | ⚠️ Creadas desde la UI (el builder JSON debe poblarse) |
 | RRD actualizándose | ✅ 544 updates en último poll |
 
 ---
@@ -290,7 +292,7 @@ Además se deshabilitó la regla "Device Down" (ID 1) que causaba `SQLSTATE[HY09
 |-------|-----------|--------|
 | Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para admin completo | 🔴 Alta | ⏳ |
 | Verificar dispositivos 7-12 (status=0, sin reverse DNS) | 🟡 Media | ⏳ |
-| Configurar alertas vía UI (Telegram, email) | 🟡 Media | ⏳ |
+| Configurar alert rules desde la UI (builder JSON requerido) | 🟡 Media | ⏳ |
 | Activar SNMP trap receiver (puertos 162/514 ya expuestos) | 🟡 Media | ⏳ |
 | Schedulear backup automático (cron CT o PVE host) | 🟡 Media | ⏳ |
 | Migrar passwords a secrets Docker o SOPS | 🟢 Baja | ⏳ |
