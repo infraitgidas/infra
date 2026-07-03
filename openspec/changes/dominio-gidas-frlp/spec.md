@@ -1,47 +1,54 @@
-# Spec: Dominio gidas.frlp — Integración con sitio institucional
+# Spec: Portal GIDAS desde Drupal — Enlace público
 
 ## Purpose
 
-Establecer la integración entre los servicios GIDAS (portal, herramientas) y el sitio institucional Drupal `gidas.frlp.utn.edu.ar`, creando un puente visible entre la infraestructura interna y la presencia pública del grupo de investigación.
+Publicar un enlace en el sitio institucional `gidas.frlp.utn.edu.ar` que permita a los miembros del grupo acceder al Portal GIDAS y sus herramientas internas.
 
 ## Requirements
 
-### R1: Enlaces en Drupal
+### R1: Enlace visible en el menú principal
 
-El sitio Drupal `gidas.frlp.utn.edu.ar` DEBE tener enlaces visibles a los servicios GIDAS.
+El sitio DEBE mostrar un enlace "Portal GIDAS" en el menú principal de navegación.
 
-#### Scenario: Enlace al Portal GIDAS
-- GIVEN un visitante del sitio Drupal
-- WHEN navega el menú principal
-- THEN DEBE ver un enlace "Acceso a Herramientas" o "Portal GIDAS"
-- AND el enlace DEBE apuntar a `https://portal.gidas.local` (vía Twingate) o la URL pública que corresponda
+#### Scenario: Enlace visible para todos los visitantes
+- GIVEN un visitante del sitio `gidas.frlp.utn.edu.ar`
+- WHEN navega la página principal
+- THEN DEBE ver un enlace con el texto "Portal GIDAS" en el menú principal
+- AND el enlace DEBE ser visible sin necesidad de iniciar sesión en Drupal
 
-#### Scenario: Enlace a servicios específicos
-- GIVEN un visitante del sitio Drupal
-- WHEN está en la sección de enlaces
-- THEN DEBE ver enlaces a: GitLab, Redmine, LibreNMS, Grafana
-- AND cada enlace DEBE incluir una breve descripción del servicio
+#### Scenario: Click en el enlace
+- GIVEN un visitante en `gidas.frlp.utn.edu.ar`
+- WHEN hace click en "Portal GIDAS"
+- THEN DEBE ser redirigido a una página explicativa
+- AND la página DEBE contener el enlace a `https://portal.gidas.local`
+- AND DEBE incluir instrucciones sobre Twingate
 
-### R2: Documentación de dominio
+### R2: Página explicativa
 
-El equipo GIDAS DEBE tener documentación clara sobre la gestión del dominio `gidas.frlp.utn.edu.ar`.
+La página DEBE contener información clara sobre cómo acceder a las herramientas.
 
-#### Scenario: Contacto de dominio
-- GIVEN un miembro de GIDAS que necesita modificar el sitio Drupal
-- WHEN consulta la documentación del dominio
-- THEN DEBE encontrar quién administra el sitio en UTN-FRLP
-- AND el procedimiento para solicitar cambios
+#### Scenario: Usuario sin Twingate
+- GIVEN un visitante sin Twingate instalado
+- WHEN lee la página de Portal GIDAS
+- THEN DEBE encontrar instrucciones para solicitar acceso
+- AND DEBE saber a quién contactar
 
-### R3: Presencia digital unificada
+### R3: Contenido auto-administrable
 
-La presencia digital de GIDAS DEBE tener una arquitectura clara con dos caras: pública (Drupal) y privada (Portal).
+La página DEBE ser editable desde el admin de Drupal (sin acceso al servidor).
 
-#### Scenario: Arquitectura documentada
-- GIVEN un nuevo miembro de GIDAS
-- WHEN consulta la documentación de infraestructura
-- THEN DEBE entender la separación: Drupal como vidriera pública, Portal como acceso a herramientas internas
-- AND DEBE saber cómo acceder a cada servicio
+#### Scenario: Modificación de contenido
+- GIVEN un administrador de Drupal
+- WHEN necesita actualizar la página
+- THEN DEBE poder hacerlo desde `/admin/content`
+- AND los cambios DEBEN publicarse inmediatamente
 
-### R4: Correo institucional
+### R4: Rollback
 
-Las notificaciones del sistema DEBERÍAN usar direcciones `@frlp.utn.edu.ar`.
+El cambio DEBE poder revertirse sin impacto en otras partes del sitio.
+
+#### Scenario: Reversión
+- GIVEN que se necesita eliminar el enlace
+- WHEN un administrador accede a la estructura de menús
+- THEN DEBE poder eliminar el elemento del menú sin afectar otros contenidos
+- AND la página DEBE poder despublicarse o eliminarse
