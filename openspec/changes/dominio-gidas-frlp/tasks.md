@@ -38,6 +38,12 @@
   - external_url + proxy_redirect
 - [x] **3.4** Fix #4: `{url}` literal en Drupal (pagina no encontrada)
 - [x] **3.5** Fix #5: Agregar "Portal GIDAS" al navbar de Drupal
+- [x] **3.6** Fix #6: Página solicitud acceso para becarios en Drupal
+- [x] **3.7** Fix #7: Monitoreo del tunnel + métricas por tool
+  - tunnel-monitor.py: heartbeat + parseo nginx logs
+  - metrics-server.py: endpoint Prometheus puerto 9100
+  - Alerta Telegram si tunnel caído
+  - Cron cada 5 min + systemd service
   - Enlace visible en el menú principal del sitio
   - Sin necesidad de escribir la URL completa
 

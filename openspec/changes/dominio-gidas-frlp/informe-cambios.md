@@ -2,7 +2,7 @@
 
 **Feature branch**: `feat/dominio-gidas-frlp`
 **Fecha**: 2026-07-03 (v1)
-**Estado**: ✅ COMPLETADO — Tunnel Cloudflare + nginx + tools via subpath
+**Estado**: ✅ COMPLETO — Tunnel + nginx + 3 tools + monitor con alertas
 
 ---
 
@@ -115,6 +115,8 @@ No relacionado con tunnel. Ver ADR-003.
 | `docs/runbooks/tunnel-migration-roadmap.md` | Roadmap de migración a soluciones estables |
 | `docs/runbooks/cloudflare-tunnel-analysis.md` | Análisis de Cloudflare Tunnel y limitaciones |
 | `docs/portal-acceso/propuesta-direccion.md` | Propuesta ejecutiva para dirección |
+| `/opt/portal-gidas/tunnel-monitor.py` | Heartbeat + parseo de logs (cron) |
+| `/opt/portal-gidas/metrics-server.py` | Endpoint Prometheus en puerto 9100 |
 
 ---
 
@@ -134,6 +136,8 @@ No relacionado con tunnel. Ver ADR-003.
 | Redmine redirect post-login | ✅ `proxy_redirect` → `/redmine/my/page` |
 | GitLab redirect loop | ✅ `external_url` + `proxy_redirect` corregido |
 | Solicitud de acceso nuevos usuarios | ✅ Sección en Drupal con mailto e instrucciones |
+| Monitoreo del tunnel | ✅ Heartbeat cada 5 min + Telegram alert |
+| Métricas por tool | ✅ Endpoint Prometheus en puerto 9100 |
 
 ---
 
@@ -147,9 +151,10 @@ No relacionado con tunnel. Ver ADR-003.
 | ✅ Fix #4: `{url}` literal en Drupal | 🔴 Alta | ✅ |
 | ✅ Fix #5: Portal GIDAS en navbar | 🟡 Media | ✅ |
 | ✅ Fix #6: Página solicitud acceso becarios | 🟢 Baja | ✅ |
+| ✅ Fix #7: Monitoreo tunnel + métricas por tool | 🟡 Media | ✅ |
 | Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |
 | Agregar HTTPS a nginx CT 208 (Let's Encrypt) | 🟢 Baja | ⏳ |
-| Monitoreo del tunnel (LibreNMS/Grafana) | 🟡 Media | ⏳ |
+
 | Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ⏳ |
 
