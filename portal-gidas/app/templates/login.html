@@ -17,6 +17,10 @@
     <div class="alert alert-error">
       <i class="fas fa-exclamation-circle"></i> Servicio de autenticación no disponible. Intente más tarde.
     </div>
+    {% elif error == "3" %}
+    <div class="alert alert-error">
+      <i class="fas fa-shield-alt"></i> Demasiados intentos fallidos. Su acceso fue bloqueado temporalmente. Espere 15 minutos.
+    </div>
     {% endif %}
 
     <form method="POST" action="/login" class="login-form">
