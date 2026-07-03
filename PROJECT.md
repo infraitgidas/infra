@@ -192,13 +192,13 @@
 - ✅ Alert rules vacías eliminadas (causaban error PDO)
 - ✅ Script de backup (DB + config)
 
-### Pendientes
-- ⏳ Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para acceso admin completo
-- ⏳ Configurar alertas vía UI (Telegram, email)
-- ⏳ Activar SNMP trap receiver (puertos 162/514 ya expuestos)
-- ⏳ Agregar monitoreo a los 7 dispositivos con status=0 (IPs sin resolver/responsive)
-- ⏳ Backup automatizado (cron en CT 210 o PVE host)
-- ⏳ Merge rama `gitlab-gidas` a `main`
+### Pendientes (30 tareas — detalle en `tasks.md` Fase 8)
+- 🔴 **Alta**: Agregar usuarios AD a `gidas-admins`/`SRV-Monitoring`
+- 🔴 **Alta**: Verificar 7 dispositivos con status=0
+- 🟡 **Media**: Activar SNMP traps + syslog (puertos expuestos)
+- 🟡 **Media**: Schedulear backup automático
+- 🟡 **Media**: Heartbeat / monitoreo del monitoreo
+- 🟡 **Media**: Merge rama `feat/monitoreo-red` → `main`
 
 ### Bugs Fixeados (críticos)
 1. **Roles AD borrados en cada login**: `getRoles()` devolvía `[]` sin `auth_ad_groups` configurado, `syncRoles([])` borraba todos los roles. Fix: configurar `auth_ad_groups` + `auth_ad_global_read=true`

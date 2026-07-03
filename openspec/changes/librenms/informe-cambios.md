@@ -392,15 +392,16 @@ Inicialmente se desplegó Grafana como container Docker en CT 210 (junto a Libre
 
 ## 12. Trabajo Futuro
 
-| Tarea | Prioridad | Estado |
-|-------|-----------|--------|
-| Agregar usuarios AD a `gidas-admins` o `SRV-Monitoring` para admin completo | 🔴 Alta | ⏳ |
-| Verificar dispositivos 7-12 (status=0, sin reverse DNS) | 🟡 Media | ⏳ |
-| Verificar alertas activas (High Temperature en pve-desa01) | 🟡 Media | ⏳ |
-| ✅ Integración Grafana completada (CT 205, dashboards importados) | 🟡 Media | ✅ |
-| ✅ LibreNMS agregado al portal GIDAS (card visible para 4 grupos) | 🟡 Media | ✅ |
-| Ajustar thresholds de reglas según necesidad | 🟢 Baja | ⏳ |
-| Activar SNMP trap receiver (puertos 162/514 ya expuestos) | 🟡 Media | ⏳ |
-| Schedulear backup automático (cron CT o PVE host) | 🟡 Media | ⏳ |
-| Migrar passwords a secrets Docker o SOPS | 🟢 Baja | ⏳ |
-| Merge rama `gitlab-gidas` → `main` | 🟢 Baja | ⏳ |
+> 📋 **Detalle completo de tareas en `openspec/changes/librenms/tasks.md` (Fase 8)**
+
+| Prioridad | Tareas Clave | Estado |
+|-----------|-------------|--------|
+| 🔴 Alta | Agregar usuarios a `gidas-admins`/`SRV-Monitoring` en AD | ⏳ |
+| 🔴 Alta | Verificar y corregir 7 dispositivos con status=0 | ⏳ |
+| 🟡 Media | Activar SNMP traps + syslog (puertos ya expuestos) | ⏳ |
+| 🟡 Media | Schedulear backup automático diario | ⏳ |
+| 🟡 Media | Heartbeat / monitoreo del monitoreo | ⏳ |
+| 🟡 Media | Merge rama `feat/monitoreo-red` → `main` | ⏳ |
+| 🟢 Baja | Ajustar thresholds, dashboards extras, WhatsApp, Let's Encrypt | ⏳ |
+
+**Total: 30 tareas pendientes** documentadas en detalle en `tasks.md` (3 altas, 16 medias, 11 bajas)
