@@ -10,6 +10,7 @@
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
+| 7 | Monitor de Red | LibreNMS | `librenms/` | `main` | 🛠️ Operativo con fixes |
 
 ## Leyenda de Estados SDD
 
@@ -141,6 +142,7 @@
 - **Archivos SDD**: `openspec/changes/portal-custom/`
 - **Archivos**: `docs/portal-acceso/`
 - **Archivos SDD**: `openspec/changes/archive/2026-06-14-sso-portal-acceso/` (histórico Authentik)
+- **Tools totales**: 13 (incluye LibreNMS incorporado en esta sesión)
 
 ---
 
@@ -159,4 +161,56 @@
 
 ---
 
-*Última actualización: 2026-07-02 (23:00)*
+---
+
+### Feature 7: Monitor de Red — LibreNMS
+
+- **Objetivo**: Monitoreo de infraestructura de red y servidores vía SNMP con alertas
+- **Componentes**: LibreNMS 26.6.1 (Docker), MariaDB 10, Redis 7, Alpine. CT 210 en pve-desa04.
+- **Estado**: 🛠️ Operativo — fixes aplicados Julio 2026
+- **URL**: `https://nms.gidas.local`
+- **Infra**: CT 210 (pve-desa04), Docker compose, nginx + php-fpm internos
+
+### Alert Rules Configuradas (18 reglas)
+- 🔴 Device Down, Device Not Polled, High CPU/Memory/Disk (critical), SNMP Disabled, Port Down
+- 🟡 Device Rebooted, High CPU/Memory/Disk (warning), High Latency, Slow Polling, Bandwidth Saturation, High Interface Errors, Unclassified Device, High Temperature
+- Todas mapeadas a Telegram Bot GIDAS Alertas (@GiDAS_alertbot)
+
+### Integración Grafana (Pendiente)
+- Script `librenms/scripts/setup-grafana.sh` listo para crear API token y datasource
+- Plugin `librenms-datasource` para Grafana (instalar vía grafana-cli)
+- Queries disponibles: devices, ports, cpu, memory, storage, uptime, traffic
+
+### Tareas Completadas
+- ✅ Deploy Docker con volúmenes nombrados (librenms_data, mysql_data, redis_data)
+- ✅ APP_KEY y NODE_ID generados
+- ✅ 12 dispositivos descubiertos y polleando (PVE hosts, MikroTik, AD DC, servicios)
+- ✅ Autenticación AD activada (ActiveDirectory auth mechanism)
+- ✅ Mapeo de grupos AD a roles: `gidas-admins`, `SRV-Monitoring`, `G-IdentityAdmins` → admin
+- ✅ `auth_ad_global_read = true` — todos los usuarios AD autenticados ven (global-read)
+- ✅ Crontab fixeado: `schedule:run` corre como `librenms` (no root)
+- ✅ Alert rules vacías eliminadas (causaban error PDO)
+- ✅ Script de backup (DB + config)
+
+### Pendientes (30 tareas — detalle en `tasks.md` Fase 8)
+- 🔴 **Alta**: Agregar usuarios AD a `gidas-admins`/`SRV-Monitoring`
+- 🔴 **Alta**: Verificar 7 dispositivos con status=0
+- 🟡 **Media**: Activar SNMP traps + syslog (puertos expuestos)
+- 🟡 **Media**: Schedulear backup automático
+- 🟡 **Media**: Heartbeat / monitoreo del monitoreo
+- 🟡 **Media**: Merge rama `feat/monitoreo-red` → `main`
+
+### Bugs Fixeados (críticos)
+1. **Roles AD borrados en cada login**: `getRoles()` devolvía `[]` sin `auth_ad_groups` configurado, `syncRoles([])` borraba todos los roles. Fix: configurar `auth_ad_groups` + `auth_ad_global_read=true`
+2. **Poller nunca ejecutaba**: Cron corría como root pero `artisan schedule:run` rechaza ejecutarse como root. Fix: `su -s /bin/bash librenms -c 'php artisan schedule:run'` en crontab
+3. **Alert rules vacías**: Reglas predefinidas con `query` vacío causaban `PDO::prepare() error`. Fix: eliminadas
+
+### Archivos
+- `librenms/docker-compose.yml` — stack Docker
+- `librenms/deploy.sh` — script de deploy actualizado
+- `librenms/scripts/backup.sh` — backup DB + config
+- `librenms/scripts/setup-telegram.sh` — guía Telegram (no implementado)
+
+---
+
+*Última actualización: 2026-07-03 (14:30)*

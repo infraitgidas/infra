@@ -1,0 +1,15 @@
+# ============================================================
+# Datasource: LibreNMS
+# Provisionado automáticamente al iniciar Grafana
+# ============================================================
+apiVersion: 1
+
+datasources:
+  - name: LibreNMS
+    type: librenms-datasource
+    access: proxy
+    url: http://librenms:8000
+    isDefault: true
+    editable: true
+    jsonData:
+      token: "${LNMS_API_TOKEN}"

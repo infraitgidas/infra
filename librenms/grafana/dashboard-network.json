@@ -1,0 +1,154 @@
+{
+  "title": "GIDAS — Red y Tráfico",
+  "description": "Monitoreo de red: tráfico por puerto, errores, estado de interfaces, ancho de banda",
+  "tags": ["librenms", "gidas", "network", "traffic"],
+  "timezone": "America/Argentina/Buenos_Aires",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "1m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Tráfico de Red - $device:$port",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "port_traffic($device, $port)", "legendFormat": "{{ direction }}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never",
+            "fillOpacity": 20
+          }
+        }
+      },
+      "description": "Tráfico de entrada/salida del puerto seleccionado en bits por segundo"
+    },
+    {
+      "id": 2,
+      "title": "Errores de Puerto - $device:$port",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 8},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "port_errors($device, $port)", "legendFormat": "{{ direction }} errors"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Errores de entrada/salida del puerto por segundo"
+    },
+    {
+      "id": 3,
+      "title": "Ancho de Banda Utilizado - $device",
+      "type": "bargauge",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 14},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "port_utilization($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
+      "description": "Utilización de ancho de banda por puerto (porcentaje)"
+    },
+    {
+      "id": 4,
+      "title": "Puertos UP/DOWN - $device",
+      "type": "table",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 14},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "ports($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "displayMode": "color-background"
+        }
+      },
+      "description": "Estado de todos los puertos del dispositivo"
+    },
+    {
+      "id": 5,
+      "title": "Top 10 Puertos por Tráfico",
+      "type": "bargauge",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 20},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "top_ports()", "sort": "traffic", "limit": 10}],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 500000000},
+              {"color": "red", "value": 900000000}
+            ]
+          }
+        }
+      },
+      "description": "Top 10 puertos con mayor tráfico en toda la red"
+    },
+    {
+      "id": 6,
+      "title": "Throughput Histórico - $device:$port",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 26},
+      "datasource": "LibreNMS",
+      "targets": [
+        {"query": "port_packets($device, $port)", "legendFormat": "{{ direction }} pkts"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        }
+      },
+      "description": "Paquetes por segundo (throughput) del puerto"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "type": "query",
+        "datasource": "LibreNMS",
+        "query": "devices()",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false,
+        "description": "Seleccionar dispositivo"
+      },
+      {
+        "name": "port",
+        "type": "query",
+        "datasource": "LibreNMS",
+        "query": "ports($device)",
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "description": "Seleccionar puerto"
+      }
+    ]
+  }
+}

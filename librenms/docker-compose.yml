@@ -1,0 +1,60 @@
+services:
+  librenms:
+    image: librenms/librenms:fixed
+    container_name: librenms
+    hostname: librenms
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8000"
+      - "162:162/udp"
+      - "162:162/tcp"
+      - "514:514/udp"
+      - "514:514/tcp"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - librenms_data:/data
+    env_file:
+      - .env
+    networks:
+      - librenms
+
+  mariadb:
+    image: mariadb:10
+    container_name: librenms-db
+    restart: unless-stopped
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=librenms
+      - MYSQL_USER=librenms
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - TZ=America/Argentina/Buenos_Aires
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - librenms
+
+  redis:
+    image: redis:7-alpine
+    container_name: librenms-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - librenms
+
+volumes:
+  librenms_data:
+  mysql_data:
+  redis_data:
+
+networks:
+  librenms:

@@ -1,0 +1,188 @@
+{
+  "title": "GIDAS — LibreNMS Overview",
+  "description": "Visión general de infraestructura monitoreada por LibreNMS: estado de dispositivos, alertas activas, health checks",
+  "tags": ["librenms", "gidas", "infra"],
+  "timezone": "America/Argentina/Buenos_Aires",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Dispositivos por Estado",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "devices()"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "red", "value": 1}
+            ]
+          }
+        }
+      },
+      "description": "Total de dispositivos monitoreados"
+    },
+    {
+      "id": 2,
+      "title": "Dispositivos UP",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "devices()", "filter": "status=1"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [{"color": "green", "value": null}]
+          }
+        }
+      },
+      "description": "Dispositivos respondiendo SNMP correctamente"
+    },
+    {
+      "id": 3,
+      "title": "Alertas Activas",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "alerts()"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 1},
+              {"color": "red", "value": 5}
+            ]
+          }
+        }
+      },
+      "description": "Alertas activas sin resolver"
+    },
+    {
+      "id": 4,
+      "title": "Uptime - Dispositivos",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "device_uptime()"}],
+      "fieldConfig": {
+        "defaults": {
+          "displayMode": "color-background"
+        }
+      },
+      "description": "Uptime de todos los dispositivos. Rojo = < 1h, Naranja = < 24h"
+    },
+    {
+      "id": 5,
+      "title": "CPU Promedio por Dispositivo",
+      "type": "gauge",
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 12},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "cpu_usage($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          }
+        }
+      },
+      "description": "Uso de CPU promedio"
+    },
+    {
+      "id": 6,
+      "title": "Memoria RAM Promedio",
+      "type": "gauge",
+      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 12},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "memory_usage($device)"}],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          }
+        }
+      },
+      "description": "Uso de memoria RAM promedio"
+    },
+    {
+      "id": 7,
+      "title": "Top 10 CPU - Última Hora",
+      "type": "bargauge",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 20},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "cpu_usage()", "sort": "desc", "limit": 10}],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
+            ]
+          }
+        }
+      },
+      "description": "Top 10 dispositivos con mayor uso de CPU en la última hora"
+    },
+    {
+      "id": 8,
+      "title": "Alertas Recientes",
+      "type": "table",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 26},
+      "datasource": "LibreNMS",
+      "targets": [{"query": "alert_log()", "limit": 20}],
+      "description": "Últimas 20 alertas generadas por LibreNMS"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "type": "query",
+        "datasource": "LibreNMS",
+        "query": "devices()",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "description": "Dispositivo a monitorear"
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Alertas LibreNMS",
+        "datasource": "LibreNMS",
+        "enable": true,
+        "iconColor": "red",
+        "query": "alert_events()",
+        "description": "Eventos de alerta registrados en LibreNMS"
+      }
+    ]
+  }
+}

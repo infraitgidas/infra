@@ -1,0 +1,17 @@
+# ============================================================
+# Dashboards: LibreNMS
+# Importa automáticamente los dashboards JSON
+# ============================================================
+apiVersion: 1
+
+providers:
+  - name: "LibreNMS"
+    orgId: 1
+    folder: "LibreNMS"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false
