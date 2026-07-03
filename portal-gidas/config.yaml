@@ -18,6 +18,7 @@ tools:
     url: "https://gitlab.gidas.local"
     icon: "fab fa-gitlab"
     description: "Repositorios y CI/CD"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -30,6 +31,7 @@ tools:
     url: "https://redmine.gidas.local"
     icon: "fas fa-tasks"
     description: "Gestión de proyectos"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -41,6 +43,7 @@ tools:
     url: "http://192.168.1.205:3000"
     icon: "fas fa-chart-line"
     description: "Monitoreo y métricas"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -49,6 +52,7 @@ tools:
     url: "https://192.168.1.14:8006"
     icon: "fas fa-server"
     description: "Hipervisor"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -57,6 +61,7 @@ tools:
     url: "http://netbox.gidas.local"
     icon: "fas fa-sitemap"
     description: "CMDB - Inventario"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -66,6 +71,7 @@ tools:
     url: "http://glpi.gidas.local"
     icon: "fas fa-life-ring"
     description: "ITSM - Mesa de ayuda"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -74,6 +80,7 @@ tools:
     url: "http://192.168.1.1"
     icon: "fas fa-network-wired"
     description: "Router y firewall"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -82,6 +89,7 @@ tools:
     url: "https://gitlab.gidas.local/infrait/identity-dashboard"
     icon: "fas fa-users-cog"
     description: "Gestión de usuarios AD/FreeIPA"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -127,6 +135,7 @@ tools:
     url: "https://vault.gidas.local"
     icon: "fas fa-key"
     description: "Gestor de contraseñas"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
@@ -140,6 +149,7 @@ tools:
     url: "https://nms.gidas.local"
     icon: "fas fa-eye"
     description: "Monitoreo de red"
+    proxy: true
     groups:
       - "G-Direccion"
       - "G-Coordinadores"

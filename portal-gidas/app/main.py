@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.status import HTTP_302_FOUND
 
 from app.config import AppConfig, Settings, load_config
-from app.routers import auth, portal
+from app.routers import auth, portal, proxy
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -49,6 +49,7 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(auth.router)
     app.include_router(portal.router)
+    app.include_router(proxy.router)
 
     @app.exception_handler(401)
     async def unauthorized_handler(request: Request, exc):

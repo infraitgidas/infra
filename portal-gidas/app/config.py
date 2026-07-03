@@ -30,6 +30,7 @@ class ToolItem(BaseModel):
     icon: str
     description: str = ""
     groups: List[str]
+    proxy: bool = False
 
 
 class AppConfig(BaseModel):
