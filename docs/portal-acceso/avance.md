@@ -1,8 +1,8 @@
 # Informe de Avance — Portal de Acceso GIDAS
 
 > **Feature**: Portal de Acceso (Feature #6)
-> **Fecha**: 2026-07-02 (actualizado 23:00)
-> **Rama**: `feat/portal-access-remoto`
+> **Fecha**: 2026-07-02 (actualizado 23:59)
+> **Rama**: `feat/monitoreo-red` (nueva feature)
 > **Estado SDD**: ✅ Implementado
 
 ---
@@ -17,6 +17,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 2. ❌ Homer (dashboard estático) — no tiene login ni RBAC
 3. ✅ **Portal custom FastAPI+LDAP** — login AD, dashboard filtrado por grupos, config YAML
 4. ✅ **Vaultwarden** — gestor de contraseñas con LDAP y SMTP, integrado al portal
+5. ✅ **LibreNMS** — monitoreo de red con auto-discovery, LDAP y alertas multicanal
 
 ---
 
@@ -84,6 +85,8 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Logs** | `journalctl -u portal-gidas` |
 | **CT 209** | Rocky Linux 9, 512MB RAM, 1 vCPU, IP `192.168.1.44/24` |
 | **Vaultwarden** | Docker + LDAP + nginx SSL en `https://vault.gidas.local` |
+| **CT 210** | Rocky Linux 9, 1GB RAM, 1 vCPU, IP `192.168.1.45/24` |
+| **LibreNMS** | Docker Compose (librenms + mariadb + redis) + nginx SSL en `https://nms.gidas.local` |
 
 ---
 
@@ -102,6 +105,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **DNS MikroTik** | ✅ `portal.gidas.local` | Resuelve en LAN |
 | **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80. Solucionado: system nginx detenido, GitLab nginx reiniciado. |
 | **Vaultwarden** | ✅ Desplegado | CT 209, Docker, LDAP, SSL. Card en portal. |
+| **LibreNMS** | ✅ Desplegado | CT 210, Docker Compose, LDAP, SSL. Alertas email configuradas. |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---
@@ -134,10 +138,13 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Dashboard** | Cards filtradas según grupos AD del usuario |
 | **Admin SSH portal** | `pct enter 208` (desde pve-desa04) |
 | **Admin SSH vault** | `pct enter 209` (desde pve-desa04) |
+| **Admin SSH librenms** | `pct enter 210` (desde pve-desa04) |
 | **Vaultwarden** | `https://vault.gidas.local` — login con email + master password |
-| **Admin panel** | `https://vault.gidas.local/admin` — token en secrets |
+| **Admin panel vault** | `https://vault.gidas.local/admin` — token en secrets |
+| **LibreNMS** | `https://nms.gidas.local` — login con usuario AD |
 | **Logs portal** | `journalctl -u portal-gidas -f` |
 | **Logs vault** | `docker logs vaultwarden -f` |
+| **Logs librenms** | `docker compose -f /opt/librenms/docker-compose.yml logs -f` |
 
 ---
 
@@ -150,5 +157,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 3 | ✅ Documentación completa (diseño + manuales + SDD) | Alta | ✅ |
 | 4 | ✅ Vaultwarden desplegado y funcional | Alta | ✅ |
 | 5 | ✅ SMTP configurado en Vaultwarden (Office 365) | Media | ✅ |
-| 6 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
-| 7 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
+| 6 | ✅ LibreNMS desplegado y funcional | Alta | ✅ |
+| 7 | Configurar Telegram Bot para alertas de LibreNMS | Media | ⏳ |
+| 8 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 9 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
