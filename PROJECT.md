@@ -10,7 +10,8 @@
 | 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
-| 7 | Monitor de Red | LibreNMS | `librenms/` | `main` | 🛠️ Operativo con fixes |
+| 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
+| 8 | Dominio gidas.frlp | Integración Drupal | `docs/gidas-frlp-dominio.md` | `feat/dominio-gidas-frlp` | 🔍 Exploración |
 
 ## Leyenda de Estados SDD
 
