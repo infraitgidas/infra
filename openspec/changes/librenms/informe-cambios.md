@@ -2,7 +2,7 @@
 
 **Feature branch**: `feat/monitoreo-red`
 **Fecha**: 2026-07-02
-**Estado**: IMPLEMENTADO (parcial — falta Telegram Bot)
+**Estado**: IMPLEMENTADO (Telegram bot operativo)
 
 ---
 
@@ -71,6 +71,7 @@ docker restart librenms
 |----------|-----------|
 | Web UI responde HTTPS | ✅ 200 OK |
 | Login page visible | ✅ Title: LibreNMS |
+| Telegram Bot configurado | ✅ Mensaje de prueba enviado |
 | LDAP configurado | ✅ En .env |
 | SMTP configurado | ✅ En .env |
 | Auto-discovery SNMP | ⏳ Pendiente configurar comunidades |
@@ -79,8 +80,8 @@ docker restart librenms
 
 | Tarea | Prioridad |
 |-------|-----------|
-| Configurar Telegram Bot para alertas | Alta |
-| Configurar comunidades SNMP en dispositivos | Alta |
-| Configurar auto-discovery en LibreNMS | Alta |
-| Agregar card en portal GIDAS | Baja |
-| Configurar WhatsApp (CallMeBot) | Baja |
+| ✅ Telegram Bot configurado y probado | Alta | ✅ |
+| Configurar comunidades SNMP en dispositivos | Alta | ⏳ |
+| Configurar auto-discovery en LibreNMS | Alta | ⏳ |
+| Agregar card en portal GIDAS | Baja | ⏳ |
+| Configurar WhatsApp (CallMeBot) | Baja | ⏳ |

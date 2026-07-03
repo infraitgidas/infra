@@ -145,6 +145,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Logs portal** | `journalctl -u portal-gidas -f` |
 | **Logs vault** | `docker logs vaultwarden -f` |
 | **Logs librenms** | `docker compose -f /opt/librenms/docker-compose.yml logs -f` |
+| **Telegram** | @GiDAS_alertbot — bot operativo para alertas de red |
 
 ---
 
@@ -158,6 +159,6 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 4 | ✅ Vaultwarden desplegado y funcional | Alta | ✅ |
 | 5 | ✅ SMTP configurado en Vaultwarden (Office 365) | Media | ✅ |
 | 6 | ✅ LibreNMS desplegado y funcional | Alta | ✅ |
-| 7 | Configurar Telegram Bot para alertas de LibreNMS | Media | ⏳ |
+| 7 | ✅ Telegram Bot configurado para alertas de LibreNMS | Media | ✅ |
 | 8 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
 | 9 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
