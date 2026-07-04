@@ -40,12 +40,15 @@
 - [x] **3.5** Fix #5: Agregar "Portal GIDAS" al navbar de Drupal
 - [x] **3.6** Fix #6: Página solicitud acceso para becarios en Drupal
 - [x] **3.7** Fix #7: Monitoreo del tunnel + métricas por tool
-  - tunnel-monitor.py: heartbeat + parseo nginx logs
-  - metrics-server.py: endpoint Prometheus puerto 9100
+  - tunnel-monitor.py: heartbeat + parseo nginx logs (cron 5 min)
+  - metrics-server.py: endpoint Prometheus puerto 9100 (systemd)
   - Alerta Telegram si tunnel caído
-  - Cron cada 5 min + systemd service
-  - Enlace visible en el menú principal del sitio
-  - Sin necesidad de escribir la URL completa
+- [x] **3.8** Fix #8: Seguridad portal — rate limiting + headers OWASP
+  - Rate limiter: 4 intentos fallidos → bloqueo 15 min
+  - Alerta Telegram en detección de fuerza bruta
+  - Headers: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+  - Endpoint /security/stats para monitoreo
+  - ADR-005 documentado
 
 ## Fase 4: Análisis de Opciones Futuras — Pendiente
 

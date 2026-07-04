@@ -138,6 +138,10 @@ No relacionado con tunnel. Ver ADR-003.
 | Solicitud de acceso nuevos usuarios | ✅ Sección en Drupal con mailto e instrucciones |
 | Monitoreo del tunnel | ✅ Heartbeat cada 5 min + Telegram alert |
 | Métricas por tool | ✅ Endpoint Prometheus en puerto 9100 |
+| Rate limiting (4 intentos → bloqueo 15 min) | ✅ Probado: error=1 → error=3 |
+| Security headers OWASP | ✅ 6 headers implementados |
+| Alerta fuerza bruta | ✅ Telegram a @GiDAS_alertbot |
+| Endpoint /security/stats | ✅ Monitoreo de IPs bloqueadas |
 
 ---
 
@@ -152,9 +156,10 @@ No relacionado con tunnel. Ver ADR-003.
 | ✅ Fix #5: Portal GIDAS en navbar | 🟡 Media | ✅ |
 | ✅ Fix #6: Página solicitud acceso becarios | 🟢 Baja | ✅ |
 | ✅ Fix #7: Monitoreo tunnel + métricas por tool | 🟡 Media | ✅ |
+| ✅ Fix #8: Seguridad — rate limiting + headers OWASP | 🔴 Alta | ✅ |
 | Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |
 | Agregar HTTPS a nginx CT 208 (Let's Encrypt) | 🟢 Baja | ⏳ |
 
-| Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ⏳ |
+| Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ✅ |
 
