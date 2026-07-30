@@ -83,13 +83,18 @@ No relacionado con tunnel. Ver ADR-003.
 ### Bug #5: `{url}` literal en Drupal
 - **Fix**: Reemplazar placeholder por URL real del tunnel
 
-### Bug #9: Falsos positivos del monitor — URL hardcodeada en tunnel-monitor.py
+### Bug #9: Falsos positivos del monitor + rediseño a chequeo integral
 
-**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada (`https://portrait-spears-chemical-drilling.trycloudflare.com`). Cloudflare Quick Tunnel genera una NUEVA URL aleatoria cada vez que el servicio se reinicia. El monitor seguía checkeando la URL vieja → falso positivo "TUNNEL CAIDO" cada 5 minutos por Telegram, cuando el tunnel real estaba funcionando con otra URL.
+**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada y solo checkeaba el tunnel. No detectaba caídas individuales de herramientas ni infraestructura.
 
-**Causa raíz**: El servicio `gidas-tunnel.service` se reinició (por la razón que fuera) y cloudflared generó una nueva URL `https://seekers-affiliation-significant-strikes.trycloudflare.com`. El monitor no la detectó porque tenía la anterior hardcodeada.
+**Causa raíz**: El servicio `gidas-tunnel.service` se reinició y cloudflared generó una nueva URL. El monitor no la detectó porque tenía la anterior hardcodeada → falso positivo cada 5 min.
 
-**Fix**: Reemplazar URL hardcodeada por lectura dinámica del log de cloudflared (`/var/log/cloudflared.log`) usando la misma regex que `auto-tunnel.py`: `r"https://[a-z0-9-]+\.trycloudflare\.com"`. Ahora el monitor extrae la URL activa en cada ejecución.
+**Fix**: Rediseño completo del monitor:
+1. **URL dinámica**: Lee la URL del tunnel desde `/var/log/cloudflared.log`
+2. **Chequeo de herramientas (5)**: Portal, Grafana, GitLab, Redmine, LibreNMS via tunnel
+3. **Chequeo de infraestructura (13)**: PVE hosts, CTs, VMs, AD, MikroTik via ping/HTTP
+4. **Detección de cambios**: Persiste estado en `state.json`, alerta solo en transiciones
+5. **Alertas**: `🔴 DOWNTIME — Servicio (detalle)` / `🟢 RESOLUCION — Servicio (detalle)`
 
 **Archivos afectados**:
 - `site-tunnel-portal/scripts/tunnel-monitor.py` (versión versionada en repo)
@@ -97,14 +102,13 @@ No relacionado con tunnel. Ver ADR-003.
 
 **Verificación**:
 ```
-[02:26:17] URL del tunnel: https://seekers-affiliation-significant-strikes.trycloudflare.com
-[02:26:18] Tunnel responde: HTTP 200 OK
-[02:26:18] Tunnel OK - 106 requests, 4 tools
+Tunnel: ✅ OK (200)     Tools: 5/5 ✅      Infra: 13/13 ✅      Alertas: 0
 ```
-✅ Sin alerta Telegram. Heartbeat registra `tunnel_up: true`.
+✅ 19 servicios monitoreados. Alertas solo ante cambios de estado reales.
+✅ DOWNTIME y RESOLUCIÓN verificados (test con Redmine: RESOLUCION enviado a Telegram).
 
 **Lecciones**:
-1. Los scripts críticos (`tunnel-monitor.py`, `auto-tunnel.py`, `metrics-server.py`) NO estaban versionados en el repo — solo existían en CT 208
+1. Los scripts críticos NO estaban versionados en el repo — solo existían en CT 208
 2. El Quick Tunnel es inherentemente volátil (cambia URL en cada reinicio)
 3. Para Named Tunnel se necesita cuenta Cloudflare con un dominio agregado
 
@@ -174,7 +178,12 @@ No relacionado con tunnel. Ver ADR-003.
 | Security headers OWASP | ✅ 6 headers implementados |
 | Alerta fuerza bruta | ✅ Telegram a @GiDAS_alertbot |
 | Endpoint /security/stats | ✅ Monitoreo de IPs bloqueadas |
-| Monitor tunnel URL dinámica | ✅ Lee URL del log de cloudflared |
+| Monitor URL dinámica | ✅ Lee URL del log de cloudflared |
+| Chequeo de herramientas (5) | ✅ Portal, Grafana, GitLab, Redmine, LibreNMS via tunnel |
+| Chequeo de infraestructura (13) | ✅ 4 PVE hosts, 4 CTs, 3 VMs, AD GDC01, MikroTik |
+| Detección de cambios de estado | ✅ state.json persistido con timestamp |
+| Alerta DOWNTIME | ✅ 🔴 DOWNTIME — Redmine (timeout) |
+| Alerta RESOLUCIÓN | ✅ 🟢 RESOLUCION — Redmine (200) — verificado |
 | Sin falsos positivos cada 5 min | ✅ Verificado: HTTP 200 OK sin alerta |
 
 ---
@@ -191,7 +200,7 @@ No relacionado con tunnel. Ver ADR-003.
 | ✅ Fix #6: Página solicitud acceso becarios | 🟢 Baja | ✅ |
 | ✅ Fix #7: Monitoreo tunnel + métricas por tool | 🟡 Media | ✅ |
 | ✅ Fix #8: Seguridad — rate limiting + headers OWASP | 🔴 Alta | ✅ |
-| ✅ Fix #9: Falsos positivos monitor — URL dinámica desde log | 🔴 Alta | ✅ |
+| ✅ Fix #9: Monitor integral — URL dinámica + tools + infra + DOWNTIME/RESOLUCION | 🔴 Alta | ✅ |
 | 🔄 Fix #5: Tunnel URL cambia al reiniciar — migrar a Named Tunnel | 🟡 Media | ✅ Parcial |
 | Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ (sin dominio) |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |

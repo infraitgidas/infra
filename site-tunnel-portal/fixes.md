@@ -69,26 +69,38 @@
 
 ---
 
-## [✅] Fix #9: Falsos positivos del monitor — URL hardcodeada en tunnel-monitor.py
+## [✅] Fix #9: Falsos positivos del monitor + chequeo integral de servicios
 
-**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada (`https://portrait-spears-chemical-drilling.trycloudflare.com`). Cada vez que el servicio se reiniciaba, Cloudflare generaba una nueva URL, pero el monitor seguía checkeando la vieja, causando una alerta "🔴 TUNNEL CAIDO" por Telegram cada 5 minutos (falso positivo).
+**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada y solo checkeaba el tunnel, sin verificar herramientas ni infraestructura individualmente.
 
-**Solución**: Reemplazar URL hardcodeada por lectura dinámica del log de cloudflared (`/var/log/cloudflared.log`). El monitor ahora usa la misma regex que `auto-tunnel.py` (`r"https://[a-z0-9-]+\.trycloudflare\.com"`) para extraer la URL activa en cada ejecución.
+**Solución**: Rediseño completo del monitor:
+1. **URL dinámica**: Lee la URL del tunnel desde `/var/log/cloudflared.log` (misma regex que `auto-tunnel.py`)
+2. **Chequeo de herramientas**: Verifica cada tool via tunnel (Portal, Grafana, GitLab, Redmine, LibreNMS) con HTTP 200/302
+3. **Chequeo de infraestructura**: Verifica 13 componentes via ping/HTTP (hosts PVE, CTs, VMs, AD, MikroTik)
+4. **Detección de cambios**: Persiste estado en `state.json`, compara vs chequeo actual
+5. **Alertas DOWNTIME / RESOLUCIÓN**: Solo envía Telegram cuando hay cambio de estado:
+   - `🔴 DOWNTIME — Redmine (timeout)` cuando se cae
+   - `🟢 RESOLUCION — Redmine (200)` cuando se recupera
+6. **Métricas**: Parseo de nginx access log + heartbeat JSON
+
+**Servicios monitoreados (19 total)**:
+| Categoría | Items |
+|-----------|-------|
+| 🌐 Tunnel | Cloudflare Quick Tunnel |
+| 🧰 Tools (5) | Portal, Grafana, GitLab, Redmine, LibreNMS |
+| 🖥️ Infra (13) | 4x PVE hosts, 4x CTs (208-211), 3x VMs (201,205,206), AD GDC01, MikroTik |
 
 **Archivo**: `site-tunnel-portal/scripts/tunnel-monitor.py` (versionado en repo) + `/opt/portal-gidas/tunnel-monitor.py` (CT 208)
 
 **Verificación**:
 ```
-[02:26:17] URL del tunnel: https://seekers-affiliation-significant-strikes.trycloudflare.com
-[02:26:18] Tunnel responde: HTTP 200 OK
-[02:26:18] Tunnel OK - 106 requests, 4 tools
-[02:26:18] Monitor OK
+Tunnel: ✅ OK (200)     Tools: 5/5 ✅      Infra: 13/13 ✅      Alertas: 0
 ```
-✅ Sin alerta Telegram. Heartbeat registra `tunnel_up: true`.
+✅ Sin falsos positivos. Alertas solo ante cambios de estado reales.
 
 ---
 
-## Estado Actual (2026-07-29)
+## Estado Actual (2026-07-30)
 
 | Tool | URL | Estado |
 |------|-----|--------|
