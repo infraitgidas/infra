@@ -1,7 +1,7 @@
 # 🔧 Fixes — Site Tunnel Portal
 
 > Registro de problemas y soluciones del portal de acceso via Cloudflare Tunnel.
-> Última actualización: 2026-07-03
+> Última actualización: 2026-07-29
 
 ---
 
@@ -59,7 +59,7 @@
 
 ---
 
-## [🔄] Fix #5: Tunnel URL cambia al reiniciar (pendiente)
+## [✅] Fix #5: Tunnel URL cambia al reiniciar (parcial)
 
 **Problema**: La URL de trycloudflare cambia cada vez que se reinicia el tunnel.
 
@@ -69,7 +69,26 @@
 
 ---
 
-## Estado Actual (2026-07-03)
+## [✅] Fix #9: Falsos positivos del monitor — URL hardcodeada en tunnel-monitor.py
+
+**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada (`https://portrait-spears-chemical-drilling.trycloudflare.com`). Cada vez que el servicio se reiniciaba, Cloudflare generaba una nueva URL, pero el monitor seguía checkeando la vieja, causando una alerta "🔴 TUNNEL CAIDO" por Telegram cada 5 minutos (falso positivo).
+
+**Solución**: Reemplazar URL hardcodeada por lectura dinámica del log de cloudflared (`/var/log/cloudflared.log`). El monitor ahora usa la misma regex que `auto-tunnel.py` (`r"https://[a-z0-9-]+\.trycloudflare\.com"`) para extraer la URL activa en cada ejecución.
+
+**Archivo**: `site-tunnel-portal/scripts/tunnel-monitor.py` (versionado en repo) + `/opt/portal-gidas/tunnel-monitor.py` (CT 208)
+
+**Verificación**:
+```
+[02:26:17] URL del tunnel: https://seekers-affiliation-significant-strikes.trycloudflare.com
+[02:26:18] Tunnel responde: HTTP 200 OK
+[02:26:18] Tunnel OK - 106 requests, 4 tools
+[02:26:18] Monitor OK
+```
+✅ Sin alerta Telegram. Heartbeat registra `tunnel_up: true`.
+
+---
+
+## Estado Actual (2026-07-29)
 
 | Tool | URL | Estado |
 |------|-----|--------|

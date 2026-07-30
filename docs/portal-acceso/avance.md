@@ -1,8 +1,8 @@
 # Informe de Avance — Portal de Acceso GIDAS
 
 > **Feature**: Portal de Acceso (Feature #6)
-> **Fecha**: 2026-07-02 (actualizado 23:59)
-> **Rama**: `feat/monitoreo-red` (nueva feature)
+> **Fecha**: 2026-07-29 (v2)
+> **Rama**: `fix/tunnel-monitor-url-dinamica`
 > **Estado SDD**: ✅ Implementado
 
 ---
@@ -87,6 +87,7 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Vaultwarden** | Docker + LDAP + nginx SSL en `https://vault.gidas.local` |
 | **CT 210** | Rocky Linux 9, 1GB RAM, 1 vCPU, IP `192.168.1.45/24` |
 | **LibreNMS** | Docker Compose (librenms + mariadb + redis) + nginx SSL en `https://nms.gidas.local` |
+| **Tunnel Monitor** | Script Python via cron cada 5 min — ahora lee URL dinámica del log de cloudflared |
 
 ---
 
@@ -106,6 +107,8 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80. Solucionado: system nginx detenido, GitLab nginx reiniciado. |
 | **Vaultwarden** | ✅ Desplegado | CT 209, Docker, LDAP, SSL. Card en portal. |
 | **LibreNMS** | ✅ Desplegado + integrado | CT 210, Docker Compose, 12 dispositivos, 18 alertas, Telegram + Grafana en CT 205 |
+| **Tunnel Monitor** | ✅ Fix falsos positivos | URL dinámica desde log (ya no alerta cada 5 min) |
+| **Scripts críticos** | ✅ Parcialmente versionados | Backup branch `backup/pre-named-tunnel` con scripts originales |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---
@@ -137,7 +140,9 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Portal** | `http://portal.gidas.local` (LAN) o `http://192.168.1.43` |
 | **Login** | Usuario y contraseña de AD GIDAS |
 | **Dashboard** | Cards filtradas según grupos AD del usuario |
-| **Admin SSH portal** | `pct enter 208` (desde pve-desa04) |
+| **Admin SSH portal** | `pct enter 208` (desde pve-sistema 192.168.1.14) |
+| **Acceso remoto portal** | Via Twingate — red `emanuelrodriguez644` |
+| **SSH via Twingate** | `ssh root@192.168.1.14` → `lxc-attach -n 208` (pve-sistema) |
 | **Admin SSH vault** | `pct enter 209` (desde pve-desa04) |
 | **Admin SSH librenms** | `pct enter 210` (desde pve-desa04) |
 | **Vaultwarden** | `https://vault.gidas.local` — login con email + master password |
@@ -165,5 +170,9 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 7 | ✅ Telegram Bot configurado para alertas de LibreNMS | Media | ✅ |
 | 8 | ✅ LibreNMS integrado al portal GIDAS | Media | ✅ |
 | 9 | ✅ Grafana en CT 205 con dashboards LibreNMS | Media | ✅ |
-| 10 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
-| 11 | Link en Drupal gidas.frlp.utn.edu.ar | Baja | ⏳ |
+| 10 | ✅ Fix #9: Falsos positivos monitor tunnel | Alta | ✅ |
+| 11 | ✅ Scripts críticos versionados en backup branch | Media | ✅ |
+| 12 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 13 | Migrar a Cloudflare Named Tunnel (requiere dominio) | Media | ⏳ |
+| 14 | Mover credenciales hardcodeadas a variables de entorno | Alta | ⏳ |
+| 15 | Comprar dominio gidas.com.ar (~$5/año) | Baja | ⏳ |
