@@ -65,6 +65,36 @@
 
 ---
 
+## Migración de perfiles al dominio (GDC01)
+
+> Piloto completado en `.30` — **2026-08-04**. Replicar en las 4 islas.
+
+### Estado
+
+| Máquina | Perfil migrado | Login screen | Estado |
+|---|---|---|---|
+| pc direccion (`.30`) | ✅ `leopoldo` → `GDC01\lnahuel` (ProfWiz R24) | ✅ Tiles: `lnahuel` + `leorocca` | Completado y verificado |
+| pc isla 1 (`.51`) | — | — | Pendiente |
+| pc isla 2 (`.52`) | — | — | Pendiente |
+| pc isla 3 (`.53`) | — | — | Pendiente |
+| pc isla 4 (`.50`) | — | — | Pendiente |
+
+### Hallazgo clave (aplicar en TODAS las máquinas)
+
+El perfil de `leopoldo` en `.30` tenía las carpetas de usuario **redirigidas a `D:\Users\Usuario`** (Desktop, Documents, Music, Pictures, Videos, Downloads, Favorites — 8,5 GB). Verificar SIEMPRE `HKU\<SID>\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders` antes de asumir dónde viven los datos de un perfil.
+
+### Configuración del login screen (aplicada en `.30`)
+
+- Ocultar usuarios locales de la UI: `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\UserList` con valor DWORD `0` por usuario (Administrador, Gidas Miembro, Javier, Leandro, Leopoldo). Oculta el tile, NO bloquea la cuenta.
+- Los tiles de dominio aparecen por logon cacheado (LSA `HKLM\SECURITY\Cache`).
+- Verificado: sin GPO que oculte la lista (`dontdisplaylastusername=0`).
+
+### Procedimiento completo
+
+Ver `docs/migracion-leopoldo-lnahuel.md` — backup (perfil + NTUSER.DAT + carpetas redirigidas), ProfWiz (freeware = solo GUI), verificación post-migración (SID re-mapeado, datos intactos, DPAPI) y rollback.
+
+---
+
 ## Guía de conexión
 
 Las credenciales de acceso están en `pc-lan.md` — archivo **local, no versionado**.
