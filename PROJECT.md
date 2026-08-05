@@ -11,7 +11,7 @@
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
-| 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` | 🛠️ Implementado — Tunnel + nginx + 3 tools |
+| 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` + `fix/tunnel-monitor-url-dinamica` | 🛠️ Implementado — Tunnel + nginx + 3 tools + Fix falsos positivos |
 
 ## Leyenda de Estados SDD
 
@@ -214,4 +214,4 @@
 
 ---
 
-*Última actualización: 2026-07-03 (14:30)*
+*Última actualización: 2026-07-30 (02:00)* — Fix #9: Monitor integral con 19 servicios + DOWNTIME/RESOLUCION

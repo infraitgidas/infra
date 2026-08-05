@@ -1,8 +1,8 @@
 # Informe de Cambios — Dominio gidas.frlp — Integración con sitio institucional
 
 **Feature branch**: `feat/dominio-gidas-frlp`
-**Fecha**: 2026-07-03 (v1)
-**Estado**: ✅ COMPLETO — Tunnel + nginx + 3 tools + monitor con alertas
+**Fecha**: 2026-07-30 (v3)
+**Estado**: ✅ COMPLETO — Tunnel + nginx + 3 tools + Monitor integral 19 servicios + DOWNTIME/RESOLUCION
 
 ---
 
@@ -83,6 +83,35 @@ No relacionado con tunnel. Ver ADR-003.
 ### Bug #5: `{url}` literal en Drupal
 - **Fix**: Reemplazar placeholder por URL real del tunnel
 
+### Bug #9: Falsos positivos del monitor + rediseño a chequeo integral
+
+**Problema**: `tunnel-monitor.py` tenía la URL del Quick Tunnel hardcodeada y solo checkeaba el tunnel. No detectaba caídas individuales de herramientas ni infraestructura.
+
+**Causa raíz**: El servicio `gidas-tunnel.service` se reinició y cloudflared generó una nueva URL. El monitor no la detectó porque tenía la anterior hardcodeada → falso positivo cada 5 min.
+
+**Fix**: Rediseño completo del monitor:
+1. **URL dinámica**: Lee la URL del tunnel desde `/var/log/cloudflared.log`
+2. **Chequeo de herramientas (5)**: Portal, Grafana, GitLab, Redmine, LibreNMS via tunnel
+3. **Chequeo de infraestructura (13)**: PVE hosts, CTs, VMs, AD, MikroTik via ping/HTTP
+4. **Detección de cambios**: Persiste estado en `state.json`, alerta solo en transiciones
+5. **Alertas**: `🔴 DOWNTIME — Servicio (detalle)` / `🟢 RESOLUCION — Servicio (detalle)`
+
+**Archivos afectados**:
+- `site-tunnel-portal/scripts/tunnel-monitor.py` (versión versionada en repo)
+- `/opt/portal-gidas/tunnel-monitor.py` (CT 208, deployado)
+
+**Verificación**:
+```
+Tunnel: ✅ OK (200)     Tools: 5/5 ✅      Infra: 13/13 ✅      Alertas: 0
+```
+✅ 19 servicios monitoreados. Alertas solo ante cambios de estado reales.
+✅ DOWNTIME y RESOLUCIÓN verificados (test con Redmine: RESOLUCION enviado a Telegram).
+
+**Lecciones**:
+1. Los scripts críticos NO estaban versionados en el repo — solo existían en CT 208
+2. El Quick Tunnel es inherentemente volátil (cambia URL en cada reinicio)
+3. Para Named Tunnel se necesita cuenta Cloudflare con un dominio agregado
+
 ---
 
 ## 5. Credenciales
@@ -115,8 +144,15 @@ No relacionado con tunnel. Ver ADR-003.
 | `docs/runbooks/tunnel-migration-roadmap.md` | Roadmap de migración a soluciones estables |
 | `docs/runbooks/cloudflare-tunnel-analysis.md` | Análisis de Cloudflare Tunnel y limitaciones |
 | `docs/portal-acceso/propuesta-direccion.md` | Propuesta ejecutiva para dirección |
-| `/opt/portal-gidas/tunnel-monitor.py` | Heartbeat + parseo de logs (cron) |
+| `/opt/portal-gidas/tunnel-monitor.py` | Heartbeat + parseo de logs (cron) — URL dinámica desde log |
 | `/opt/portal-gidas/metrics-server.py` | Endpoint Prometheus en puerto 9100 |
+| `site-tunnel-portal/scripts/tunnel-monitor.py` | ✅ Versionado en repo (nuevo) — URL dinámica |
+| `site-tunnel-portal/scripts/tunnel-monitor.py.quick-tunnel.bak` | Backup del monitor original (URL hardcodeada) |
+| `site-tunnel-portal/scripts/auto-tunnel.py.quick-tunnel.bak` | Backup del auto-tunnel original |
+| `site-tunnel-portal/scripts/metrics-server.py.quick-tunnel.bak` | Backup del metrics server |
+| `site-tunnel-portal/scripts/gidas-tunnel.service.quick-tunnel.bak` | Backup del systemd service |
+| `site-tunnel-portal/scripts/auto-tunnel.service.quick-tunnel.bak` | Backup del auto-tunnel service alternativo |
+| `site-tunnel-portal/scripts/tunnel-monitor.cron.quick-tunnel.bak` | Backup del cron original |
 
 ---
 
@@ -142,6 +178,13 @@ No relacionado con tunnel. Ver ADR-003.
 | Security headers OWASP | ✅ 6 headers implementados |
 | Alerta fuerza bruta | ✅ Telegram a @GiDAS_alertbot |
 | Endpoint /security/stats | ✅ Monitoreo de IPs bloqueadas |
+| Monitor URL dinámica | ✅ Lee URL del log de cloudflared |
+| Chequeo de herramientas (5) | ✅ Portal, Grafana, GitLab, Redmine, LibreNMS via tunnel |
+| Chequeo de infraestructura (13) | ✅ 4 PVE hosts, 4 CTs, 3 VMs, AD GDC01, MikroTik |
+| Detección de cambios de estado | ✅ state.json persistido con timestamp |
+| Alerta DOWNTIME | ✅ 🔴 DOWNTIME — Redmine (timeout) |
+| Alerta RESOLUCIÓN | ✅ 🟢 RESOLUCION — Redmine (200) — verificado |
+| Sin falsos positivos cada 5 min | ✅ Verificado: HTTP 200 OK sin alerta |
 
 ---
 
@@ -157,9 +200,13 @@ No relacionado con tunnel. Ver ADR-003.
 | ✅ Fix #6: Página solicitud acceso becarios | 🟢 Baja | ✅ |
 | ✅ Fix #7: Monitoreo tunnel + métricas por tool | 🟡 Media | ✅ |
 | ✅ Fix #8: Seguridad — rate limiting + headers OWASP | 🔴 Alta | ✅ |
-| Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ |
+| ✅ Fix #9: Monitor integral — URL dinámica + tools + infra + DOWNTIME/RESOLUCION | 🔴 Alta | ✅ |
+| 🔄 Fix #5: Tunnel URL cambia al reiniciar — migrar a Named Tunnel | 🟡 Media | ✅ Parcial |
+| Migrar a Cloudflare Named Tunnel (URL estable) | 🟡 Media | ⏳ (sin dominio) |
 | Comprar dominio propio (gidas.com.ar) | 🟢 Baja | ⏳ |
 | Agregar HTTPS a nginx CT 208 (Let's Encrypt) | 🟢 Baja | ⏳ |
+| Versionar scripts críticos del CT en el repo | 🟡 Media | ✅ Parcial |
+| Mover credenciales hardcodeadas a variables de entorno/vault | 🔴 Alta | ⏳ |
 
 | Seguridad: bloquear tras 4 intentos fallidos | 🟡 Media | ✅ |
 
