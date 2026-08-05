@@ -6,12 +6,13 @@
 |---|---------|-------------|-----------|------|------------|
 | 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 📦 Archivado ✅ |
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
-| 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
-| 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
+| 3 | Gestor CMDB | NetBox | `cmdb/` | `feat/herramientas-pendientes` | 📋 Planificado — SDD ✅, código NO implementado (`cmdb/` vacío) |
+| 4 | Gestor ITSM | GLPI | `itsm/` | `feat/herramientas-pendientes` | 🛠️ Implementado — SIN disponibilizar (sin CT/DNS) |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
 | 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` + `fix/tunnel-monitor-url-dinamica` | 🛠️ Implementado — Tunnel + nginx + 3 tools + Fix falsos positivos |
+| 9 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | ⏳ Pendiente — no iniciado |
 
 ## Leyenda de Estados SDD
 
@@ -76,13 +77,12 @@
 
 ---
 
-### Feature 3: Gestor CMDB
+### Feature 3: Gestor CMDB — NetBox
 
 - **Objetivo**: Implementar una CMDB (Configuration Management Database) para inventario de infraestructura
 - **Componentes**: NetBox 4.x (Docker Compose), PostgreSQL 15, Redis 7, scripts discovery (Proxmox, Mikrotik, LDAP)
-- **Estado SDD**: 🛠️ Implementación
-- **Tareas**: 14/14 completadas (apply)
-- **Tareas Completadas**: Deploy stack, scripts base, discovery scripts, documentación
+- **Estado SDD**: 📋 Planificado — SDD completo (exploration/proposal/design/specs), código **NO implementado** (`cmdb/` vacío, verificado 2026-08-05)
+- **Pendiente**: Implementar el stack según `openspec/changes/cmdb/design.md` (rama `feat/herramientas-pendientes`)
 
 ---
 
@@ -90,9 +90,17 @@
 
 - **Objetivo**: Implementar un sistema ITSM (IT Service Management) para gestión de incidentes, cambios y problemas
 - **Componentes**: GLPI + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
-- **Estado SDD**: 🛠️ Implementación
-- **Tareas**: 18 tareas en 6 fases
-- **Tareas Completadas**: F1 (stack), F2 (post-deploy), F3 (backup/restore), F4 (integraciones), F5 (LDAP), F6 (verificación)
+- **Estado SDD**: 🛠️ Implementado en repo — 18 tareas en 6 fases completadas, **SIN disponibilizar** (sin CT/VM ni DNS en producción, verificado 2026-08-05)
+- **Pendiente**: Deploy en CT 212 + DNS MikroTik + alta en portal (rama `feat/herramientas-pendientes`)
+
+---
+
+### Feature 9: Automatización — Ansible
+
+- **Objetivo**: Automatización de la infraestructura (deploy de stacks, config drift, orquestación)
+- **Componentes**: Por definir (SDD pendiente)
+- **Estado SDD**: ⏳ Pendiente — no iniciado (rama `feat/herramientas-pendientes`)
+- **Pendiente**: Exploration en `openspec/changes/ansible/`
 
 ---
 
