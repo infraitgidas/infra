@@ -1,8 +1,8 @@
 # Informe de Cambios — Dominio gidas.frlp — Integración con sitio institucional
 
 **Feature branch**: `feat/dominio-gidas-frlp`
-**Fecha**: 2026-07-29 (v2)
-**Estado**: ✅ COMPLETO — Tunnel + nginx + 3 tools + monitor con alertas + Fix falsos positivos
+**Fecha**: 2026-07-30 (v3)
+**Estado**: ✅ COMPLETO — Tunnel + nginx + 3 tools + Monitor integral 19 servicios + DOWNTIME/RESOLUCION
 
 ---
 

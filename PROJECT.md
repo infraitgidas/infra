@@ -214,4 +214,4 @@
 
 ---
 
-*Última actualización: 2026-07-29 (23:00)* — Fix #9: Falsos positivos monitor tunnel (URL dinámica desde log)
+*Última actualización: 2026-07-30 (02:00)* — Fix #9: Monitor integral con 19 servicios + DOWNTIME/RESOLUCION

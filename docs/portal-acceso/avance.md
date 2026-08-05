@@ -1,7 +1,7 @@
 # Informe de Avance — Portal de Acceso GIDAS
 
 > **Feature**: Portal de Acceso (Feature #6)
-> **Fecha**: 2026-07-29 (v2)
+> **Fecha**: 2026-07-30 (v3)
 > **Rama**: `fix/tunnel-monitor-url-dinamica`
 > **Estado SDD**: ✅ Implementado
 
@@ -107,8 +107,8 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **GitLab** | ✅ Restaurado | System nginx ocupaba puerto 80. Solucionado: system nginx detenido, GitLab nginx reiniciado. |
 | **Vaultwarden** | ✅ Desplegado | CT 209, Docker, LDAP, SSL. Card en portal. |
 | **LibreNMS** | ✅ Desplegado + integrado | CT 210, Docker Compose, 12 dispositivos, 18 alertas, Telegram + Grafana en CT 205 |
-| **Tunnel Monitor** | ✅ Fix falsos positivos | URL dinámica desde log (ya no alerta cada 5 min) |
-| **Scripts críticos** | ✅ Parcialmente versionados | Backup branch `backup/pre-named-tunnel` con scripts originales |
+| **Tunnel Monitor** | ✅ Monitor integral 19 servicios | Tunnel + 5 tools + 13 infra. Alertas DOWNTIME/RESOLUCIÓN |
+| **Scripts críticos** | ✅ Versionados en repo | `site-tunnel-portal/scripts/tunnel-monitor.py` + backup branch |
 | **VM 207** | ❌ Eliminada | Ex-Authentik, 1.5GB RAM liberados |
 
 ---
@@ -153,7 +153,9 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | **Logs vault** | `docker logs vaultwarden -f` |
 | **Logs librenms** | `docker compose -f /opt/librenms/docker-compose.yml logs -f` |
 | **Logs grafana** | `journalctl -u grafana-server -f` (CT 205) |
-| **Telegram** | @GiDAS_alertbot — bot operativo para alertas de red |
+| **Telegram** | @GiDAS_alertbot — bot operativo para alertas de red + DOWNTIME/RESOLUCIÓN de 19 servicios |
+| **Monitor logs** | `tail -f /var/log/tunnel-monitor/$(date +%Y-%m-%d).jsonl` |
+| **Monitor estado** | `cat /var/log/tunnel-monitor/state.json` |
 
 ---
 
@@ -170,9 +172,10 @@ Portal web custom desarrollado con FastAPI + LDAP que permite a los miembros de 
 | 7 | ✅ Telegram Bot configurado para alertas de LibreNMS | Media | ✅ |
 | 8 | ✅ LibreNMS integrado al portal GIDAS | Media | ✅ |
 | 9 | ✅ Grafana en CT 205 con dashboards LibreNMS | Media | ✅ |
-| 10 | ✅ Fix #9: Falsos positivos monitor tunnel | Alta | ✅ |
-| 11 | ✅ Scripts críticos versionados en backup branch | Media | ✅ |
-| 12 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
-| 13 | Migrar a Cloudflare Named Tunnel (requiere dominio) | Media | ⏳ |
-| 14 | Mover credenciales hardcodeadas a variables de entorno | Alta | ⏳ |
-| 15 | Comprar dominio gidas.com.ar (~$5/año) | Baja | ⏳ |
+| 10 | ✅ Monitor integral: 19 servicios (tunnel + 5 tools + 13 infra) | Alta | ✅ |
+| 11 | ✅ Alertas DOWNTIME / RESOLUCIÓN por cambio de estado | Alta | ✅ |
+| 12 | ✅ Scripts críticos versionados en backup branch | Media | ✅ |
+| 13 | Twingate resource para `portal.gidas.local` | Media | ⏳ |
+| 14 | Migrar a Cloudflare Named Tunnel (requiere dominio) | Media | ⏳ |
+| 15 | Mover credenciales hardcodeadas a variables de entorno | Alta | ⏳ |
+| 16 | Comprar dominio gidas.com.ar (~$5/año) | Baja | ⏳ |
