@@ -157,9 +157,10 @@ pct exec 210 -- docker exec librenms ps aux | grep snmpd
 ```bash
 #!/bin/bash
 # heartbeat-lnms.sh
+# TELEGRAM_TOKEN y TELEGRAM_CHAT son variables de entorno (ver secrets/telegram.yaml.template)
 curl -skf --max-time 10 https://nms.gidas.local/api/v0 > /dev/null 2>&1 || \
-  curl -s "https://api.telegram.org/bot8965268173:AAFOqin05EmL7bMSqQkJmgu4uo5GrAwxC-o/sendMessage" \
-    -d "chat_id=1773145563" \
+  curl -s "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+    -d "chat_id=${TELEGRAM_CHAT}" \
     -d "text=🔴 *ALERTA* LibreNMS no responde - $(date)" \
     -d "parse_mode=Markdown"
 ```

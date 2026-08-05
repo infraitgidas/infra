@@ -7,6 +7,7 @@ Notifica comportamiento sospechoso via Telegram.
 
 from __future__ import annotations
 
+import os
 import time
 import urllib.request
 import urllib.error
@@ -17,8 +18,10 @@ MAX_ATTEMPTS = 4
 BLOCK_MINUTES = 15
 BLOCK_SECONDS = BLOCK_MINUTES * 60
 
-TELEGRAM_TOKEN = "8965268173:AAFOqin05EmL7bMSqQkJmgu4uo5GrAwxC-o"
-TELEGRAM_CHAT = "1773145563"
+# Credenciales desde variables de entorno (nunca hardcodear).
+# Formato del secreto: ver secrets/telegram.yaml.template
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT = os.environ.get("TELEGRAM_CHAT", "")
 
 # In-memory store: {key: {"attempts": int, "first_attempt": float, "blocked_until": float}}
 _attempts: dict = {}
@@ -38,6 +41,8 @@ def _get_ip(request) -> str:
 
 def _send_telegram(msg: str):
     """Send alert via Telegram (best effort, no raise)."""
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT:
+        return  # Telegram no configurado — definir TELEGRAM_TOKEN/TELEGRAM_CHAT (env)
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
         data = f"chat_id={TELEGRAM_CHAT}&text={msg}&parse_mode=Markdown".encode()
