@@ -7,7 +7,7 @@
 | 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 📦 Archivado ✅ |
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
 | 3 | Gestor CMDB | NetBox | `cmdb/` | `feat/herramientas-pendientes` | 📋 Planificado — SDD ✅, código NO implementado (`cmdb/` vacío) |
-| 4 | Gestor ITSM | GLPI | `itsm/` | `feat/herramientas-pendientes` | 🛠️ Implementado — SIN disponibilizar (sin CT/DNS) |
+| 4 | Gestor ITSM | GLPI | `itsm/` | `feat/herramientas-pendientes` | ✅ Operativo — CT 212 + DNS + portal (LDAP/email pendientes) |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
@@ -89,9 +89,21 @@
 ### Feature 4: Gestor ITSM — GLPI
 
 - **Objetivo**: Implementar un sistema ITSM (IT Service Management) para gestión de incidentes, cambios y problemas
-- **Componentes**: GLPI + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
-- **Estado SDD**: 🛠️ Implementado en repo — 18 tareas en 6 fases completadas, **SIN disponibilizar** (sin CT/VM ni DNS en producción, verificado 2026-08-05)
-- **Pendiente**: Deploy en CT 212 + DNS MikroTik + alta en portal (rama `feat/herramientas-pendientes`)
+- **Componentes**: GLPI 10.0.26 (imagen oficial `glpi/glpi:10.0`) + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
+- **Estado SDD**: ✅ **OPERATIVO** — deployado en CT 212 (192.168.1.47), DNS MikroTik, portal y API verificados E2E (ticket id=1). SDD completo (4 specs, 18 tareas). Actualizado 2026-08-06
+- **Tareas Completadas**:
+  - Migración a imagen oficial `glpi/glpi:10.0` (la imagen `diouxx/glpi` no existe)
+  - CT 212 Rocky 9 (2c/4G/20G), Docker CE + Compose, stack en `/opt/glpi`, 3 contenedores healthy
+  - DNS MikroTik `glpi.gidas.local → 192.168.1.47` + `/etc/hosts` CT 208 corregido
+  - HTTPS con cert autofirmado SAN DNS+IP, nginx 301 http→https
+  - API habilitada: App-Token (SOPS), 2 API clients por IP range, E2E verificado
+  - Alta en portal (`proxy: true`, G-Direccion/G-Coordinadores), reverse proxy 200
+  - Backup `backup.sh` + zstd probado (SUCCESS) + crons CT 212 (cron.php 5min, backup dom 03:00)
+  - Config core: `url_base`, `es_AR`, tz Buenos Aires, `enable_api=1`
+  - 7 bugs corregidos documentados en `docs/itsm/avance.md` e `openspec/changes/itsm/informe-cambios.md`
+- **Pendiente**: LDAP (decidir AD GDC01 vs FreeIPA — FreeIPA no existe en la LAN), SMTP (no hay servidor de correo), integraciones Redmine/GitLab (tokens PENDIENTE)
+- **Archivos**: `itsm/`, `secrets/glpi.yaml`, `docs/itsm/avance.md`
+- **Archivo SDD**: `openspec/changes/itsm/`
 
 ---
 

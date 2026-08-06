@@ -21,12 +21,13 @@ Tres herramientas están implementadas (o planificadas) en el repo pero **no ope
 - **Código**: `itsm/` (docker-compose glpi+mariadb+nginx, `scripts/install-glpi.sh`, backup/restore, webhooks Redmine/GitLab, LDAP FreeIPA, `docs/post-deploy-config.md`).
 - **SDD**: specs `itsm-core`, `itsm-ldap-auth`, `itsm-backup`, `itsm-integrations`; change `openspec/changes/itsm/` con 18 tareas en 6 fases completadas.
 - **Producción**: ✅ CT 212 (Rocky, 2c/4G/20G, IP fija `192.168.1.47`) con stack `itsm/` desplegado en `/opt/glpi` (imagen oficial `glpi/glpi:10.0`, contenedores `glpi-mariadb`/`glpi-app`/`glpi-nginx` healthy). `glpi.gidas.local` resuelve a `192.168.1.47` (record static en MikroTik) y el proxy del portal (`/proxy/glpi/`) responde 200.
-- **Para disponibilizar** (1-4 completados, 5 pendiente):
+- **Para disponibilizar** (1-4 completados, 5 en curso — config post-deploy aplicada 2026-08-06):
   1. ✅ Crear CT 212 en pve-desa04 (Rocky Linux, IP fija en la LAN).
   2. ✅ Deploy del stack `itsm/` (docker compose + scripts) en `/opt/glpi`.
   3. ✅ DNS: record static en MikroTik `glpi.gidas.local → 192.168.1.47`; `/etc/hosts` del CT 208 corregido (apuntaba a `.45`).
   4. ✅ Alta en el portal (`config.yaml` de `portal-gidas/` ya tenía GLPI con `proxy: true`; grupos G-Direccion/G-Coordinadores).
   5. 🔲 Verificación LDAP FreeIPA + cron interno + backup.
+- **Config post-deploy aplicada (2026-08-06)**: crons CT 212 (cron.php cada 5 min + backup dom 03:00), `zstd` instalado, `backup.sh` probado (SUCCESS), `00-env.sh` carga credenciales reales del `.env`, comandos corregidos a GLPI 10 (`config:set`, `ldap:synchronize_users`). Detalle en `docs/itsm/avance.md`.
 
 ### 2. NetBox — Gestor CMDB
 
