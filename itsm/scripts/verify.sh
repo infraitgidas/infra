@@ -107,7 +107,7 @@ if [ -f "${COMPOSE_FILE}" ]; then
     done
     
     # Check named volumes
-    for vol in glpi_mariadb_data glpi_config glpi_plugins glpi_documents; do
+    for vol in glpi_mariadb_data glpi_data glpi_plugins glpi_marketplace; do
         if grep -q "${vol}:" "${COMPOSE_FILE}"; then
             check "Volume: ${vol} defined" "PASS"
         else
@@ -129,7 +129,7 @@ fi
 if [ -f "${ITSM_DIR}/.env.example" ]; then
     check "File: .env.example (documented)" "PASS"
     # Check for required variables
-    for var in MYSQL_ROOT_PASSWORD MYSQL_DATABASE GLPI_TIMEZONE; do
+    for var in MYSQL_ROOT_PASSWORD GLPI_DB_NAME GLPI_TIMEZONE; do
         if grep -q "${var}" "${ITSM_DIR}/.env.example"; then
             check "Variable: ${var} in .env.example" "PASS"
         else

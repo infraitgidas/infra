@@ -25,10 +25,11 @@ MYSQL_PASSWORD="${MYSQL_PASSWORD:-glpi_password}"
 MYSQL_HOST="${MYSQL_HOST:-mariadb}"
 MYSQL_PORT="${MYSQL_PORT:-3306}"
 
-# --- GLPI ---
-GLPI_VERSION="${GLPI_VERSION:-10.0.x}"
+# --- GLPI (imagen oficial glpi/glpi) ---
+GLPI_VERSION="${GLPI_VERSION:-10.0}"
 GLPI_HOSTNAME="${GLPI_HOSTNAME:-glpi.gidas.local}"
 GLPI_TIMEZONE="${GLPI_TIMEZONE:-America/Argentina/Buenos_Aires}"
+GLPI_LANG="${GLPI_LANG:-es_AR}"
 GLPI_ADMIN_EMAIL="${GLPI_ADMIN_EMAIL:-admin@gidas.local}"
 GLPI_ADMIN_USER="${GLPI_ADMIN_USER:-glpi}"
 GLPI_ADMIN_PASSWORD="${GLPI_ADMIN_PASSWORD:-}"
@@ -54,15 +55,18 @@ BACKUP_RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-30}"
 BACKUP_SCHEDULE="${BACKUP_SCHEDULE:-0 3 * * 0}"  # Weekly Sunday 03:00
 
 # --- Docker Volume Names ---
+# Migrados a la imagen oficial glpi/glpi (2026-08-06):
+#   - config + files + logs viven juntos en el volumen unico glpi_data (/var/glpi)
+#   - plugins y marketplace en paths propios (/var/www/glpi/...)
 VOLUME_MARIADB="glpi_mariadb_data"
-VOLUME_GLPI_CONFIG="glpi_config"
+VOLUME_GLPI_DATA="glpi_data"
 VOLUME_GLPI_PLUGINS="glpi_plugins"
-VOLUME_GLPI_DOCUMENTS="glpi_documents"
+VOLUME_GLPI_MARKETPLACE="glpi_marketplace"
 
 # --- Container Names ---
-CONTAINER_MARIADB="${COMPOSE_PROJECT_NAME}-mariadb-1"
-CONTAINER_GLPI="${COMPOSE_PROJECT_NAME}-glpi-1"
-CONTAINER_NGINX="${COMPOSE_PROJECT_NAME}-nginx-1"
+CONTAINER_MARIADB="glpi-mariadb"
+CONTAINER_GLPI="glpi-app"
+CONTAINER_NGINX="glpi-nginx"
 
 # --- Docker ---
 DOCKER_NETWORK="${COMPOSE_PROJECT_NAME}_default"

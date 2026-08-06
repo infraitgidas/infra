@@ -94,9 +94,9 @@ echo "[3/7] Removing old volumes for clean restore..."
 
 VOLUMES=(
     "${VOLUME_MARIADB}"
-    "${VOLUME_GLPI_CONFIG}"
+    "${VOLUME_GLPI_DATA}"
     "${VOLUME_GLPI_PLUGINS}"
-    "${VOLUME_GLPI_DOCUMENTS}"
+    "${VOLUME_GLPI_MARKETPLACE}"
 )
 
 for vol in "${VOLUMES[@]}"; do
@@ -143,10 +143,9 @@ restore_volume() {
     echo "[4/7] Restored: ${volume_name}"
 }
 
-restore_volume "${VOLUME_GLPI_CONFIG}" "glpi-config-*.tar.gz" "/var/www/html/glpi/config"
-restore_volume "${VOLUME_GLPI_PLUGINS}" "glpi-plugins-*.tar.gz" "/var/www/html/glpi/plugins"
-restore_volume "${VOLUME_GLPI_DOCUMENTS}" "glpi-documents-*.tar.gz" "/var/www/html/glpi/files"
-restore_volume "${VOLUME_GLPI_MARKETPLACE}" "glpi-marketplace-*.tar.gz" "/var/www/html/glpi/marketplace" 2>/dev/null || true
+restore_volume "${VOLUME_GLPI_DATA}" "glpi-data-*.tar.gz" "/var/glpi"
+restore_volume "${VOLUME_GLPI_PLUGINS}" "glpi-plugins-*.tar.gz" "/var/www/glpi/plugins"
+restore_volume "${VOLUME_GLPI_MARKETPLACE}" "glpi-marketplace-*.tar.gz" "/var/www/glpi/marketplace" 2>/dev/null || true
 
 echo "[4/7] Volume restore completed"
 
@@ -216,8 +215,9 @@ echo "[7/7] Running health check..."
 
 sleep 15
 
-if docker exec "${CONTAINER_GLPI}" curl -sf -o /dev/null "http://localhost/" 2>/dev/null; then
-    echo "[7/7] GLPI is responding"
+# Health check via the container's own healthcheck (la imagen oficial no trae curl)
+if docker inspect --format='{{.State.Health.Status}}' "${CONTAINER_GLPI}" 2>/dev/null | grep -q "healthy"; then
+    echo "[7/7] GLPI is healthy"
 else
     echo "[7/7] WARNING: GLPI health check failed — check container logs" >&2
 fi

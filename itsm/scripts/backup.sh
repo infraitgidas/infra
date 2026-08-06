@@ -4,7 +4,7 @@
 # ================================================================
 # Creates a timestamped backup bundle containing:
 #   - MariaDB SQL dump (compressed with zstd)
-#   - GLPI config, plugins, documents, and marketplace tarballs
+#   - GLPI data (/var/glpi), plugins, and marketplace tarballs
 #
 # Usage:
 #   ./backup.sh                    # Default backup
@@ -80,10 +80,9 @@ backup_volume() {
     }
 }
 
-backup_volume "${VOLUME_GLPI_CONFIG}" "glpi-config" "/var/www/html/glpi/config"
-backup_volume "${VOLUME_GLPI_PLUGINS}" "glpi-plugins" "/var/www/html/glpi/plugins"
-backup_volume "${VOLUME_GLPI_DOCUMENTS}" "glpi-documents" "/var/www/html/glpi/files"
-backup_volume "${VOLUME_GLPI_MARKETPLACE}" "glpi-marketplace" "/var/www/html/glpi/marketplace" 2>/dev/null || true
+backup_volume "${VOLUME_GLPI_DATA}" "glpi-data" "/var/glpi"
+backup_volume "${VOLUME_GLPI_PLUGINS}" "glpi-plugins" "/var/www/glpi/plugins"
+backup_volume "${VOLUME_GLPI_MARKETPLACE}" "glpi-marketplace" "/var/www/glpi/marketplace" 2>/dev/null || true
 
 echo "[2/4] Volumes archived"
 
@@ -102,9 +101,8 @@ MANIFEST="${BACKUP_PATH}/MANIFEST.txt"
     echo ""
     echo "Contents:"
     echo "  - glpi-database.sql.zst (MariaDB dump, zstd-compressed)"
-    echo "  - glpi-config-${TIMESTAMP}.tar.gz (GLPI config)"
+    echo "  - glpi-data-${TIMESTAMP}.tar.gz (GLPI data: config, files, logs)"
     echo "  - glpi-plugins-${TIMESTAMP}.tar.gz (GLPI plugins)"
-    echo "  - glpi-documents-${TIMESTAMP}.tar.gz (GLPI files/documents)"
     echo "  - glpi-marketplace-${TIMESTAMP}.tar.gz (GLPI marketplace)"
     echo ""
     echo "Restore: scripts/restore.sh ${BACKUP_TARGET}/${TIMESTAMP}"

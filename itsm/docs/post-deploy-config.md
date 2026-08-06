@@ -49,7 +49,7 @@ purge logs). Add to the host's crontab:
 
 ```bash
 # GLPI background tasks — every 5 minutes
-*/5 * * * * docker exec glpi-app php /var/www/html/glpi/front/cron.php >/dev/null 2>&1
+*/5 * * * * docker exec glpi-app php /var/www/glpi/front/cron.php >/dev/null 2>&1
 
 # LDAP user sync — every hour
 0 * * * * docker exec glpi-app php bin/console glpi:ldap:synchronize --all >/dev/null 2>&1
@@ -108,15 +108,15 @@ docker exec glpi-app php bin/console glpi:config:set smtp_password "<password>"
 ## 6. Security Hardening
 
 ```bash
-# Remove install.php (done by install-glpi.sh)
-docker exec glpi-app rm -f /var/www/html/glpi/install/install.php
+# Remove installer (la imagen oficial autoinstala; el installer web queda inactivo)
+docker exec glpi-app rm -f /var/www/glpi/install/install.php
 
 # Remove documentation from webroot
-docker exec glpi-app rm -rf /var/www/html/glpi/docs
+docker exec glpi-app rm -rf /var/www/glpi/docs
 
-# Restrict files permissions
-docker exec glpi-app chmod -R 640 /var/www/html/glpi/config/*
-docker exec glpi-app chmod -R 640 /var/www/html/glpi/files/_log/*
+# Restrict files permissions (config y files viven en /var/glpi con la imagen oficial)
+docker exec glpi-app chmod -R 640 /var/glpi/config/*
+docker exec glpi-app chmod -R 640 /var/glpi/files/_log/*
 
 # Disable setup wizard
 docker exec glpi-app php bin/console glpi:config:set setup_wizard_closed 1
