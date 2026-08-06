@@ -76,14 +76,18 @@ fi
 # ---------------------------------------------------------------
 echo "[2/5] Setting GLPI admin password..."
 
+# NOTA: GLPI 10.0 NO expone comando CLI para cambiar password
+# (glpi:security:change_password llego en GLPI 11). Se actualiza
+# la tabla glpi_users con un hash bcrypt generado en el contenedor.
 if [ -n "${GLPI_ADMIN_PASSWORD}" ]; then
-    docker exec "${CONTAINER_GLPI}" php bin/console glpi:security:change_password \
-        --no-interaction \
-        "${GLPI_ADMIN_USER}" \
-        "${GLPI_ADMIN_PASSWORD}" \
-        >/dev/null 2>&1 && \
-    echo "[2/5] Admin password set" || \
-    echo "[2/5] WARNING: Could not set admin password (may already be set or CLI not available)"
+    HASH=$(docker exec "${CONTAINER_GLPI}" php -r "echo password_hash('${GLPI_ADMIN_PASSWORD}', PASSWORD_BCRYPT);" 2>/dev/null || true)
+    if [ -n "${HASH}" ] && docker exec "${CONTAINER_MARIADB}" \
+        mariadb -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}" \
+        -e "UPDATE glpi_users SET password='${HASH}' WHERE name='${GLPI_ADMIN_USER}' AND is_active=1;" >/dev/null 2>&1; then
+        echo "[2/5] Admin password set (bcrypt via SQL)"
+    else
+        echo "[2/5] WARNING: Could not set admin password — verify manually" >&2
+    fi
 else
     echo "[2/5] SKIP: GLPI_ADMIN_PASSWORD not set — change manually via web UI"
     echo "    Default credentials: glpi / glpi"
@@ -155,17 +159,16 @@ echo "[4/5] GLPI settings configured"
 # ---------------------------------------------------------------
 echo "[5/5] Checking LDAP configuration..."
 
-if docker exec "${CONTAINER_GLPI}" php bin/console glpi:ldap:list 2>/dev/null | grep -q "No LDAP"; then
+# En GLPI 10 el comando es ldap:synchronize_users (alias ldap:sync);
+# si no hay directorios LDAP configurados, falla -> se reporta como skip.
+if docker exec "${CONTAINER_GLPI}" php bin/console ldap:synchronize_users \
+    --no-interaction \
+    --all \
+    >/dev/null 2>&1; then
+    echo "[5/5] LDAP sync completed"
+else
     echo "[5/5] No LDAP directories configured — skipping sync"
     echo "    Configure LDAP first via config/ldap-auth.php or web UI"
-else
-    echo "[5/5] Running LDAP synchronization..."
-    docker exec "${CONTAINER_GLPI}" php bin/console glpi:ldap:synchronize \
-        --no-interaction \
-        --all \
-        >/dev/null 2>&1 && \
-    echo "[5/5] LDAP sync completed" || \
-    echo "[5/5] WARNING: LDAP sync failed (may not be configured yet)"
 fi
 
 # ---------------------------------------------------------------
