@@ -51,6 +51,7 @@ if docker exec "${CONTAINER_MARIADB}" \
 else
     echo "[1/4] ERROR: Database dump FAILED" >&2
     echo "[1/4] Check: MariaDB container running? Credentials valid?" >&2
+    rm -f "${DB_FILE}"  # no dejar dump vacio de 0 bytes
     RC=1
     logger -t glpi-backup "ERROR: MariaDB dump failed"
 fi

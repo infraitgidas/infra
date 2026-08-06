@@ -98,13 +98,13 @@ fi
 # ---------------------------------------------------------------
 echo "[3/5] Configuring GLPI API access..."
 
-docker exec "${CONTAINER_GLPI}" php bin/console glpi:config:set \
+docker exec "${CONTAINER_GLPI}" php bin/console config:set \
     --no-interaction \
     "enable_api" \
     "1" \
     >/dev/null 2>&1 || echo "[3/5] WARNING: Could not enable API via CLI"
 
-docker exec "${CONTAINER_GLPI}" php bin/console glpi:config:set \
+docker exec "${CONTAINER_GLPI}" php bin/console config:set \
     --no-interaction \
     "enable_api_login_credentials" \
     "1" \
@@ -127,7 +127,7 @@ echo "[4/5] Configuring GLPI settings..."
 
 # Set server URL
 if [ -n "${GLPI_HOSTNAME}" ]; then
-    docker exec "${CONTAINER_GLPI}" php bin/console glpi:config:set \
+    docker exec "${CONTAINER_GLPI}" php bin/console config:set \
         --no-interaction \
         "url_base" \
         "https://${GLPI_HOSTNAME}" \
@@ -136,7 +136,7 @@ fi
 
 # Set language
 if [ -n "${GLPI_LANG}" ]; then
-    docker exec "${CONTAINER_GLPI}" php bin/console glpi:config:set \
+    docker exec "${CONTAINER_GLPI}" php bin/console config:set \
         --no-interaction \
         "language" \
         "${GLPI_LANG}" \
@@ -145,7 +145,7 @@ fi
 
 # Set timezone
 if [ -n "${GLPI_TIMEZONE}" ]; then
-    docker exec "${CONTAINER_GLPI}" php bin/console glpi:config:set \
+    docker exec "${CONTAINER_GLPI}" php bin/console config:set \
         --no-interaction \
         "timezone" \
         "${GLPI_TIMEZONE}" \

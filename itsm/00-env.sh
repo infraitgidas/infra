@@ -13,17 +13,28 @@ SCRIPTS_DIR="${ITSM_DIR}/scripts"
 CONFIG_DIR="${ITSM_DIR}/config"
 BACKUP_DIR="/var/backups/glpi"
 
+# --- Cargar .env real (credenciales de produccion) si existe ---
+# El .env del compose (generado desde secrets/glpi.yaml) usa las vars de
+# la imagen oficial glpi/glpi (GLPI_DB_*). Se carga ANTES de los defaults
+# para que los scripts usen las credenciales reales, no los placeholders.
+if [ -f "${ITSM_DIR}/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . "${ITSM_DIR}/.env"
+    set +a
+fi
+
 # --- Docker Compose ---
 COMPOSE_FILE="${ITSM_DIR}/docker-compose.yml"
 COMPOSE_PROJECT_NAME="glpi"
 
-# --- MariaDB ---
-MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-glpi_root_secret}"
-MYSQL_DATABASE="${MYSQL_DATABASE:-glpi}"
-MYSQL_USER="${MYSQL_USER:-glpi}"
-MYSQL_PASSWORD="${MYSQL_PASSWORD:-glpi_password}"
-MYSQL_HOST="${MYSQL_HOST:-mariadb}"
-MYSQL_PORT="${MYSQL_PORT:-3306}"
+# --- MariaDB (mapeo GLPI_DB_* -> MYSQL_*) ---
+MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-}"
+MYSQL_DATABASE="${MYSQL_DATABASE:-${GLPI_DB_NAME:-glpi}}"
+MYSQL_USER="${MYSQL_USER:-${GLPI_DB_USER:-glpi}}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-${GLPI_DB_PASSWORD:-glpi_password}}"
+MYSQL_HOST="${MYSQL_HOST:-${GLPI_DB_HOST:-mariadb}}"
+MYSQL_PORT="${MYSQL_PORT:-${GLPI_DB_PORT:-3306}}"
 
 # --- GLPI (imagen oficial glpi/glpi) ---
 GLPI_VERSION="${GLPI_VERSION:-10.0}"
