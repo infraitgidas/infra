@@ -1,7 +1,7 @@
 # Herramientas Pendientes de Disponibilizar
 
 > **Rama**: `feat/herramientas-pendientes`
-> **Última verificación**: 2026-08-05
+> **Última verificación**: 2026-08-06
 > **Criterio**: "disponibilizada" = deployada en producción, accesible por DNS y operativa (no basta el código versionado).
 
 ## Resumen
@@ -10,7 +10,7 @@ Tres herramientas están implementadas (o planificadas) en el repo pero **no ope
 
 | # | Herramienta | Código | Specs SDD | En producción | Bloqueante principal |
 |---|-------------|--------|-----------|---------------|----------------------|
-| 1 | **GLPI** (ITSM) | ✅ `itsm/` | ✅ 4 specs | ❌ | Deploy + DNS + portal |
+| 1 | **GLPI** (ITSM) | ✅ `itsm/` | ✅ 4 specs | ✅ CT 212 + DNS + portal | Verificación LDAP/backup |
 | 2 | **NetBox** (CMDB) | ❌ `cmdb/` vacío | ✅ SDD completo | ❌ | Implementar el stack desde cero |
 | 3 | **Ansible** | ❌ — | ❌ | ❌ | SDD: definir alcance y arquitectura |
 
@@ -20,13 +20,13 @@ Tres herramientas están implementadas (o planificadas) en el repo pero **no ope
 
 - **Código**: `itsm/` (docker-compose glpi+mariadb+nginx, `scripts/install-glpi.sh`, backup/restore, webhooks Redmine/GitLab, LDAP FreeIPA, `docs/post-deploy-config.md`).
 - **SDD**: specs `itsm-core`, `itsm-ldap-auth`, `itsm-backup`, `itsm-integrations`; change `openspec/changes/itsm/` con 18 tareas en 6 fases completadas.
-- **Producción**: ❌ No existe CT/VM de GLPI en pve-desa04 (CTs activos: 208 portal, 209 vaultwarden, 210 librenms, 211 freeradius; VMs: 201 gitlab, 206 redmine). `glpi.gidas.local` no resuelve en DNS.
-- **Para disponibilizar**:
-  1. Crear CT nuevo en pve-desa04 (patrón: CT 212, Rocky Linux, IP fija en la LAN).
-  2. Deploy del stack `itsm/` (docker compose + scripts).
-  3. DNS en MikroTik: `glpi.gidas.local` → IP del CT.
-  4. Alta en el portal (config.yaml de `portal-gidas/`) con grupo AD.
-  5. Verificación LDAP FreeIPA + cron interno + backup.
+- **Producción**: ✅ CT 212 (Rocky, 2c/4G/20G, IP fija `192.168.1.47`) con stack `itsm/` desplegado en `/opt/glpi` (imagen oficial `glpi/glpi:10.0`, contenedores `glpi-mariadb`/`glpi-app`/`glpi-nginx` healthy). `glpi.gidas.local` resuelve a `192.168.1.47` (record static en MikroTik) y el proxy del portal (`/proxy/glpi/`) responde 200.
+- **Para disponibilizar** (1-4 completados, 5 pendiente):
+  1. ✅ Crear CT 212 en pve-desa04 (Rocky Linux, IP fija en la LAN).
+  2. ✅ Deploy del stack `itsm/` (docker compose + scripts) en `/opt/glpi`.
+  3. ✅ DNS: record static en MikroTik `glpi.gidas.local → 192.168.1.47`; `/etc/hosts` del CT 208 corregido (apuntaba a `.45`).
+  4. ✅ Alta en el portal (`config.yaml` de `portal-gidas/` ya tenía GLPI con `proxy: true`; grupos G-Direccion/G-Coordinadores).
+  5. 🔲 Verificación LDAP FreeIPA + cron interno + backup.
 
 ### 2. NetBox — Gestor CMDB
 
@@ -52,13 +52,13 @@ Tres herramientas están implementadas (o planificadas) en el repo pero **no ope
 
 ## Decisiones pendientes (para el equipo)
 
-- [ ] ¿GLPI en CT propio (212) o en VM? — CT es el patrón del repo (208/210/211).
+- [x] ¿GLPI en CT propio (212) o en VM? — resuelto: CT 212, patrón del repo.
 - [ ] ¿NetBox en CT o VM? — necesita más recursos que GLPI (PostgreSQL+Redis).
 - [ ] ¿Alcance inicial de Ansible: deploy de stacks existentes, config drift, o ambos?
 - [ ] ¿Alta de las 3 en el portal unificado (config.yaml) apenas estén disponibles?
 
 ## Siguientes pasos propuestos
 
-1. **GLPI**: deploy CT 212 + stack `itsm/` + DNS + portal → verificación end-to-end.
+1. **GLPI**: ✅ deploy CT 212 + stack `itsm/` + DNS + portal → verificación end-to-end OK. Pendiente: LDAP FreeIPA + cron + backup (fase 5 de verificación).
 2. **NetBox**: implementar stack según SDD (es el que más trabajo de código requiere).
 3. **Ansible**: exploration SDD en `openspec/changes/ansible/` (arrancar sin código).
