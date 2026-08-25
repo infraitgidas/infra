@@ -4,17 +4,37 @@
 
 .USAGE
     Run interactively in an ELEVATED PowerShell window on the target PC:
-        .\enable-winrm.ps1
+        .\enable-winrm.ps1 [-AllowRemoteLocalAdmin]
 
 .NOTES
     Keeps management traffic restricted: HTTP (5985) listener, firewall scoped
     to LocalSubnet, and Basic authentication over the network stays disabled
     (NTLM/Kerberos only, matching the deploy orchestrator).
+
+    -AllowRemoteLocalAdmin sets LocalAccountTokenFilterPolicy=1 so REMOTE
+    sessions with a LOCAL admin account receive a full (non-filtered) token.
+    Without it, remote local-admin logons are UAC-filtered and every elevated
+    operation (DISM, installer, group changes) fails with access denied.
+    Only needed while managing these PCs with LOCAL admin accounts; domain
+    admin credentials do not require this. Rollback: set the value to 0.
 #>
 
 #Requires -RunAsAdministrator
 
+param(
+    # Grant remote LOCAL admins a full token (see NOTES). Default: off.
+    [switch]$AllowRemoteLocalAdmin
+)
+
 $ErrorActionPreference = 'Stop'
+
+if ($AllowRemoteLocalAdmin) {
+    Write-Host '[0/4] Enabling full-token remote sessions for LOCAL admin accounts (LocalAccountTokenFilterPolicy=1)...'
+    $regPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+    Set-ItemProperty -Path $regPath -Name LocalAccountTokenFilterPolicy -Value 1 -Type DWord
+    Write-Host '      done. Rollback later with:  Set-ItemProperty -Path'
+    Write-Host "      '$regPath' -Name LocalAccountTokenFilterPolicy -Value 0"
+}
 
 Write-Host '[1/4] Enabling PowerShell remoting (WinRM service, listener, default firewall rules)...'
 Enable-PSRemoting -Force -SkipNetworkProfileCheck | Out-Null

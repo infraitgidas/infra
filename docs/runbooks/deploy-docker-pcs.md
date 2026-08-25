@@ -59,8 +59,14 @@ Habilitarlo de una de estas dos formas:
 elevado en la PC:
 
 ```powershell
-.\enable-winrm.ps1
+.\enable-winrm.ps1 -AllowRemoteLocalAdmin
 ```
+
+> El switch `-AllowRemoteLocalAdmin` setea `LocalAccountTokenFilterPolicy=1`:
+> sin eso, las sesiones remotas con cuentas admin **locales** reciben un token
+> filtrado por UAC y todo paso elevado (DISM, instalador, grupos) falla con
+> acceso denegado. No hace falta si se opera con una cuenta de dominio admin.
+> Rollback: setear el valor en `0`.
 
 **Opción B — GPO (recomendada para escala)**:
 
@@ -210,7 +216,7 @@ Stop-Service WinRM; Set-Service WinRM -StartupType Disabled
 | Instalador reporta `3010` / `REBOOT_REQUIRED` | Features de Windows recién habilitadas | Reiniciar y reejecutar `deploy` (o usar `--auto-reboot`) |
 | `[WARN] Firmware virtualization not reported enabled` y Docker no arranca su VM | VT-x/AMD-V deshabilitada en BIOS | Habilitar virtualización en firmware y reiniciar |
 | `UNREACHABLE` en preflight | WinRM deshabilitado o puerto 5985 bloqueado | Ejecutar `enable-winrm.ps1` en la PC o aplicar la GPO; verificar regla HTTP-In con ámbito LocalSubnet |
-| Tareas admin fallan con acceso denegado por WinRM | Token filtrado por UAC al usar cuenta admin **local** | Usar cuenta de **dominio** con privilegios admin, o setear `LocalAccountTokenFilterPolicy=1` (valor 1) en la PC |
+| Tareas admin fallan con acceso denegado por WinRM | Token filtrado por UAC al usar cuenta admin **local** | Reejecutar `enable-winrm.ps1 -AllowRemoteLocalAdmin` en la PC, o usar cuenta de **dominio** con privilegios admin |
 | `ERROR: failed to decrypt ...` | Identidad age ausente o clave SOPS incorrecta | Revisar `SOPS_AGE_KEY_FILE` / `~/.config/sops/age/keys.txt`; alternativamente exportar `WINRM_USER`/`WINRM_PASS` |
 
 ---
