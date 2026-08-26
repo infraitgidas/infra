@@ -5,40 +5,67 @@
 > **Proyecto**: Telepark
 > **Última actualización**: 2026-08-26
 
-Este manual explica cómo usar la máquina de desarrollo del proyecto Telepark: cómo entrar, cómo trabajar con Docker, y cómo administrar los servicios a través de Cockpit y Portainer.
+Este manual explica cómo usar la máquina de desarrollo del proyecto Telepark: qué herramientas tenés disponibles, qué es cada una, y cómo acceder a ellas (SSH, Cockpit y Portainer).
 
 ---
 
 ## 1. ¿Qué es esta VM?
 
-Es el entorno de desarrollo compartido del proyecto Telepark. Una máquina Rocky Linux 10 con:
+Es el **entorno de desarrollo compartido** del proyecto Telepark: una máquina Rocky Linux 10 donde todos los integrantes del grupo desarrollan y prueban los servicios del proyecto.
 
-- **Docker + Docker Compose** — para levantar y probar los servicios del proyecto.
-- **Cockpit** — consola web para administrar el sistema (terminal, servicios, logs).
-- **Portainer** — interfaz web para gestionar contenedores y stacks.
-
-Todos los integrantes del grupo Telepark tienen acceso con su usuario de dominio y pueden escalar a **root** con `sudo`.
+Todos los integrantes del grupo Telepark tienen acceso con su **usuario de dominio** (el mismo con el que te logueás en tu PC) y pueden escalar a **root** con `sudo`.
 
 ---
 
-## 2. Cómo entrar
+## 2. Herramientas: qué son y cómo acceder
 
-### 2.1 Por SSH (recomendado para trabajar)
+### 2.1 Tabla de acceso rápido
 
-Usás tu **usuario de dominio** (el mismo con el que te logueás en tu PC). Como la VM usa nombres totalmente calificados, el usuario lleva el sufijo `@gdc01.local`:
+| Herramienta | ¿Qué es? | ¿Cómo accedo? |
+|-------------|----------|---------------|
+| **SSH** | Conexión segura a la terminal de la VM | `ssh <usuario>@gdc01.local@192.168.1.48` |
+| **Docker** | Motor de contenedores | Por terminal (SSH) |
+| **Docker Compose** | Orquestador de stacks multi-contenedor | Por terminal (`docker compose`) |
+| **Cockpit** | Consola web para administrar el **sistema** | `https://192.168.1.48:9090` |
+| **Portainer** | Consola web para gestionar **Docker** | `https://192.168.1.48:9443` |
+
+### 2.2 ¿Qué es cada herramienta?
+
+**🔗 SSH (Secure Shell)**
+Protocolo para conectarte de forma **segura y cifrada** a la terminal de la VM desde tu PC. Es como "teletransportarte" a la máquina: escribís comandos como si estuvieras sentado frente a ella. Es la forma principal de trabajar (editar archivos, correr Docker, ver logs).
+
+**🐳 Docker**
+Motor de **contenedores**. Un contenedor es como una mini-máquina virtual liviana que empaqueta una aplicación y todas sus dependencias, de modo que corra **igual en cualquier lado**. Docker es el motor que crea y ejecuta esos contenedores. (No lo confundas con Cockpit/Portainer: Docker es el *motor*, los otros dos son *paneles de control*.)
+
+**🧩 Docker Compose**
+Herramienta para definir y levantar aplicaciones **multi-contenedor**. Con un archivo `docker-compose.yml` describís todos los servicios (web, base de datos, caché…) y sus relaciones, y con **un solo comando** (`docker compose up`) levantás todo el stack.
+
+**🖥️ Cockpit**
+Consola **web** para administrar el **sistema operativo** (la VM en sí), no las aplicaciones. Desde el navegador ves el estado del servidor, los servicios (systemd), los logs, el disco, la red, y hasta abrís una **terminal web**. Es el "panel de control" del servidor. Autentica con tu **usuario de dominio**.
+
+**🎛️ Portainer**
+Interfaz **web** para gestionar **Docker**: ver contenedores, deployar stacks, revisar logs, crear volúmenes y redes. Es el "panel de control" de Docker — la alternativa gráfica a la línea de comandos `docker`. (No usa tu password de dominio; tenés una cuenta local, ver sección 5.)
+
+---
+
+## 3. Cómo entrar por SSH
+
+### 3.1 Conexión
+
+Usás tu **usuario de dominio**. Como la VM usa nombres totalmente calificados, el usuario lleva el sufijo `@gdc01.local`:
 
 ```bash
 ssh <usuario>@gdc01.local@192.168.1.48
 # ejemplos:
 ssh penalvam@gdc01.local@192.168.1.48
 ssh ebernalcustodio@gdc01.local@192.168.1.48
+ssh pnepotti@gdc01.local@192.168.1.48
 ```
 
 > ⚠️ El nombre corto (`ssh penalvam@192.168.1.48`) **no funciona**; siempre con `@gdc01.local`.
+> En el primer login se crea automáticamente tu carpeta `/home/<usuario>@gdc01.local`.
 
-En el primer login se crea automáticamente tu carpeta `/home/<usuario>@gdc01.local`.
-
-### 2.2 Hacerse root
+### 3.2 Hacerse root
 
 Todos los miembros del grupo Telepark tienen sudo total:
 
@@ -46,7 +73,7 @@ Todos los miembros del grupo Telepark tienen sudo total:
 sudo -i          # o sudo <comando>
 ```
 
-### 2.3 Usuarios con acceso
+### 3.3 Usuarios con acceso
 
 | Nombre | Usuario |
 |--------|---------|
@@ -59,59 +86,18 @@ sudo -i          # o sudo <comando>
 
 ---
 
-## 3. Consolas web
+## 4. Consolas web (Cockpit y Portainer)
 
-| Herramienta | URL | Para qué sirve |
-|-------------|-----|----------------|
-| **Cockpit** | `https://192.168.1.48:9090` | Terminal web, ver servicios (systemd), logs, uso de disco/red |
-| **Portainer** | `https://192.168.1.48:9443` | Gestionar contenedores, imágenes, volúmenes y stacks |
+| Herramienta | URL | Para qué |
+|-------------|-----|----------|
+| **Cockpit** | `https://192.168.1.48:9090` | Administrar el **sistema** (terminal web, servicios, logs, disco/red) |
+| **Portainer** | `https://192.168.1.48:9443` | Gestionar **Docker** (contenedores, imágenes, volúmenes, stacks) |
+
+> 💡 **También desde el Portal GIDAS**: si tenés acceso al portal (`portal.gidas.local`), vas a ver las cards **"Cockpit Telepark"** y **"Portainer Telepark"** — aparecen solo para los del grupo Telepark.
 
 > **Cockpit**: entrás con tu **usuario de dominio** (`usuario@gdc01.local` + password de dominio). El usuario `root` está **deshabilitado** en Cockpit.
 > **Portainer**: cada usuario del grupo Telepark tiene una **cuenta local** (Portainer CE no usa el password de dominio). Password inicial: `Telepark.2026!` — cambiala al primer ingreso.
 > Son certificados autofirmados → el navegador va a mostrar advertencia de seguridad la primera vez; aceptala.
-
----
-
-## 4. Trabajar con Docker
-
-### 4.1 Comandos básicos
-
-```bash
-docker ps                 # contenedores corriendo
-docker ps -a              # todos (incluidos los detenidos)
-docker images             # imágenes descargadas
-docker logs <contenedor>  # ver logs
-docker exec -it <contenedor> bash   # entrar a un contenedor
-docker volume ls          # volúmenes
-```
-
-### 4.2 Docker Compose
-
-La VM ya trae Compose v2 (`docker compose`, sin guion):
-
-```bash
-# dentro de la carpeta del proyecto (donde está docker-compose.yml)
-docker compose up -d          # levantar el stack en background
-docker compose down           # bajar el stack
-docker compose ps             # estado del stack
-docker compose logs -f        # ver logs en tiempo real
-docker compose pull && docker compose up -d   # actualizar imágenes
-```
-
-### 4.3 Ejemplo completo: levantar un stack
-
-```bash
-mkdir -p /srv/mi-app && cd /srv/mi-app
-cat > docker-compose.yml <<'YML'
-services:
-  web:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-YML
-docker compose up -d
-curl http://localhost:8080
-```
 
 ---
 
@@ -151,7 +137,50 @@ Con Cockpit podés:
 
 ---
 
-## 7. Buenas prácticas
+## 7. Trabajar con Docker (por terminal)
+
+### 7.1 Comandos básicos
+
+```bash
+docker ps                 # contenedores corriendo
+docker ps -a              # todos (incluidos los detenidos)
+docker images             # imágenes descargadas
+docker logs <contenedor>  # ver logs
+docker exec -it <contenedor> bash   # entrar a un contenedor
+docker volume ls          # volúmenes
+```
+
+### 7.2 Docker Compose
+
+La VM ya trae Compose v2 (`docker compose`, sin guion):
+
+```bash
+# dentro de la carpeta del proyecto (donde está docker-compose.yml)
+docker compose up -d          # levantar el stack en background
+docker compose down           # bajar el stack
+docker compose ps             # estado del stack
+docker compose logs -f        # ver logs en tiempo real
+docker compose pull && docker compose up -d   # actualizar imágenes
+```
+
+### 7.3 Ejemplo completo: levantar un stack
+
+```bash
+mkdir -p /srv/mi-app && cd /srv/mi-app
+cat > docker-compose.yml <<'YML'
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+YML
+docker compose up -d
+curl http://localhost:8080
+```
+
+---
+
+## 8. Buenas prácticas
 
 - **No trabajes como root por defecto**: usá tu usuario de dominio y `sudo` cuando lo necesites.
 - **Datos persistentes con volúmenes**: no guardes datos importantes dentro del contenedor; usá volúmenes (`docker volume`) o bind mounts (`/srv/...`).
@@ -161,7 +190,7 @@ Con Cockpit podés:
 
 ---
 
-## 8. Troubleshooting rápido
+## 9. Troubleshooting rápido
 
 | Problema | Qué hacer |
 |----------|-----------|
@@ -171,3 +200,4 @@ Con Cockpit podés:
 | Un puerto ya está en uso | `sudo ss -tlnp | grep <puerto>` para ver quién lo usa |
 | No resuelve `telepark-dev.gidas.local` | Está en el DNS del MikroTik. Si tu DNS primario no es `192.168.1.1` o `192.168.1.117`, usá la IP directa |
 | Portainer no carga | `sudo systemctl status docker` y `docker ps --filter name=portainer` |
+| Cockpit no me da acceso admin | Tenés que estar en el grupo `wheel` (los del grupo Telepark ya lo están). Volvé a entrar con el toggle "Reuse my password" |

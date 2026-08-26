@@ -70,6 +70,7 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 18 | **Sincronización AD→Portainer** | script `identity-management/scripts/sync-portainer-users.sh` — crea cuentas locales en Portainer espejando `PROY-Telepark` (Portainer CE no tiene LDAP/AD) |
 | 19 | **Cambio password Portainer** | password de las cuentas locales actualizada a `Telepark.2026!` (el `PUT /api/users/{id}/passwd` dio "Invalid new password"; se resolvió con delete+recreate) |
 | 20 | **Admin en Cockpit para dominio** | usuarios del grupo Telepark agregados al grupo local `wheel` (Cockpit gating del modo privilegiado por `wheel`, no por sudoers) |
+| 21 | **Acceso vía Portal GIDAS** | agregadas las cards "Cockpit Telepark" y "Portainer Telepark" a `portal-gidas/config.yaml` (grupo `PROY-Telepark`, enlaces directos `proxy: false`) |
 
 ---
 
@@ -92,6 +93,19 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | Paulo Nepotti | `pnepotti` | `pnepotti` (standard) |
 | Cuenta funcional | `telepark` | `telepark` (standard) |
 | — | — | `admin` (admin) |
+
+### Acceso vía Portal GIDAS
+
+Se agregaron dos cards al Portal GIDAS (visible solo para el grupo `PROY-Telepark`):
+
+| Card | URL destino |
+|------|-------------|
+| **Cockpit Telepark** | `https://telepark-dev.gidas.local:9090` |
+| **Portainer Telepark** | `https://telepark-dev.gidas.local:9443` |
+
+> **Por qué enlaces directos (`proxy: false`)**: el proxy del portal (httpx) **no soporta WebSockets**, y Cockpit los necesita (la terminal y las actualizaciones en vivo). Portainer también usa WebSocket para logs/consola. Por eso las cards enlazan directo al servicio (el navegador conecta directo), en lugar de pasar por el proxy. El RBAC sigue funcionando: la card solo aparece si el usuario pertenece a `PROY-Telepark`.
+
+> **Despliegue pendiente**: el cambio está en `portal-gidas/config.yaml` (repo), pero **no se aplicó** al portal en producción. Para desplegar: acceder al CT 208 vía `pct enter 208` (desde `root@192.168.1.14`), actualizar `/opt/portal-gidas/config.yaml`, y `systemctl restart portal-gidas`.
 
 ---
 

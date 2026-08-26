@@ -156,3 +156,19 @@ tools:
       - "G-Coordinadores"
       - "G-Becarios"
       - "G-Graduados"
+
+  - name: "Cockpit Telepark"
+    url: "https://telepark-dev.gidas.local:9090"
+    icon: "fas fa-terminal"
+    description: "Consola web del entorno de desarrollo Telepark"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
+
+  - name: "Portainer Telepark"
+    url: "https://telepark-dev.gidas.local:9443"
+    icon: "fas fa-cubes"
+    description: "Gestión de contenedores Docker (Telepark)"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
