@@ -168,40 +168,66 @@ async def _ws_proxy(tool, websocket: WebSocket, path: str):
     query = websocket.url.query if hasattr(websocket, "url") else ""
     ws_url = _ws_backend_url(tool, path, query)
 
-    await websocket.accept()
+    # Subprotocol negotiation (Cockpit/ttyd requieren uno)
+    subprotocols = []
+    sec = websocket.headers.get("sec-websocket-protocol", "")
+    if sec:
+        subprotocols = [s.strip() for s in sec.split(",") if s.strip()]
+
+    # Origin del backend (Cockpit exige Origin == Host; sin él devuelve 403)
+    from urllib.parse import urlparse
+    _p = urlparse(tool.url)
+    backend_origin = f"{_p.scheme}://{_p.netloc}"
+
+    # Conectar al backend PRIMERO para negociar el subprotocolo
+    try:
+        backend = await websockets.connect(
+            ws_url, ssl=_ws_ssl_context(),
+            subprotocols=subprotocols or None,
+            additional_headers={"Origin": backend_origin},
+        )
+    except Exception:
+        await websocket.close(code=4402)
+        return
+
+    negotiated = getattr(backend, "subprotocol", None)
+    await websocket.accept(subprotocol=negotiated)
 
     try:
-        async with websockets.connect(ws_url, ssl=_ws_ssl_context()) as backend:
-            async def client_to_backend():
-                try:
-                    while True:
-                        msg = await websocket.receive()
-                        if msg["type"] == "websocket.receive":
-                            if msg.get("text") is not None:
-                                await backend.send(msg["text"])
-                            elif msg.get("bytes") is not None:
-                                await backend.send(msg["bytes"])
-                        elif msg["type"] == "websocket.disconnect":
-                            break
-                except WebSocketDisconnect:
-                    pass
-                except Exception:
-                    pass
+        async def client_to_backend():
+            try:
+                while True:
+                    msg = await websocket.receive()
+                    if msg["type"] == "websocket.receive":
+                        if msg.get("text") is not None:
+                            await backend.send(msg["text"])
+                        elif msg.get("bytes") is not None:
+                            await backend.send(msg["bytes"])
+                    elif msg["type"] == "websocket.disconnect":
+                        break
+            except WebSocketDisconnect:
+                pass
+            except Exception:
+                pass
 
-            async def backend_to_client():
-                try:
-                    async for m in backend:
-                        if isinstance(m, str):
-                            await websocket.send_text(m)
-                        else:
-                            await websocket.send_bytes(m)
-                except Exception:
-                    pass
+        async def backend_to_client():
+            try:
+                async for m in backend:
+                    if isinstance(m, str):
+                        await websocket.send_text(m)
+                    else:
+                        await websocket.send_bytes(m)
+            except Exception:
+                pass
 
-            await asyncio.gather(client_to_backend(), backend_to_client())
+        await asyncio.gather(client_to_backend(), backend_to_client())
     except Exception:
         pass
     finally:
+        try:
+            await backend.close()
+        except Exception:
+            pass
         try:
             await websocket.close()
         except Exception:
