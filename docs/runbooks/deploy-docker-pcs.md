@@ -70,6 +70,11 @@ elevado en la PC:
 
 **Opción B — GPO (recomendada para escala)**:
 
+> **GPO ya creada y vinculada** (2026-08-26): `Enable-WinRM-ForManagement`
+> ID: `11dbb8db-deec-4ecc-b795-33a17b09f7c2`. Configura WinRM, firewall
+> HTTP-In LocalSubnet, y `LocalAccountTokenFilterPolicy=1`. Las PCs la
+> aplicarán en el próximo ciclo de GPO o tras reinicio.
+
 ```text
 Configuración del equipo > Plantillas administrativas > Componentes de Windows
   > Administración remota de Windows (WinRM) > Servicio de WinRM
