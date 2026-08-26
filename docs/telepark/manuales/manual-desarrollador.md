@@ -93,7 +93,7 @@ sudo -i          # o sudo <comando>
 | **Cockpit** | `https://192.168.1.48:9090` | Administrar el **sistema** (terminal web, servicios, logs, disco/red) |
 | **Portainer** | `https://192.168.1.48:9443` | Gestionar **Docker** (contenedores, imágenes, volúmenes, stacks) |
 
-> 💡 **También desde el Portal GIDAS**: si tenés acceso al portal (`portal.gidas.local`), vas a ver las cards **"Cockpit Telepark"** y **"Portainer Telepark"** — aparecen solo para los del grupo Telepark.
+> 💡 **También desde el Portal GIDAS**: si tenés acceso al portal (`portal.gidas.local`), vas a ver las cards **"Cockpit Telepark"**, **"Portainer Telepark"** y **"SSH Telepark"** (terminal) — aparecen solo para los del grupo Telepark.
 
 > **Cockpit**: entrás con tu **usuario de dominio** (`usuario@gdc01.local` + password de dominio). El usuario `root` está **deshabilitado** en Cockpit.
 > **Portainer**: cada usuario del grupo Telepark tiene una **cuenta local** (Portainer CE no usa el password de dominio). Password inicial: `Telepark.2026!` — cambiala al primer ingreso.

@@ -174,3 +174,12 @@ tools:
     slug: "telepark-portainer"
     groups:
       - "PROY-Telepark"
+
+  - name: "SSH Telepark"
+    url: "https://192.168.1.48:7681"
+    icon: "fas fa-keyboard"
+    description: "Terminal SSH del entorno de desarrollo Telepark"
+    proxy: true
+    slug: "telepark-ssh"
+    groups:
+      - "PROY-Telepark"

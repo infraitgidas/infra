@@ -73,6 +73,7 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 21 | **Acceso vía Portal GIDAS** | agregadas las cards "Cockpit Telepark" y "Portainer Telepark" a `portal-gidas/config.yaml` (grupo `PROY-Telepark`, proxeadas `proxy: true`) |
 | 22 | **Proxy WebSocket en el portal** | `portal-gidas/app/routers/proxy.py` reescrito para soportar WebSockets (ruta `WebSocket` + reenvío bidireccional con `websockets`) |
 | 23 | **nginx con WebSocket** | nginx del CT 208 actualizado (`proxy_http_version 1.1` + headers `Upgrade`/`Connection`) para permitir el handshake WebSocket al portal |
+| 24 | **Terminal SSH (ttyd)** | desplegado `ttyd` en la VM (puerto 7681, HTTPS con cert autofirmado, login AD vía PAM/SSSD) + card "SSH Telepark" en el portal |
 
 ---
 
@@ -104,6 +105,7 @@ Se agregaron dos cards al Portal GIDAS (visible solo para el grupo `PROY-Telepar
 |------|-----------------------------|
 | **Cockpit Telepark** | `https://192.168.1.48:9090` (`/proxy/telepark-cockpit/`) |
 | **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`) |
+| **SSH Telepark** | `https://192.168.1.48:7681` (`/proxy/telepark-ssh/`) — terminal web (ttyd) con login AD |
 
 Para que funcionara el proxy con Cockpit/Portainer se hicieron **tres cambios**:
 
