@@ -70,7 +70,9 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 18 | **Sincronización AD→Portainer** | script `identity-management/scripts/sync-portainer-users.sh` — crea cuentas locales en Portainer espejando `PROY-Telepark` (Portainer CE no tiene LDAP/AD) |
 | 19 | **Cambio password Portainer** | password de las cuentas locales actualizada a `Telepark.2026!` (el `PUT /api/users/{id}/passwd` dio "Invalid new password"; se resolvió con delete+recreate) |
 | 20 | **Admin en Cockpit para dominio** | usuarios del grupo Telepark agregados al grupo local `wheel` (Cockpit gating del modo privilegiado por `wheel`, no por sudoers) |
-| 21 | **Acceso vía Portal GIDAS** | agregadas las cards "Cockpit Telepark" y "Portainer Telepark" a `portal-gidas/config.yaml` (grupo `PROY-Telepark`, enlaces directos `proxy: false`) |
+| 21 | **Acceso vía Portal GIDAS** | agregadas las cards "Cockpit Telepark" y "Portainer Telepark" a `portal-gidas/config.yaml` (grupo `PROY-Telepark`, proxeadas `proxy: true`) |
+| 22 | **Proxy WebSocket en el portal** | `portal-gidas/app/routers/proxy.py` reescrito para soportar WebSockets (ruta `WebSocket` + reenvío bidireccional con `websockets`) |
+| 23 | **nginx con WebSocket** | nginx del CT 208 actualizado (`proxy_http_version 1.1` + headers `Upgrade`/`Connection`) para permitir el handshake WebSocket al portal |
 
 ---
 
@@ -96,16 +98,20 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 
 ### Acceso vía Portal GIDAS
 
-Se agregaron dos cards al Portal GIDAS (visible solo para el grupo `PROY-Telepark`):
+Se agregaron dos cards al Portal GIDAS (visible solo para el grupo `PROY-Telepark`), **proxeadas** a través del portal para que funcionen también en acceso remoto (el nombre local `telepark-dev.gidas.local` no resuelve fuera de la LAN):
 
-| Card | URL destino |
-|------|-------------|
-| **Cockpit Telepark** | `https://telepark-dev.gidas.local:9090` |
-| **Portainer Telepark** | `https://telepark-dev.gidas.local:9443` |
+| Card | Backend interno (vía proxy) |
+|------|-----------------------------|
+| **Cockpit Telepark** | `https://192.168.1.48:9090` (`/proxy/telepark-cockpit/`) |
+| **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`) |
 
-> **Por qué enlaces directos (`proxy: false`)**: el proxy del portal (httpx) **no soporta WebSockets**, y Cockpit los necesita (la terminal y las actualizaciones en vivo). Portainer también usa WebSocket para logs/consola. Por eso las cards enlazan directo al servicio (el navegador conecta directo), en lugar de pasar por el proxy. El RBAC sigue funcionando: la card solo aparece si el usuario pertenece a `PROY-Telepark`.
+Para que funcionara el proxy con Cockpit/Portainer se hicieron **tres cambios**:
 
-> **Despliegue pendiente**: el cambio está en `portal-gidas/config.yaml` (repo), pero **no se aplicó** al portal en producción. Para desplegar: acceder al CT 208 vía `pct enter 208` (desde `root@192.168.1.14`), actualizar `/opt/portal-gidas/config.yaml`, y `systemctl restart portal-gidas`.
+1. **Proxy del portal con soporte WebSocket** (`portal-gidas/app/routers/proxy.py`): el proxy original (httpx) no soportaba WebSockets, imprescindibles para Cockpit (terminal) y Portainer (logs/consola). Se agregó una ruta `WebSocket` que reenvía bidireccionalmente (texto + binario) con la librería `websockets`.
+2. **nginx del CT 208**: el proxy frontal usaba HTTP/1.0 y no reenviaba los headers `Upgrade`/`Connection`, rompiendo el handshake WebSocket. Se agregó `proxy_http_version 1.1` + `proxy_set_header Upgrade`/`Connection` (map `$connection_upgrade`) + timeouts largos.
+3. **Config**: las cards pasaron de `proxy: false` (enlace directo) a `proxy: true` con la IP interna.
+
+El RBAC sigue funcionando: la card solo aparece si el usuario pertenece a `PROY-Telepark`, y el proxy valida la sesión (cookie JWT) también en la conexión WebSocket.
 
 ---
 
