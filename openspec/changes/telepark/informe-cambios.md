@@ -74,6 +74,8 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 22 | **Proxy WebSocket en el portal** | `portal-gidas/app/routers/proxy.py` reescrito para soportar WebSockets (ruta `WebSocket` + reenvío bidireccional con `websockets`) |
 | 23 | **nginx con WebSocket** | nginx del CT 208 actualizado (`proxy_http_version 1.1` + headers `Upgrade`/`Connection`) para permitir el handshake WebSocket al portal |
 | 24 | **Terminal SSH (ttyd)** | desplegado `ttyd` en la VM (puerto 7681, HTTPS con cert autofirmado, login AD vía PAM/SSSD) + card "SSH Telepark" en el portal |
+| 25 | **Fix Content-Length (502)** | el proxy copiaba el header `Content-Length` del backend descomprimido por httpx → `RuntimeError: Response content longer than Content-Length`. Se excluye `content-length` (Starlette lo recalcula) |
+| 26 | **Fix Cockpit bajo subpath** | Cockpit usa `<base href="/">` y rutas relativas. Se configuró `UrlRoot = /proxy/telepark-cockpit` (cockpit.conf), se ajustó el `url` de la card y se agregó el trailing slash en el proxy (Cockpit rechaza el no-slash con UrlRoot) |
 
 ---
 

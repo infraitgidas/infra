@@ -31,18 +31,21 @@ def _find_tool(request: Request, tool_name: str):
     return None
 
 
-def _rewrite_url(url: str, request_url: str, tool_name: str) -> str:
+def _rewrite_url(url: str, slug: str) -> str:
     """Rewrite redirect URLs from internal to proxy paths."""
     from urllib.parse import urlparse
     if not url:
         return ""
+    prefix = f"/proxy/{slug.lower()}"
     if url.startswith("/"):
-        return f"/proxy/{tool_name.lower()}{url}".rstrip("/") or "/"
+        if url.startswith(prefix):
+            return url.rstrip("/") or "/"
+        return f"{prefix}{url}".rstrip("/") or "/"
     parsed = urlparse(url)
     internal_domains = (".gidas.local", "192.168.1.205", "192.168.1.14", "192.168.1.1", "192.168.1.48")
     if parsed.hostname and any(h in str(parsed.hostname) for h in internal_domains):
         old_path = parsed.path
-        new_path = f"/proxy/{tool_name.lower()}{old_path}"
+        new_path = f"{prefix}{old_path}"
         new_path = new_path.rstrip("/") or "/"
         if parsed.query:
             new_path += f"?{parsed.query}"
@@ -60,7 +63,7 @@ async def _proxy(tool, request: Request, path: str):
         return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
 
     base = tool.url.rstrip("/")
-    target_url = f"{base}/{path}" if path else base
+    target_url = f"{base}/{path}" if path else base + "/"
     query = request.url.query
     if query:
         target_url += f"?{query}"
@@ -88,9 +91,9 @@ async def _proxy(tool, request: Request, path: str):
     resp_headers = {}
     for k, v in response.headers.items():
         kl = k.lower()
-        if kl not in ("content-encoding", "transfer-encoding", "connection", "keep-alive"):
+        if kl not in ("content-encoding", "transfer-encoding", "connection", "keep-alive", "content-length"):
             if kl == "location":
-                v = _rewrite_url(v, str(request.url), tool.name)
+                v = _rewrite_url(v, tool.slug or tool.name.lower())
             if v:
                 resp_headers[k] = v
 

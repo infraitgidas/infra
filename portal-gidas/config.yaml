@@ -158,7 +158,7 @@ tools:
       - "G-Graduados"
 
   - name: "Cockpit Telepark"
-    url: "https://192.168.1.48:9090"
+    url: "https://192.168.1.48:9090/proxy/telepark-cockpit"
     icon: "fas fa-terminal"
     description: "Consola web del entorno de desarrollo Telepark"
     proxy: true
