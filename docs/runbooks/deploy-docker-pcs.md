@@ -232,3 +232,19 @@ Stop-Service WinRM; Set-Service WinRM -StartupType Disabled
 - Bootstrap WinRM: `pcs/docker/enable-winrm.ps1`
 - Orquestador: `pcs/docker/deploy-docker.sh`
 - Inventario de PCs: `mikrotik/mac-pc.md`
+
+---
+
+## 10. Estado del despliegue (actualizado 2026-08-26)
+
+| IP | Hostname | SSH | WinRM | Virtualización | Docker | Estado |
+|---|---|---|---|---|---|---|
+| 192.168.1.51 | GIDAS-002 | ✅ | ✅ (manual) | ✅ | v27.5.1 + hello-world ✅ | **COMPLETO** |
+| 192.168.1.50 | gidas-37710 | ✅ | ✅ (manual) | ✅ | v29.7.2 instalado, daemon no arranca tras reboot | **PENDIENTE** — puede necesitar interacción manual para primer start de Docker Desktop |
+| 192.168.1.52 | gidas-desktop-854 | ✅ | ✅ (GPO) | ❌ BIOS OFF | No instalado | **BLOCKED** — habilitar VT-x/AMD-V en BIOS |
+| 192.168.1.53 | GIDAS-003 | ✅ | ✅ (GPO) | ❌ BIOS OFF | No instalado | **BLOCKED** — habilitar VT-x/AMD-V en BIOS |
+| 192.168.1.30 | — | ❌ | ❌ | N/D | N/D | **INACCESIBLE** — sin SSH/WinRM |
+
+**Credenciales SSH** (mismas para todas las PCs): `Administrator` o `gidas_admin`, password compartido (ver mikrotik/mac-pc.md).
+
+**GPO creada**: `Enable-WinRM-ForManagement` (ID `11dbb8db-deec-4ecc-b795-33a17b09f7c2`). WinRM habilitado en .52 y .53 vía GPO. .51 y .50 habilitados manualmente via SSH.
