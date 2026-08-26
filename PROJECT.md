@@ -12,7 +12,7 @@
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
 | 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` + `fix/tunnel-monitor-url-dinamica` | 🛠️ Implementado — Tunnel + nginx + 3 tools + Fix falsos positivos |
-| 9 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | ⏳ Pendiente — no iniciado |
+| 9 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | 🔍 Exploración — alcance recomendado: progresivo por fases (config base → deploy NetBox → provisioning) |
 
 ## Leyenda de Estados SDD
 
@@ -110,9 +110,14 @@
 ### Feature 9: Automatización — Ansible
 
 - **Objetivo**: Automatización de la infraestructura (deploy de stacks, config drift, orquestación)
-- **Componentes**: Por definir (SDD pendiente)
-- **Estado SDD**: ⏳ Pendiente — no iniciado (rama `feat/herramientas-pendientes`)
-- **Pendiente**: Exploration en `openspec/changes/ansible/`
+- **Componentes**: Inventario YAML por grupos, ansible.cfg, playbooks de config base + deploy reproducible (NetBox como piloto), SOPS integrado
+- **Estado SDD**: 🔍 Exploración — exploration en `openspec/changes/ansible/exploration.md` (2026-08-06). Ansible core 2.16.16 ya instalado en host de trabajo
+- **Enfoque recomendado (progresivo por fases)**:
+  - **F1 Config base**: sync `/etc/hosts` (arregla drift real del CT 208), health checks de los 7 stacks, verificación de paquetes/utilidades, sync de crontabs — todo no-destructivo
+  - **F2 Deploy reproducible**: playbook de deploy de UN stack greenfield — NetBox (Feature 3) como piloto natural (`cmdb/` vacío, SDD listo)
+  - **F3 Provisioning Proxmox** (API) + evaluar MikroTik v6/Windows (probablemente fuera de alcance)
+- **Decisiones clave**: mantener SOPS+age (NO ansible-vault); no migrar los 7 stacks existentes de una (riesgo de regresión); Windows/AD fuera del alcance inicial
+- **Pendiente**: Proposal (`sdd-propose`) tras confirmar control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows
 
 ---
 

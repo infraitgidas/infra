@@ -42,20 +42,22 @@ Tres herramientas están implementadas (o planificadas) en el repo pero **no ope
 
 ### 3. Ansible — Automatización
 
-- **Código**: ❌ No existe.
-- **SDD**: ❌ No existe (`openspec/changes/ansible/` a crear).
+- **Código**: ❌ No existe (`ansible/` vacío).
+- **SDD**: 🔍 Exploration creada — `openspec/changes/ansible/exploration.md` (2026-08-06). Ansible core 2.16.16 ya instalado en el host de trabajo (sin ansible-lint/molecule).
 - **Producción**: ❌.
-- **Contexto previo**: mencionado en `openspec/changes/cmdb/exploration.md` (integración con NetBox) y `openspec/changes/archive/2026-06-02-gitlab/design.md` (alternativa al patrón scripting Bash+SSH).
-- **Para iniciar**:
-  1. SDD exploration: definir alcance (¿orquestación de deploys existentes? ¿gestión de configs? ¿provisioning de CTs/VMs?).
-  2. Decidir rol vs el patrón actual del repo (scripts `00-env.sh` + numerados).
-  3. Proposal con inventario de tareas automatizables en la infra actual.
+- **Enfoque recomendado** (progresivo por fases, no rompe el patrón Bash probado):
+  1. **F1 Config base** (no-destructivo): sync `/etc/hosts` (arregla drift real del CT 208), health checks HTTP de los 7 stacks, verificación de paquetes/utilidades, sync de crontabs.
+  2. **F2 Deploy reproducible**: playbook de deploy de UN stack greenfield — NetBox como piloto natural (`cmdb/` vacío, SDD listo).
+  3. **F3 Provisioning Proxmox** (API pve) + evaluar MikroTik v6 (limitado) y Windows (fuera de alcance inicial).
+- **Decisiones clave**: mantener SOPS+age (NO ansible-vault, formato distinto); no migrar los 7 stacks existentes de una (riesgo de regresión); F1 usa módulos Ansible (lineinfile/cron/uri/package), no `shell:`.
+- **Riesgos**: MikroTik v6 no soporta bien los módulos modernos (target v7); Windows usa OpenSSH cmd.exe sin WinRM; sin CI/CD (playbooks manuales como los scripts actuales).
+- **Para continuar**: proposal (`sdd-propose`) tras confirmar: (1) control node `.107` vs CT dedicado, (2) NetBox como piloto F2, (3) excluir MikroTik/Windows del alcance inicial, (4) hosts sync + crontabs como entregables mínimos F1.
 
 ## Decisiones pendientes (para el equipo)
 
 - [x] ¿GLPI en CT propio (212) o en VM? — resuelto: CT 212, patrón del repo.
 - [ ] ¿NetBox en CT o VM? — necesita más recursos que GLPI (PostgreSQL+Redis).
-- [ ] ¿Alcance inicial de Ansible: deploy de stacks existentes, config drift, o ambos?
+- [ ] ¿Alcance inicial de Ansible: deploy de stacks existentes, config drift, o ambos? — exploration propone **progresivo**: F1 config drift → F2 deploy de NetBox (piloto) → F3 provisioning. Confirmar en proposal.
 - [ ] ¿Alta de las 3 en el portal unificado (config.yaml) apenas estén disponibles?
 
 ## Siguientes pasos propuestos
