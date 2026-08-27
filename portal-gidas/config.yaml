@@ -157,15 +157,6 @@ tools:
       - "G-Becarios"
       - "G-Graduados"
 
-  - name: "Cockpit Telepark"
-    url: "https://192.168.1.48:9090/proxy/telepark-cockpit"
-    icon: "fas fa-terminal"
-    description: "Consola web del entorno de desarrollo Telepark"
-    proxy: true
-    slug: "telepark-cockpit"
-    groups:
-      - "PROY-Telepark"
-
   - name: "Portainer Telepark"
     url: "https://192.168.1.48:9443"
     icon: "fas fa-cubes"

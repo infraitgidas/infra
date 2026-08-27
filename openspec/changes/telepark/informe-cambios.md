@@ -78,6 +78,7 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 26 | **Fix Cockpit bajo subpath** | Cockpit usa `<base href="/">` y rutas relativas. Se configuró `UrlRoot = /proxy/telepark-cockpit` (cockpit.conf), se ajustó el `url` de la card y se agregó el trailing slash en el proxy (Cockpit rechaza el no-slash con UrlRoot) |
 | 27 | **SSH remoto vía túnel Cloudflare** | servicio systemd `ssh-tunnel` en el CT 208 (`cloudflared tunnel --url ssh://192.168.1.48:22`) con captura de la URL dinámica a `/opt/portal-gidas/ssh-tunnel-url.txt`. El Quick Tunnel SSH no da SSH directo: se conecta con `cloudflared access ssh` en el cliente |
 | 28 | **Launchers SSH descargables** | cards "SSH Telepark (Linux/macOS)" y "(Windows)" en el portal → rutas `/download/ssh-telepark` y `/download/ssh-telepark-win` que generan un script con `cloudflared access ssh` (auto-descarga de `cloudflared`), leyendo la URL del túnel al vuelo |
+| 29 | **Cockpit eliminado** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal y se retiró de la documentación. Pendiente deshabilitar `cockpit.socket` en la VM y quitar el `UrlRoot` de `cockpit.conf` |
 
 ---
 
@@ -89,7 +90,6 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | SSH (remoto) | ✅ vía Portal GIDAS → launcher con `cloudflared access ssh` (túnel Cloudflare) |
 | Sudo (root) | ✅ vía grupo `proy-telepark` |
 | Docker CLI | ✅ sin sudo (socket del grupo AD) |
-| Cockpit | ⚠️ con credenciales de dominio (PAM/SSSD) + admin vía `wheel`; el login web por el portal devuelve solo `Negotiate` (Kerberos) |
 | Portainer | ⚠️ cuentas locales sincronizadas (password inicial `Telepark.2026!`), **no** la de dominio (limitación CE) |
 
 ### Usuarios del grupo Telepark
@@ -108,14 +108,15 @@ Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`)
 
 | Card | Acceso |
 |------|--------|
-| **Cockpit Telepark** | `https://192.168.1.48:9090` (`/proxy/telepark-cockpit/`, proxeada) |
 | **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`, proxeada) |
 | **SSH Telepark (Linux/macOS)** | launcher `.sh` descargable (`/download/ssh-telepark`) — vía túnel Cloudflare + cloudflared |
 | **SSH Telepark (Windows)** | launcher `.cmd` descargable (`/download/ssh-telepark-win`) — vía túnel Cloudflare + cloudflared |
 
-Para que funcionara el proxy con Cockpit/Portainer se hicieron **tres cambios**:
+> **Cockpit Telepark** se **eliminó** (no es una herramienta necesaria para los desarrolladores).
 
-1. **Proxy del portal con soporte WebSocket** (`portal-gidas/app/routers/proxy.py`): el proxy original (httpx) no soportaba WebSockets, imprescindibles para Cockpit (terminal) y Portainer (logs/consola). Se agregó una ruta `WebSocket` que reenvía bidireccionalmente (texto + binario) con la librería `websockets`.
+Para que funcionara el proxy con Portainer se hicieron **tres cambios**:
+
+1. **Proxy del portal con soporte WebSocket** (`portal-gidas/app/routers/proxy.py`): el proxy original (httpx) no soportaba WebSockets, imprescindibles para Portainer (logs/consola). Se agregó una ruta `WebSocket` que reenvía bidireccionalmente (texto + binario) con la librería `websockets`.
 2. **nginx del CT 208**: el proxy frontal usaba HTTP/1.0 y no reenviaba los headers `Upgrade`/`Connection`, rompiendo el handshake WebSocket. Se agregó `proxy_http_version 1.1` + `proxy_set_header Upgrade`/`Connection` (map `$connection_upgrade`) + timeouts largos.
 3. **Config**: las cards pasaron de `proxy: false` (enlace directo) a `proxy: true` con la IP interna.
 

@@ -5,7 +5,7 @@
 > **Proyecto**: Telepark
 > **Última actualización**: 2026-08-26
 
-Este manual explica cómo usar la máquina de desarrollo del proyecto Telepark: qué herramientas tenés disponibles, qué es cada una, y cómo acceder a ellas (SSH, Cockpit y Portainer).
+Este manual explica cómo usar la máquina de desarrollo del proyecto Telepark: qué herramientas tenés disponibles, qué es cada una, y cómo acceder a ellas (SSH y Portainer).
 
 ---
 
@@ -26,7 +26,6 @@ Todos los integrantes del grupo Telepark tienen acceso con su **usuario de domin
 | **SSH** | Conexión segura a la terminal de la VM | `ssh <usuario>@gdc01.local@192.168.1.48` |
 | **Docker** | Motor de contenedores | Por terminal (SSH) |
 | **Docker Compose** | Orquestador de stacks multi-contenedor | Por terminal (`docker compose`) |
-| **Cockpit** | Consola web para administrar el **sistema** | `https://192.168.1.48:9090` |
 | **Portainer** | Consola web para gestionar **Docker** | `https://192.168.1.48:9443` |
 
 ### 2.2 ¿Qué es cada herramienta?
@@ -35,13 +34,10 @@ Todos los integrantes del grupo Telepark tienen acceso con su **usuario de domin
 Protocolo para conectarte de forma **segura y cifrada** a la terminal de la VM desde tu PC. Es como "teletransportarte" a la máquina: escribís comandos como si estuvieras sentado frente a ella. Es la forma principal de trabajar (editar archivos, correr Docker, ver logs).
 
 **🐳 Docker**
-Motor de **contenedores**. Un contenedor es como una mini-máquina virtual liviana que empaqueta una aplicación y todas sus dependencias, de modo que corra **igual en cualquier lado**. Docker es el motor que crea y ejecuta esos contenedores. (No lo confundas con Cockpit/Portainer: Docker es el *motor*, los otros dos son *paneles de control*.)
+Motor de **contenedores**. Un contenedor es como una mini-máquina virtual liviana que empaqueta una aplicación y todas sus dependencias, de modo que corra **igual en cualquier lado**. Docker es el motor que crea y ejecuta esos contenedores. (No lo confundas con Portainer: Docker es el *motor*, Portainer es el *panel de control*.)
 
 **🧩 Docker Compose**
 Herramienta para definir y levantar aplicaciones **multi-contenedor**. Con un archivo `docker-compose.yml` describís todos los servicios (web, base de datos, caché…) y sus relaciones, y con **un solo comando** (`docker compose up`) levantás todo el stack.
-
-**🖥️ Cockpit**
-Consola **web** para administrar el **sistema operativo** (la VM en sí), no las aplicaciones. Desde el navegador ves el estado del servidor, los servicios (systemd), los logs, el disco, la red, y hasta abrís una **terminal web**. Es el "panel de control" del servidor. Autentica con tu **usuario de dominio**.
 
 **🎛️ Portainer**
 Interfaz **web** para gestionar **Docker**: ver contenedores, deployar stacks, revisar logs, crear volúmenes y redes. Es el "panel de control" de Docker — la alternativa gráfica a la línea de comandos `docker`. (No usa tu password de dominio; tenés una cuenta local, ver sección 5.)
@@ -101,16 +97,14 @@ sudo -i          # o sudo <comando>
 
 ---
 
-## 4. Consolas web (Cockpit y Portainer)
+## 4. Consolas web (Portainer)
 
 | Herramienta | URL | Para qué |
 |-------------|-----|----------|
-| **Cockpit** | `https://192.168.1.48:9090` | Administrar el **sistema** (terminal web, servicios, logs, disco/red) |
 | **Portainer** | `https://192.168.1.48:9443` | Gestionar **Docker** (contenedores, imágenes, volúmenes, stacks) |
 
-> 💡 **También desde el Portal GIDAS**: si tenés acceso al portal (`portal.gidas.local`), vas a ver las cards **"Cockpit Telepark"**, **"Portainer Telepark"** y **"SSH Telepark"** (terminal) — aparecen solo para los del grupo Telepark.
+> 💡 **También desde el Portal GIDAS**: si tenés acceso al portal (`portal.gidas.local`), vas a ver las cards **"Portainer Telepark"** y **"SSH Telepark"** — aparecen solo para los del grupo Telepark.
 
-> **Cockpit**: entrás con tu **usuario de dominio** (`usuario@gdc01.local` + password de dominio). El usuario `root` está **deshabilitado** en Cockpit.
 > **Portainer**: cada usuario del grupo Telepark tiene una **cuenta local** (Portainer CE no usa el password de dominio). Password inicial: `Telepark.2026!` — cambiala al primer ingreso.
 > Son certificados autofirmados → el navegador va a mostrar advertencia de seguridad la primera vez; aceptala.
 
@@ -136,25 +130,9 @@ Con Portainer podés:
 
 ---
 
-## 6. Usar Cockpit
+## 6. Trabajar con Docker (por terminal)
 
-1. Entrá a `https://192.168.1.48:9090`.
-2. Logeate con tu usuario de dominio.
-
-> **Acceso administrativo**: como integrante del grupo Telepark, estás en el grupo `wheel`, así que tenés **acceso administrativo** completo (podés tocar servicios, discos, red, etc.). Si al entrar aparece en modo "limited", activá el toggle de **"Reuse my password for administrative tasks"**.
-
-Con Cockpit podés:
-
-- **Terminal** — una shell web (botón "Terminal" en el menú izquierdo).
-- **Servicios** — ver y reiniciar `docker.service`, `cockpit.socket`, etc.
-- **Logs** — revisar el journal del sistema.
-- **Almacenamiento / Red** — ver disco y tráfico.
-
----
-
-## 7. Trabajar con Docker (por terminal)
-
-### 7.1 Comandos básicos
+### 6.1 Comandos básicos
 
 ```bash
 docker ps                 # contenedores corriendo
@@ -165,7 +143,7 @@ docker exec -it <contenedor> bash   # entrar a un contenedor
 docker volume ls          # volúmenes
 ```
 
-### 7.2 Docker Compose
+### 6.2 Docker Compose
 
 La VM ya trae Compose v2 (`docker compose`, sin guion):
 
@@ -178,7 +156,7 @@ docker compose logs -f        # ver logs en tiempo real
 docker compose pull && docker compose up -d   # actualizar imágenes
 ```
 
-### 7.3 Ejemplo completo: levantar un stack
+### 6.3 Ejemplo completo: levantar un stack
 
 ```bash
 mkdir -p /srv/mi-app && cd /srv/mi-app
@@ -195,7 +173,7 @@ curl http://localhost:8080
 
 ---
 
-## 8. Buenas prácticas
+## 7. Buenas prácticas
 
 - **No trabajes como root por defecto**: usá tu usuario de dominio y `sudo` cuando lo necesites.
 - **Datos persistentes con volúmenes**: no guardes datos importantes dentro del contenedor; usá volúmenes (`docker volume`) o bind mounts (`/srv/...`).
@@ -205,7 +183,7 @@ curl http://localhost:8080
 
 ---
 
-## 9. Troubleshooting rápido
+## 8. Troubleshooting rápido
 
 | Problema | Qué hacer |
 |----------|-----------|
@@ -215,4 +193,3 @@ curl http://localhost:8080
 | Un puerto ya está en uso | `sudo ss -tlnp | grep <puerto>` para ver quién lo usa |
 | No resuelve `telepark-dev.gidas.local` | Está en el DNS del MikroTik. Si tu DNS primario no es `192.168.1.1` o `192.168.1.117`, usá la IP directa |
 | Portainer no carga | `sudo systemctl status docker` y `docker ps --filter name=portainer` |
-| Cockpit no me da acceso admin | Tenés que estar en el grupo `wheel` (los del grupo Telepark ya lo están). Volvé a entrar con el toggle "Reuse my password" |
