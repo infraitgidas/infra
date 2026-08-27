@@ -76,6 +76,11 @@ async def _proxy(tool, request: Request, path: str):
             headers[key] = value
     headers.pop("cookie", None)
 
+    # Reescribir Origin al del backend (Cockpit exige Origin == Host también en HTTP)
+    from urllib.parse import urlparse
+    _p = urlparse(tool.url)
+    headers["Origin"] = f"{_p.scheme}://{_p.netloc}"
+
     try:
         response = await client.request(
             method=request.method, url=target_url,
