@@ -189,8 +189,11 @@ Reglas:
   frontend en React).
 - Tenés que **estar logueado** en el Portal y pertenecer al grupo
   `PROY-Telepark`.
-- El puerto debe estar escuchando en la VM (`0.0.0.0` o `localhost`); verificá
-  con `curl http://localhost:8080`.
+- El puerto debe estar escuchando en la **IP de la VM** (o `0.0.0.0`), **no** solo
+  en `localhost` — el Portal vive en otro servidor y tiene que alcanzarlo. Con
+  Docker, `-p 8080:80` ya escucha en `0.0.0.0`. Verificá desde otra máquina con
+  `curl http://192.168.1.48:<puerto>`, o en la VM con
+  `ss -tlnp | grep <puerto>` (debe mostrar `0.0.0.0` o `192.168.1.48`, no `127.0.0.1`).
 - Si la app usa WebSockets (hot-reload, chat, etc.) también funciona.
 
 Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
