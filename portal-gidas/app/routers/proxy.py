@@ -184,9 +184,11 @@ async def _ws_proxy(tool, websocket: WebSocket, path: str):
     backend_origin = f"{_p.scheme}://{_p.netloc}"
 
     # Conectar al backend PRIMERO para negociar el subprotocolo
+    # `ssl` solo aplica a wss:// (websockets 14+ lo rechaza en ws://).
     try:
+        ssl_ctx = _ws_ssl_context() if ws_url.startswith("wss://") else None
         backend = await websockets.connect(
-            ws_url, ssl=_ws_ssl_context(),
+            ws_url, ssl=ssl_ctx,
             subprotocols=subprotocols or None,
             additional_headers={"Origin": backend_origin},
         )
