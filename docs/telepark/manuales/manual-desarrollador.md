@@ -195,6 +195,9 @@ Reglas:
 
 Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 
+> **Atajo**: en el Portal tenés la card **"Navegador"**, que te abre una página
+> para ingresar el puerto directamente (sin escribir la URL a mano).
+
 ---
 
 ## 7. Editor en el navegador (VS Code remoto)
@@ -202,6 +205,9 @@ Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 ¿No querés editar código por terminal? Tenés **VS Code en el navegador**: un editor
 completo (extensiones, terminal integrado y Git) que corre en la VM y lo abrís
 desde tu navegador, sin instalar nada en tu PC.
+
+> **Atajo**: en el Portal tenés la card **"IDE (VS Code)"**, que abre el puerto
+> `8080`. Arrancá el editor con `code-on 8080` (acá abajo) y después hacé clic en esa card.
 
 ### 7.1 Arrancar el editor
 

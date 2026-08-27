@@ -11,7 +11,7 @@ import ssl
 import httpx
 import websockets
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.status import HTTP_302_FOUND
 
 from app.auth import COOKIE_NAME, decode_token, get_user_from_cookie
@@ -312,3 +312,67 @@ async def proxy_port_ws(websocket: WebSocket, port: int, path: str):
         await websocket.close(code=4400)
         return
     await _ws_proxy(_port_tool(port), websocket, path)
+
+
+# ── Raíz sin path y launcher ────────────────────────────────────────────
+# `/port/8080` (sin trailing slash) y `/port/` (página para ingresar el puerto).
+
+@router.api_route("/port/{port}",
+                  methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+async def proxy_port_root(request: Request, port: int):
+    return await proxy_port(request, port, "")
+
+
+@router.websocket("/port/{port}")
+async def proxy_port_ws_root(websocket: WebSocket, port: int):
+    await proxy_port_ws(websocket, port, "")
+
+
+_PORT_LAUNCHER_HTML = """<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navegador — VM Telepark</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#0f172a; color:#e2e8f0;
+         display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  .box { background:#1e293b; padding:2rem 2.5rem; border-radius:1rem; text-align:center;
+         box-shadow:0 10px 30px rgba(0,0,0,.4); max-width:420px; }
+  h1 { font-size:1.4rem; margin:0 0 .5rem; }
+  p { color:#94a3b8; margin:0 0 1.2rem; }
+  input { font-size:1.1rem; padding:.6rem .8rem; border-radius:.5rem; border:1px solid #334155;
+          background:#0f172a; color:#e2e8f0; width:150px; text-align:center; }
+  button { font-size:1.1rem; padding:.6rem 1.4rem; border-radius:.5rem; border:none;
+           background:#2563eb; color:#fff; cursor:pointer; margin-left:.5rem; }
+  button:hover { background:#1d4ed8; }
+  .tip { margin-top:1.5rem; font-size:.82rem; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Navegador de la VM Telepark</h1>
+    <p>Ingresá el puerto de tu app para abrirla en el navegador:</p>
+    <input type="number" id="port" placeholder="ej. 3000" min="1" max="65535" autofocus>
+    <button onclick="abrir()">Abrir</button>
+    <p class="tip">El editor (VS Code) se abre igual: puerto 8080 con <code>code-on 8080</code>.</p>
+  </div>
+  <script>
+    function abrir() {
+      const p = document.getElementById('port').value.trim();
+      if (p) window.location.href = '/port/' + p + '/';
+    }
+    document.getElementById('port').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') abrir();
+    });
+  </script>
+</body>
+</html>
+"""
+
+
+@router.get("/port/", response_class=HTMLResponse)
+async def port_launcher(request: Request):
+    if not _telepark_user(request):
+        return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
+    return HTMLResponse(_PORT_LAUNCHER_HTML)

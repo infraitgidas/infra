@@ -83,6 +83,7 @@ Para el acceso **remoto** (fuera de la LAN) se agregaron al Portal GIDAS: launch
 | 29 | **Cockpit fuera del portal** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal (desplegada). Cockpit se mantiene activo en la VM (`:9090`) para uso local/administrativo |
 | 30 | **Proxy dinámico de puertos** | ruta `/port/{puerto}/` en el portal (`proxy.py`) proxea **cualquier puerto** de la VM (`http://192.168.1.48:{puerto}`), con HTTP + WebSockets y RBAC (sesión del portal + grupo `PROY-Telepark`). Refactor de `_rewrite_url(url, slug)` → `_rewrite_url(url, prefix)` + atributo `proxy_prefix` para que los `Location` del backend se reescriban a `/port/{puerto}/` |
 | 31 | **IDE remoto (code-server)** | instalado `code-server` 4.135.0 (RPM) en la VM. Launcher on-demand `/usr/local/bin/code-on` (script `scripts/telepark/code-on.sh`): cada dev arranca su editor (`code-on <puerto>`) con `--auth none` (autentica el portal) y lo abre vía `https://<portal>/port/{puerto}/`. Verificado: index.html 100% relativo (`rootEndpoint: "."`) → funciona detrás del proxy strip-prefix |
+| 32 | **Cards Telepark ordenadas** | `config.yaml` reorganizado: cards de `PROY-Telepark` agrupadas por orden de importancia (SSH → Portainer → Navegador → IDE → Redmine → GitLab → Grafana). Agregadas cards "Navegador" (`/port/`, página launcher de puertos) e "IDE (VS Code)" (`/port/8080/`). Redmine/GitLab/Grafana ahora incluyen `PROY-Telepark`. En `proxy.py` se agregaron la ruta launcher `GET /port/` y las raíces `/port/{port}` (HTTP+WS) sin trailing slash |
 
 ---
 
@@ -109,13 +110,18 @@ Para el acceso **remoto** (fuera de la LAN) se agregaron al Portal GIDAS: launch
 
 ### Acceso vía Portal GIDAS
 
-Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`) para acceso remoto:
+Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`) para acceso remoto, **ordenadas por importancia**:
 
 | Card | Acceso |
 |------|--------|
-| **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`, proxeada) |
 | **SSH Telepark (Linux/macOS)** | launcher `.sh` descargable (`/download/ssh-telepark`) — vía túnel Cloudflare + cloudflared |
 | **SSH Telepark (Windows)** | launcher `.cmd` descargable (`/download/ssh-telepark-win`) — vía túnel Cloudflare + cloudflared |
+| **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`, proxeada) |
+| **Navegador** | `/port/` — página para abrir cualquier puerto de la VM en el navegador |
+| **IDE (VS Code)** | `/port/8080/` — editor en el navegador (corré `code-on 8080` en la VM) |
+| **Redmine** | `/redmine/` (túnel) |
+| **GitLab** | `/gitlab/` (túnel) |
+| **Grafana** | `/grafana/` (túnel) |
 
 > **Cockpit Telepark**: la card se **quitó** del portal (los desarrolladores no la necesitan). Cockpit **sigue activo** en la VM (`https://192.168.1.48:9090`) para uso local/administrativo.
 

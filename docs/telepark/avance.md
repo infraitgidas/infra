@@ -129,6 +129,8 @@ Todos los miembros del grupo AD `PROY-Telepark` tienen sudo total (equivalente a
 
 > **Editor en el navegador (VS Code remoto)**: `code-server` 4.135.0 instalado en la VM + launcher on-demand `/usr/local/bin/code-on`. Cada dev arranca su editor (`code-on <puerto>`) y lo abre vía `https://<portal>/port/<puerto>/`. Corre como el propio usuario, con `--auth none` (autentica el portal). Ver manual del desarrollador §7.
 
+> **Cards del Portal ordenadas**: la vista de `PROY-Telepark` quedó ordenada por importancia: SSH → Portainer → Navegador → IDE (VS Code) → Redmine → GitLab → Grafana. Se agregaron las cards "Navegador" (página `/port/` para ingresar el puerto) e "IDE (VS Code)" (`/port/8080/`), y Redmine/GitLab/Grafana ahora son visibles para Telepark.
+
 ### Acceso a Docker (sin sudo)
 
 El socket `/var/run/docker.sock` pertenece al grupo AD `proy-telepark@GDC01.local` (vía override de `docker.socket`), por lo que los usuarios del grupo Telepark ejecutan `docker` **directamente**, sin `sudo`:
