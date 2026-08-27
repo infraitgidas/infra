@@ -178,7 +178,7 @@ tools:
   - name: "SSH Telepark (Linux/macOS)"
     url: "/download/ssh-telepark"
     icon: "fas fa-terminal"
-    description: "Descargar launcher SSH — requiere Twingate/VPN"
+    description: "Descargar launcher SSH — vía túnel Cloudflare (descarga cloudflared solo)"
     proxy: false
     groups:
       - "PROY-Telepark"
@@ -186,7 +186,7 @@ tools:
   - name: "SSH Telepark (Windows)"
     url: "/download/ssh-telepark-win"
     icon: "fas fa-keyboard"
-    description: "Descargar launcher SSH para Windows — requiere Twingate/VPN"
+    description: "Descargar launcher SSH para Windows — vía túnel Cloudflare (descarga cloudflared solo)"
     proxy: false
     groups:
       - "PROY-Telepark"
