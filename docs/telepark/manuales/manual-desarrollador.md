@@ -201,6 +201,11 @@ Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 > **Atajo**: en el Portal tenés la card **"Navegador"**, que te abre una página
 > para ingresar el puerto directamente (sin escribir la URL a mano).
 
+> **Verificación rápida** (probado end-to-end el 2026-08-27): si querés confirmar
+> que el navegador anda, corré en la VM `docker run -d -p 7000:80 nginx:alpine` y
+> abrí `https://<portal>/port/7000/`. Deberías ver la página de bienvenida de
+> nginx. Para detenerlo: `docker rm -f <nombre-del-contenedor>`.
+
 ---
 
 ## 7. Editor en el navegador (VS Code remoto)

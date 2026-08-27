@@ -127,6 +127,8 @@ Todos los miembros del grupo AD `PROY-Telepark` tienen sudo total (equivalente a
 
 > **Revisar despliegues en el navegador (cualquier puerto)**: el Portal GIDAS proxea puertos de la VM vía la ruta `/port/{puerto}/`. Por ejemplo, una app en el puerto `8080` se ve en `https://<url-del-portal>/port/8080/`. Requiere login en el Portal y pertenecer a `PROY-Telepark`. Soporta HTTP y WebSockets. Ver manual del desarrollador §6.4.
 
+> **Verificado end-to-end (navegador)**: se probó el proxy de puertos con un nginx en el puerto `7000` (`docker run -d -p 7000:80 nginx:alpine`), accesible vía `https://<portal>/port/7000/` (HTTP 200, tanto desde la VM como desde el CT 208). Quedó el contenedor `browser-test` corriendo para pruebas manuales.
+
 > **Editor en el navegador (VS Code remoto)**: `code-server` 4.135.0 instalado en la VM + launcher on-demand `/usr/local/bin/code-on`. Cada dev arranca su editor (`code-on <puerto>`) y lo abre vía `https://<portal>/port/<puerto>/`. Corre como el propio usuario, con `--auth none` (autentica el portal). Ver manual del desarrollador §7.
 
 > **Cards del Portal ordenadas**: la vista de `PROY-Telepark` quedó ordenada por importancia: SSH → Portainer → Navegador → IDE (VS Code) → Redmine → GitLab → Grafana. Se agregaron las cards "Navegador" (página `/port/` para ingresar el puerto) e "IDE (VS Code)" (`/port/8080/`), y Redmine/GitLab/Grafana ahora son visibles para Telepark.
