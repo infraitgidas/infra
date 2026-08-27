@@ -24,9 +24,11 @@ Todos los integrantes del grupo Telepark tienen acceso con su **usuario de domin
 | Herramienta | ¿Qué es? | ¿Cómo accedo? |
 |-------------|----------|---------------|
 | **SSH** | Conexión segura a la terminal de la VM | `ssh <usuario>@gdc01.local@192.168.1.48` |
+| **SSH remoto** | Conectarte desde fuera de la LAN | launcher del Portal GIDAS (ver §3.2) |
 | **Docker** | Motor de contenedores | Por terminal (SSH) |
 | **Docker Compose** | Orquestador de stacks multi-contenedor | Por terminal (`docker compose`) |
 | **Portainer** | Consola web para gestionar **Docker** | `https://192.168.1.48:9443` |
+| **Revisar mi app** | Ver un despliegue en el navegador (cualquier puerto) | `https://<portal>/port/<puerto>/` (ver §6.4) |
 
 ### 2.2 ¿Qué es cada herramienta?
 

@@ -13,6 +13,8 @@ Se creó y disponibilizó la **VM de desarrollo del proyecto Telepark** (`telepa
 
 Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigió el acceso SSH por contraseña, el acceso a Docker sin sudo, el timeout de seguridad de Portainer, y un problema **preexistente** de resolución DNS (`*.gidas.local` no resolvía desde las workstations).
 
+Para el acceso **remoto** (fuera de la LAN) se agregaron al Portal GIDAS: launchers SSH por túnel Cloudflare y un **proxy dinámico de puertos** (`/port/{puerto}/`) para revisar despliegues desde el navegador.
+
 | Concepto | Valor |
 |----------|-------|
 | VM | `telepark-dev` (VMID 213, nodo `pve-desa01`) |
@@ -79,6 +81,7 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 27 | **SSH remoto vía túnel Cloudflare** | servicio systemd `ssh-tunnel` en el CT 208 (`cloudflared tunnel --url ssh://192.168.1.48:22`) con captura de la URL dinámica a `/opt/portal-gidas/ssh-tunnel-url.txt`. El Quick Tunnel SSH no da SSH directo: se conecta con `cloudflared access ssh` en el cliente |
 | 28 | **Launchers SSH descargables** | cards "SSH Telepark (Linux/macOS)" y "(Windows)" en el portal → rutas `/download/ssh-telepark` y `/download/ssh-telepark-win` que generan un script con `cloudflared access ssh` (auto-descarga de `cloudflared`), leyendo la URL del túnel al vuelo |
 | 29 | **Cockpit fuera del portal** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal (desplegada). Cockpit se mantiene activo en la VM (`:9090`) para uso local/administrativo |
+| 30 | **Proxy dinámico de puertos** | ruta `/port/{puerto}/` en el portal (`proxy.py`) proxea **cualquier puerto** de la VM (`http://192.168.1.48:{puerto}`), con HTTP + WebSockets y RBAC (sesión del portal + grupo `PROY-Telepark`). Refactor de `_rewrite_url(url, slug)` → `_rewrite_url(url, prefix)` + atributo `proxy_prefix` para que los `Location` del backend se reescriban a `/port/{puerto}/` |
 
 ---
 
