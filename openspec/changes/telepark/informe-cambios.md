@@ -78,7 +78,7 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 26 | **Fix Cockpit bajo subpath** | Cockpit usa `<base href="/">` y rutas relativas. Se configuró `UrlRoot = /proxy/telepark-cockpit` (cockpit.conf), se ajustó el `url` de la card y se agregó el trailing slash en el proxy (Cockpit rechaza el no-slash con UrlRoot) |
 | 27 | **SSH remoto vía túnel Cloudflare** | servicio systemd `ssh-tunnel` en el CT 208 (`cloudflared tunnel --url ssh://192.168.1.48:22`) con captura de la URL dinámica a `/opt/portal-gidas/ssh-tunnel-url.txt`. El Quick Tunnel SSH no da SSH directo: se conecta con `cloudflared access ssh` en el cliente |
 | 28 | **Launchers SSH descargables** | cards "SSH Telepark (Linux/macOS)" y "(Windows)" en el portal → rutas `/download/ssh-telepark` y `/download/ssh-telepark-win` que generan un script con `cloudflared access ssh` (auto-descarga de `cloudflared`), leyendo la URL del túnel al vuelo |
-| 29 | **Cockpit eliminado** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal y se retiró de la documentación. Pendiente deshabilitar `cockpit.socket` en la VM y quitar el `UrlRoot` de `cockpit.conf` |
+| 29 | **Cockpit fuera del portal** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal (desplegada). Cockpit se mantiene activo en la VM (`:9090`) para uso local/administrativo |
 
 ---
 
@@ -112,7 +112,7 @@ Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`)
 | **SSH Telepark (Linux/macOS)** | launcher `.sh` descargable (`/download/ssh-telepark`) — vía túnel Cloudflare + cloudflared |
 | **SSH Telepark (Windows)** | launcher `.cmd` descargable (`/download/ssh-telepark-win`) — vía túnel Cloudflare + cloudflared |
 
-> **Cockpit Telepark** se **eliminó** (no es una herramienta necesaria para los desarrolladores).
+> **Cockpit Telepark**: la card se **quitó** del portal (los desarrolladores no la necesitan). Cockpit **sigue activo** en la VM (`https://192.168.1.48:9090`) para uso local/administrativo.
 
 **Revisar despliegues en el navegador (proxy de puertos)**: se agregó al Portal una ruta dinámica `/port/{puerto}/` que proxea **cualquier puerto** de la VM `telepark-dev` (`http://192.168.1.48:{puerto}`), para que los desarrolladores revisen sus apps desde el navegador sin estar en la LAN. Soporta HTTP y WebSockets, con el mismo RBAC: requiere sesión del Portal y pertenencia al grupo `PROY-Telepark`. Ver manual del desarrollador §6.4.
 
