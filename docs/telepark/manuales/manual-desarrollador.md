@@ -171,6 +171,27 @@ docker compose up -d
 curl http://localhost:8080
 ```
 
+### 6.4 Revisar tu app en el navegador (cualquier puerto)
+
+Cuando levantes una app (por ejemplo en el puerto `8080`), podés revisarla desde
+tu navegador **sin estar en la red de la empresa**. El Portal GIDAS proxea
+cualquier puerto de la VM de desarrollo:
+
+```
+https://<url-del-portal>/port/8080/
+```
+
+Reglas:
+- Reemplazá `8080` por el puerto de tu app (por ejemplo `/port/3000/` para un
+  frontend en React).
+- Tenés que **estar logueado** en el Portal y pertenecer al grupo
+  `PROY-Telepark`.
+- El puerto debe estar escuchando en la VM (`0.0.0.0` o `localhost`); verificá
+  con `curl http://localhost:8080`.
+- Si la app usa WebSockets (hot-reload, chat, etc.) también funciona.
+
+Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
+
 ---
 
 ## 7. Buenas prácticas

@@ -124,6 +124,8 @@ Todos los miembros del grupo AD `PROY-Telepark` tienen sudo total (equivalente a
 
 > **SSH remoto (fuera de la LAN)**: vía el Portal GIDAS. Las cards **"SSH Telepark (Linux/macOS)"** y **"(Windows)"** descargan un launcher que conecta por el **túnel de Cloudflare** (`cloudflared access ssh` como ProxyCommand, con auto-descarga de `cloudflared`). El túnel SSH corre como servicio `ssh-tunnel` en el CT 208, y su URL dinámica se captura en `/opt/portal-gidas/ssh-tunnel-url.txt` (el launcher la lee al vuelo).
 
+> **Revisar despliegues en el navegador (cualquier puerto)**: el Portal GIDAS proxea puertos de la VM vía la ruta `/port/{puerto}/`. Por ejemplo, una app en el puerto `8080` se ve en `https://<url-del-portal>/port/8080/`. Requiere login en el Portal y pertenecer a `PROY-Telepark`. Soporta HTTP y WebSockets. Ver manual del desarrollador §6.4.
+
 ### Acceso a Docker (sin sudo)
 
 El socket `/var/run/docker.sock` pertenece al grupo AD `proy-telepark@GDC01.local` (vía override de `docker.socket`), por lo que los usuarios del grupo Telepark ejecutan `docker` **directamente**, sin `sudo`:

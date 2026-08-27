@@ -114,6 +114,8 @@ Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`)
 
 > **Cockpit Telepark** se **eliminó** (no es una herramienta necesaria para los desarrolladores).
 
+**Revisar despliegues en el navegador (proxy de puertos)**: se agregó al Portal una ruta dinámica `/port/{puerto}/` que proxea **cualquier puerto** de la VM `telepark-dev` (`http://192.168.1.48:{puerto}`), para que los desarrolladores revisen sus apps desde el navegador sin estar en la LAN. Soporta HTTP y WebSockets, con el mismo RBAC: requiere sesión del Portal y pertenencia al grupo `PROY-Telepark`. Ver manual del desarrollador §6.4.
+
 Para que funcionara el proxy con Portainer se hicieron **tres cambios**:
 
 1. **Proxy del portal con soporte WebSocket** (`portal-gidas/app/routers/proxy.py`): el proxy original (httpx) no soportaba WebSockets, imprescindibles para Portainer (logs/consola). Se agregó una ruta `WebSocket` que reenvía bidireccionalmente (texto + binario) con la librería `websockets`.

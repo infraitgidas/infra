@@ -31,12 +31,11 @@ def _find_tool(request: Request, tool_name: str):
     return None
 
 
-def _rewrite_url(url: str, slug: str) -> str:
+def _rewrite_url(url: str, prefix: str) -> str:
     """Rewrite redirect URLs from internal to proxy paths."""
     from urllib.parse import urlparse
     if not url:
         return ""
-    prefix = f"/proxy/{slug.lower()}"
     if url.startswith("/"):
         if url.startswith(prefix):
             return url.rstrip("/") or "/"
@@ -98,7 +97,7 @@ async def _proxy(tool, request: Request, path: str):
         kl = k.lower()
         if kl not in ("content-encoding", "transfer-encoding", "connection", "keep-alive", "content-length"):
             if kl == "location":
-                v = _rewrite_url(v, tool.slug or tool.name.lower())
+                v = _rewrite_url(v, getattr(tool, "proxy_prefix", None) or f"/proxy/{tool.slug or tool.name.lower()}")
             if v:
                 resp_headers[k] = v
 
@@ -255,3 +254,61 @@ async def proxy_ws_root(websocket: WebSocket, tool_name: str):
         await websocket.close(code=4404)
         return
     await _ws_proxy(tool, websocket, "")
+
+
+# ── Proxy dinámico de puertos (VM Telepark) ─────────────────────────────
+# Permite revisar despliegues en cualquier puerto de la VM de desarrollo:
+#   https://<portal>/port/3000/  →  http://192.168.1.48:3000/
+
+VM_PORT_HOST = "192.168.1.48"   # VM de desarrollo Telepark
+TELEPARK_GROUP = "PROY-Telepark"
+
+
+def _port_tool(port: int):
+    """Tool virtual para proxear un puerto de la VM."""
+    from types import SimpleNamespace
+    return SimpleNamespace(
+        url=f"http://{VM_PORT_HOST}:{port}",
+        name=f"Port {port}",
+        slug=f"port-{port}",
+        proxy_prefix=f"/port/{port}",
+    )
+
+
+def _telepark_user(request):
+    settings = request.app.state.settings
+    user = get_user_from_cookie(request, settings.jwt_secret)
+    if not user or TELEPARK_GROUP not in user.get("groups", []):
+        return None
+    return user
+
+
+@router.api_route("/port/{port}/{path:path}",
+                  methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+async def proxy_port(request: Request, port: int, path: str):
+    if not _telepark_user(request):
+        return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
+    if not (1 <= port <= 65535):
+        raise HTTPException(status_code=400, detail="Puerto inválido")
+    return await _proxy(_port_tool(port), request, path)
+
+
+@router.websocket("/port/{port}/{path:path}")
+async def proxy_port_ws(websocket: WebSocket, port: int, path: str):
+    settings = websocket.app.state.settings
+    token = websocket.cookies.get(COOKIE_NAME)
+    if not token:
+        await websocket.close(code=4401)
+        return
+    try:
+        user = decode_token(token, settings.jwt_secret)
+    except Exception:
+        await websocket.close(code=4401)
+        return
+    if TELEPARK_GROUP not in user.get("groups", []):
+        await websocket.close(code=4403)
+        return
+    if not (1 <= port <= 65535):
+        await websocket.close(code=4400)
+        return
+    await _ws_proxy(_port_tool(port), websocket, path)
