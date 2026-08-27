@@ -124,6 +124,8 @@ Todos los miembros del grupo AD `PROY-Telepark` tienen sudo total (equivalente a
 
 > **SSH por password**: el cloud-init del template dejaba `PasswordAuthentication no`; se habilitó para que los usuarios de dominio puedan entrar con su contraseña. El login exige el nombre completo (`usuario@gdc01.local`); el nombre corto no resuelve (`use_fully_qualified_names = True`).
 
+> **SSH remoto (fuera de la LAN)**: vía el Portal GIDAS. Las cards **"SSH Telepark (Linux/macOS)"** y **"(Windows)"** descargan un launcher que conecta por el **túnel de Cloudflare** (`cloudflared access ssh` como ProxyCommand, con auto-descarga de `cloudflared`). El túnel SSH corre como servicio `ssh-tunnel` en el CT 208, y su URL dinámica se captura en `/opt/portal-gidas/ssh-tunnel-url.txt` (el launcher la lee al vuelo).
+
 > **Cockpit**: autentica por PAM → SSSD → AD. Los usuarios de dominio entran con `usuario@gdc01.local` + password de dominio. El **acceso administrativo** (modo privilegiado) depende del grupo local `wheel`: los usuarios del grupo Telepark se agregaron a `wheel` para tener admin. El usuario `root` está **deshabilitado** en Cockpit (usar `infra` o un usuario de dominio con sudo).
 
 ### Acceso a Docker (sin sudo)
@@ -290,3 +292,4 @@ El script: lee los miembros de `PROY-Telepark` (vía `getent group`/SSSD) → lo
 - 🔲 **FreeIPA**: crear el usuario `telepark` en FreeIPA (realm `IPA.GDC01.LOCAL`, host `192.168.1.118`). **Bloqueado** — la password de admin está perdida (`PREAUTH_FAILED`), `infra` es solo un user SSH local (no principal IPA), y el reset del Directory Manager (hash PBKDF2 no recuperable) no prosperó por las vías probadas (`pwdhash -s` falló el bind, texto plano rechazado por 389-DS). FreeIPA **no lo usa nada** en la infra (sin trust AD, SSSD solo con `ipa.gdc01.local`); recomendado dejarlo fuera o reinstalarlo limpio.
 - 🔲 **Emanuel Bernal** (`ebernalcustodio`): no tiene `Title` seteado en AD (no afecta el acceso).
 - 🔲 **Firewall**: evaluar si se agrega `firewalld` con reglas mínimas (SSH 22, Cockpit 9090, Portainer 9443).
+- 🔲 **Cockpit web por el portal**: el login de Cockpit devuelve solo `WWW-Authenticate: Negotiate` (Kerberos, por el SSSD unido a AD). Para usarlo desde el navegador sin ticket de Kerberos hay que habilitar el login por password (ajustar PAM/SSSD) o configurar `network.negotiate-auth.trusted-uris` en Firefox. No es bloqueante: el acceso remoto se resuelve con SSH (túnel Cloudflare) + Portainer.

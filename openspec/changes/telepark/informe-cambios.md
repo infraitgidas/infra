@@ -76,6 +76,8 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 | 24 | **Terminal SSH (ttyd)** | desplegado `ttyd` en la VM (puerto 7681, HTTPS con cert autofirmado, login AD vía PAM/SSSD) + card "SSH Telepark" en el portal |
 | 25 | **Fix Content-Length (502)** | el proxy copiaba el header `Content-Length` del backend descomprimido por httpx → `RuntimeError: Response content longer than Content-Length`. Se excluye `content-length` (Starlette lo recalcula) |
 | 26 | **Fix Cockpit bajo subpath** | Cockpit usa `<base href="/">` y rutas relativas. Se configuró `UrlRoot = /proxy/telepark-cockpit` (cockpit.conf), se ajustó el `url` de la card y se agregó el trailing slash en el proxy (Cockpit rechaza el no-slash con UrlRoot) |
+| 27 | **SSH remoto vía túnel Cloudflare** | servicio systemd `ssh-tunnel` en el CT 208 (`cloudflared tunnel --url ssh://192.168.1.48:22`) con captura de la URL dinámica a `/opt/portal-gidas/ssh-tunnel-url.txt`. El Quick Tunnel SSH no da SSH directo: se conecta con `cloudflared access ssh` en el cliente |
+| 28 | **Launchers SSH descargables** | cards "SSH Telepark (Linux/macOS)" y "(Windows)" en el portal → rutas `/download/ssh-telepark` y `/download/ssh-telepark-win` que generan un script con `cloudflared access ssh` (auto-descarga de `cloudflared`), leyendo la URL del túnel al vuelo |
 
 ---
 
@@ -83,10 +85,11 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 
 | Recurso | Usuarios de dominio (grupo Telepark) |
 |---------|--------------------------------------|
-| SSH | ✅ con `usuario@gdc01.local` + password de dominio |
+| SSH (LAN/Twingate) | ✅ `ssh usuario@gdc01.local@192.168.1.48` + password de dominio |
+| SSH (remoto) | ✅ vía Portal GIDAS → launcher con `cloudflared access ssh` (túnel Cloudflare) |
 | Sudo (root) | ✅ vía grupo `proy-telepark` |
 | Docker CLI | ✅ sin sudo (socket del grupo AD) |
-| Cockpit | ✅ con credenciales de dominio (PAM/SSSD) + admin vía `wheel` |
+| Cockpit | ⚠️ con credenciales de dominio (PAM/SSSD) + admin vía `wheel`; el login web por el portal devuelve solo `Negotiate` (Kerberos) |
 | Portainer | ⚠️ cuentas locales sincronizadas (password inicial `Telepark.2026!`), **no** la de dominio (limitación CE) |
 
 ### Usuarios del grupo Telepark
@@ -101,19 +104,22 @@ Además se crearon dos usuarios de dominio (`telepark` y `pnepotti`), se corrigi
 
 ### Acceso vía Portal GIDAS
 
-Se agregaron dos cards al Portal GIDAS (visible solo para el grupo `PROY-Telepark`), **proxeadas** a través del portal para que funcionen también en acceso remoto (el nombre local `telepark-dev.gidas.local` no resuelve fuera de la LAN):
+Se agregaron cards al Portal GIDAS (visibles solo para el grupo `PROY-Telepark`) para acceso remoto:
 
-| Card | Backend interno (vía proxy) |
-|------|-----------------------------|
-| **Cockpit Telepark** | `https://192.168.1.48:9090` (`/proxy/telepark-cockpit/`) |
-| **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`) |
-| **SSH Telepark** | `https://192.168.1.48:7681` (`/proxy/telepark-ssh/`) — terminal web (ttyd) con login AD |
+| Card | Acceso |
+|------|--------|
+| **Cockpit Telepark** | `https://192.168.1.48:9090` (`/proxy/telepark-cockpit/`, proxeada) |
+| **Portainer Telepark** | `https://192.168.1.48:9443` (`/proxy/telepark-portainer/`, proxeada) |
+| **SSH Telepark (Linux/macOS)** | launcher `.sh` descargable (`/download/ssh-telepark`) — vía túnel Cloudflare + cloudflared |
+| **SSH Telepark (Windows)** | launcher `.cmd` descargable (`/download/ssh-telepark-win`) — vía túnel Cloudflare + cloudflared |
 
 Para que funcionara el proxy con Cockpit/Portainer se hicieron **tres cambios**:
 
 1. **Proxy del portal con soporte WebSocket** (`portal-gidas/app/routers/proxy.py`): el proxy original (httpx) no soportaba WebSockets, imprescindibles para Cockpit (terminal) y Portainer (logs/consola). Se agregó una ruta `WebSocket` que reenvía bidireccionalmente (texto + binario) con la librería `websockets`.
 2. **nginx del CT 208**: el proxy frontal usaba HTTP/1.0 y no reenviaba los headers `Upgrade`/`Connection`, rompiendo el handshake WebSocket. Se agregó `proxy_http_version 1.1` + `proxy_set_header Upgrade`/`Connection` (map `$connection_upgrade`) + timeouts largos.
 3. **Config**: las cards pasaron de `proxy: false` (enlace directo) a `proxy: true` con la IP interna.
+
+**SSH remoto**: el terminal web (ttyd) no renderizaba el prompt en Firefox (problema client-side), así que se reemplazó por **launchers SSH nativos** que conectan por el **túnel SSH de Cloudflare** (`cloudflared access ssh` como ProxyCommand, con auto-descarga de `cloudflared`). El túnel corre como servicio `ssh-tunnel` en el CT 208, y su URL dinámica se captura en `/opt/portal-gidas/ssh-tunnel-url.txt` (el launcher la lee al vuelo).
 
 El RBAC sigue funcionando: la card solo aparece si el usuario pertenece a `PROY-Telepark`, y el proxy valida la sesión (cookie JWT) también en la conexión WebSocket.
 

@@ -65,7 +65,22 @@ ssh pnepotti@gdc01.local@192.168.1.48
 > ⚠️ El nombre corto (`ssh penalvam@192.168.1.48`) **no funciona**; siempre con `@gdc01.local`.
 > En el primer login se crea automáticamente tu carpeta `/home/<usuario>@gdc01.local`.
 
-### 3.2 Hacerse root
+### 3.2 SSH remoto (fuera de la LAN)
+
+Si estás **fuera de la oficina** (en casa), la VM no es alcanzable directamente por IP. Usá el **Portal GIDAS**:
+
+1. Entrá al portal (`https://<portal>.trycloudflare.com` o `portal.gidas.local`).
+2. Clic en **"SSH Telepark (Linux/macOS)"** o **"(Windows)"** → se descarga un launcher.
+3. Ejecutalo:
+   ```bash
+   bash ssh-telepark.sh     # Linux/macOS
+   ssh-telepark.cmd         # Windows
+   ```
+4. El launcher descarga `cloudflared` la primera vez (si no lo tenés), te pide tu usuario de dominio, y conecta por SSH vía el **túnel de Cloudflare**.
+
+> La conexión usa `cloudflared access ssh` como proxy — no necesitás configurar nada más. El usuario se ingresa igual que en LAN (`usuario@gdc01.local`).
+
+### 3.3 Hacerse root
 
 Todos los miembros del grupo Telepark tienen sudo total:
 
@@ -73,7 +88,7 @@ Todos los miembros del grupo Telepark tienen sudo total:
 sudo -i          # o sudo <comando>
 ```
 
-### 3.3 Usuarios con acceso
+### 3.4 Usuarios con acceso
 
 | Nombre | Usuario |
 |--------|---------|
