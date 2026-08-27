@@ -82,6 +82,7 @@ Para el acceso **remoto** (fuera de la LAN) se agregaron al Portal GIDAS: launch
 | 28 | **Launchers SSH descargables** | cards "SSH Telepark (Linux/macOS)" y "(Windows)" en el portal → rutas `/download/ssh-telepark` y `/download/ssh-telepark-win` que generan un script con `cloudflared access ssh` (auto-descarga de `cloudflared`), leyendo la URL del túnel al vuelo |
 | 29 | **Cockpit fuera del portal** | Cockpit no es una herramienta que necesiten los desarrolladores. Se quitó la card "Cockpit Telepark" del portal (desplegada). Cockpit se mantiene activo en la VM (`:9090`) para uso local/administrativo |
 | 30 | **Proxy dinámico de puertos** | ruta `/port/{puerto}/` en el portal (`proxy.py`) proxea **cualquier puerto** de la VM (`http://192.168.1.48:{puerto}`), con HTTP + WebSockets y RBAC (sesión del portal + grupo `PROY-Telepark`). Refactor de `_rewrite_url(url, slug)` → `_rewrite_url(url, prefix)` + atributo `proxy_prefix` para que los `Location` del backend se reescriban a `/port/{puerto}/` |
+| 31 | **IDE remoto (code-server)** | instalado `code-server` 4.135.0 (RPM) en la VM. Launcher on-demand `/usr/local/bin/code-on` (script `scripts/telepark/code-on.sh`): cada dev arranca su editor (`code-on <puerto>`) con `--auth none` (autentica el portal) y lo abre vía `https://<portal>/port/{puerto}/`. Verificado: index.html 100% relativo (`rootEndpoint: "."`) → funciona detrás del proxy strip-prefix |
 
 ---
 
@@ -94,6 +95,7 @@ Para el acceso **remoto** (fuera de la LAN) se agregaron al Portal GIDAS: launch
 | Sudo (root) | ✅ vía grupo `proy-telepark` |
 | Docker CLI | ✅ sin sudo (socket del grupo AD) |
 | Portainer | ⚠️ cuentas locales sincronizadas (password inicial `Telepark.2026!`), **no** la de dominio (limitación CE) |
+| Editor (VS Code remoto) | ✅ on-demand con `code-on <puerto>` → `https://<portal>/port/<puerto>/` (corre como el propio usuario, RBAC del portal) |
 
 ### Usuarios del grupo Telepark
 
@@ -176,5 +178,6 @@ Flujo: lee `getent group proy-telepark@GDC01.local` → loguea en Portainer (adm
 | `docs/telepark/avance.md` | Informe de avance de la VM |
 | `docs/telepark/manuales/manual-desarrollador.md` | Manual para desarrolladores |
 | `identity-management/scripts/sync-portainer-users.sh` | Sync AD → Portainer |
+| `scripts/telepark/code-on.sh` | Launcher on-demand de code-server (desplegado en `/usr/local/bin/code-on`) |
 | `/etc/sudoers.d/telepark-dev` (en la VM) | Sudo para el grupo Telepark |
 | `/etc/systemd/system/docker.socket.d/override.conf` (en la VM) | Docker socket para el grupo AD |

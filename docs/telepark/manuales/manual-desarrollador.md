@@ -29,6 +29,7 @@ Todos los integrantes del grupo Telepark tienen acceso con su **usuario de domin
 | **Docker Compose** | Orquestador de stacks multi-contenedor | Por terminal (`docker compose`) |
 | **Portainer** | Consola web para gestionar **Docker** | `https://192.168.1.48:9443` |
 | **Revisar mi app** | Ver un despliegue en el navegador (cualquier puerto) | `https://<portal>/port/<puerto>/` (ver §6.4) |
+| **Editor (VS Code remoto)** | Editar código en el navegador | `code-on <puerto>` → `https://<portal>/port/<puerto>/` (ver §7) |
 
 ### 2.2 ¿Qué es cada herramienta?
 
@@ -196,7 +197,56 @@ Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 
 ---
 
-## 7. Buenas prácticas
+## 7. Editor en el navegador (VS Code remoto)
+
+¿No querés editar código por terminal? Tenés **VS Code en el navegador**: un editor
+completo (extensiones, terminal integrado y Git) que corre en la VM y lo abrís
+desde tu navegador, sin instalar nada en tu PC.
+
+### 7.1 Arrancar el editor
+
+Conectate por SSH a la VM y ejecutá:
+
+```bash
+cd /srv/mi-proyecto    # (opcional) abrís el editor sobre tu carpeta
+code-on 8080           # arranca code-server en el puerto 8080
+```
+
+El comando te responde con la URL para abrir:
+
+```
+✅ code-server corriendo como penalvam en el puerto 8080
+   Abrí en tu navegador:  https://<url-del-portal>/port/8080/
+   Para detener:          code-on 8080 stop
+```
+
+Pegá esa URL en tu navegador (tenés que estar **logueado en el Portal**) y listo.
+
+### 7.2 Comandos
+
+| Comando | Qué hace |
+|---------|----------|
+| `code-on [puerto]` | Arranca el editor en ese puerto (default `8080`) |
+| `code-on [puerto] status` | Te muestra si está corriendo y su URL |
+| `code-on [puerto] stop` | Lo detiene |
+
+**Cada uno usa su propio puerto** para no pisarse: por ejemplo `8080` vos, `8081`
+tu compañero, etc. Si el puerto está ocupado, el comando te avisa y elegís otro.
+
+### 7.3 Reglas y seguridad
+
+- El editor corre **como tu usuario** (no como root): edita tus archivos con tu identidad.
+- Se arranca **sin password propio** (`--auth none`) porque la autenticación la
+  hace el **Portal GIDAS**: solo el grupo `PROY-Telepark` puede abrir `/port/{puerto}/`.
+- **Detenelo cuando termines** (`code-on <puerto> stop`): mientras corre, el puerto
+  queda escuchando en la red interna de la empresa.
+- Si levantás una app dentro del editor, el terminal integrado de VS Code ofrece su
+  propio reenvío de puertos; igual podés verla en el navegador con
+  `https://<portal>/port/<puerto>/` (ver §6.4).
+
+---
+
+## 8. Buenas prácticas
 
 - **No trabajes como root por defecto**: usá tu usuario de dominio y `sudo` cuando lo necesites.
 - **Datos persistentes con volúmenes**: no guardes datos importantes dentro del contenedor; usá volúmenes (`docker volume`) o bind mounts (`/srv/...`).
@@ -206,7 +256,7 @@ Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 
 ---
 
-## 8. Troubleshooting rápido
+## 9. Troubleshooting rápido
 
 | Problema | Qué hacer |
 |----------|-----------|
@@ -216,3 +266,4 @@ Esto es ideal para mostrar avances o revisar un despliegue en una reunión.
 | Un puerto ya está en uso | `sudo ss -tlnp | grep <puerto>` para ver quién lo usa |
 | No resuelve `telepark-dev.gidas.local` | Está en el DNS del MikroTik. Si tu DNS primario no es `192.168.1.1` o `192.168.1.117`, usá la IP directa |
 | Portainer no carga | `sudo systemctl status docker` y `docker ps --filter name=portainer` |
+| El editor (VS Code) no carga | Verificá que siga corriendo (`code-on <puerto> status`) y que el puerto escuche (`curl http://localhost:<puerto>`) |

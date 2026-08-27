@@ -77,6 +77,7 @@ Se creó y disponibilizó la **VM de desarrollo para el proyecto Telepark**, un 
 | `docker-buildx-plugin` | 0.36.1 | |
 | `cockpit-ws` / `cockpit-bridge` / `cockpit-system` | 356.2 | Vienen en el template Rocky 10 |
 | `portainer-ce` | tag `lts` | Contenedor Docker, `restart=always` |
+| `code-server` | 4.135.0 | RPM de Coder. IDE en el navegador, launcher on-demand `/usr/local/bin/code-on` |
 
 > **Nota sobre el repo de Docker**: Docker CE **no publica paquetes para RHEL/Rocky 10** en el repo `rhel`. Se usa el repo `centos` (`https://download.docker.com/linux/centos/$releasever/...`), que sí tiene `el10`. Este es el mismo patrón del host FreeIPA (`192.168.1.118`).
 
@@ -125,6 +126,8 @@ Todos los miembros del grupo AD `PROY-Telepark` tienen sudo total (equivalente a
 > **SSH remoto (fuera de la LAN)**: vía el Portal GIDAS. Las cards **"SSH Telepark (Linux/macOS)"** y **"(Windows)"** descargan un launcher que conecta por el **túnel de Cloudflare** (`cloudflared access ssh` como ProxyCommand, con auto-descarga de `cloudflared`). El túnel SSH corre como servicio `ssh-tunnel` en el CT 208, y su URL dinámica se captura en `/opt/portal-gidas/ssh-tunnel-url.txt` (el launcher la lee al vuelo).
 
 > **Revisar despliegues en el navegador (cualquier puerto)**: el Portal GIDAS proxea puertos de la VM vía la ruta `/port/{puerto}/`. Por ejemplo, una app en el puerto `8080` se ve en `https://<url-del-portal>/port/8080/`. Requiere login en el Portal y pertenecer a `PROY-Telepark`. Soporta HTTP y WebSockets. Ver manual del desarrollador §6.4.
+
+> **Editor en el navegador (VS Code remoto)**: `code-server` 4.135.0 instalado en la VM + launcher on-demand `/usr/local/bin/code-on`. Cada dev arranca su editor (`code-on <puerto>`) y lo abre vía `https://<portal>/port/<puerto>/`. Corre como el propio usuario, con `--auth none` (autentica el portal). Ver manual del desarrollador §7.
 
 ### Acceso a Docker (sin sudo)
 
@@ -218,6 +221,11 @@ docker run -d --name portainer --restart=always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v portainer_data:/data \
   portainer/portainer-ce:lts
+
+# code-server (IDE en el navegador)
+curl -fsSL -o /tmp/code-server.rpm https://github.com/coder/code-server/releases/download/v4.135.0/code-server-4.135.0-amd64.rpm
+rpm -i /tmp/code-server.rpm
+install -m 0755 scripts/telepark/code-on.sh /usr/local/bin/code-on
 ```
 
 ### 5.4 Dominio AD + sudo
