@@ -14,6 +14,62 @@ ldap:
   group_attribute: "memberOf"
 
 tools:
+  # ── Desarrollo Telepark (orden de importancia) ──────────────────────
+  - name: "SSH Telepark (Linux/macOS)"
+    url: "/download/ssh-telepark"
+    icon: "fas fa-terminal"
+    description: "Descargar launcher SSH — vía túnel Cloudflare (descarga cloudflared solo)"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
+
+  - name: "SSH Telepark (Windows)"
+    url: "/download/ssh-telepark-win"
+    icon: "fas fa-keyboard"
+    description: "Descargar launcher SSH para Windows — vía túnel Cloudflare (descarga cloudflared solo)"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
+
+  - name: "Portainer Telepark"
+    url: "https://192.168.1.48:9443"
+    icon: "fas fa-cubes"
+    description: "Gestión de contenedores Docker (Telepark)"
+    proxy: true
+    slug: "telepark-portainer"
+    groups:
+      - "PROY-Telepark"
+
+  - name: "Navegador"
+    url: "/port/"
+    icon: "fas fa-globe"
+    description: "Abrí una app de la VM en el navegador (ingresá el puerto)"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
+
+  - name: "IDE (VS Code)"
+    url: "/port/8080/"
+    icon: "fas fa-code"
+    description: "Editor en el navegador — corré code-on 8080 en la VM"
+    proxy: false
+    groups:
+      - "PROY-Telepark"
+
+  # ── Gestión de proyectos y monitoreo ────────────────────────────────
+  - name: "Redmine"
+    url: "/redmine/"
+    icon: "fas fa-tasks"
+    description: "Gestión de proyectos (acceso via tunnel)"
+    proxy: false
+    groups:
+      - "G-Direccion"
+      - "G-Coordinadores"
+      - "G-Becarios"
+      - "G-Graduados"
+      - "G-Pasantes"
+      - "PROY-Telepark"
+
   - name: "GitLab"
     url: "/gitlab/"
     icon: "fab fa-gitlab"
@@ -26,18 +82,7 @@ tools:
       - "G-Graduados"
       - "G-Pasantes"
       - "G-Externos"
-
-  - name: "Redmine"
-    url: "/redmine/"
-    icon: "fas fa-tasks"
-    description: "Gestión de proyectos (acceso via tunnel)"
-    proxy: false
-    groups:
-      - "G-Direccion"
-      - "G-Coordinadores"
-      - "G-Becarios"
-      - "G-Graduados"
-      - "G-Pasantes"
+      - "PROY-Telepark"
 
   - name: "Grafana"
     url: "/grafana/"
@@ -47,7 +92,9 @@ tools:
     groups:
       - "G-Direccion"
       - "G-Coordinadores"
+      - "PROY-Telepark"
 
+  # ── Infraestructura ─────────────────────────────────────────────────
   - name: "Proxmox VE"
     url: "https://192.168.1.14:8006"
     icon: "fas fa-server"

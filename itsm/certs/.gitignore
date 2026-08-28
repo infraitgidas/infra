@@ -1,0 +1,4 @@
+# Certificados — NUNCA commitear claves privadas
+# Generar con: scripts/generate-certs.sh
+*.crt
+*.key

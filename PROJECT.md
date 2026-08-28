@@ -6,13 +6,14 @@
 |---|---------|-------------|-----------|------|------------|
 | 1 | Gestor de proyecto | Redmine | `redmine/` | `feature/redmine` | 📦 Archivado ✅ |
 | 2 | VCS onpremise | GitLab | `gitlab/` | `feature/gitlab` | 📦 Archivado ✅ |
-| 3 | Gestor CMDB | NetBox | `cmdb/` | `feature/cmdb` | 🛠️ Implementación ✅ |
-| 4 | Gestor ITSM | GLPI | `itsm/` | `feature/itsm` | 🛠️ Implementación ✅ |
+| 3 | Gestor CMDB | NetBox | `cmdb/` | `feat/herramientas-pendientes` | 📋 Planificado — SDD ✅, código NO implementado (`cmdb/` vacío) |
+| 4 | Gestor ITSM | GLPI | `itsm/` | `feat/herramientas-pendientes` | ✅ Operativo — CT 212 + DNS + portal (LDAP/email pendientes) |
 | 5 | Identidad AD+FreeIPA | identity-dashboard | `identity-dashboard/` | `main` | 🛠️ Implementación ✅ |
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
 | 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` + `fix/tunnel-monitor-url-dinamica` | 🛠️ Implementado — Tunnel + nginx + 3 tools + Fix falsos positivos |
 | 9 | Docker Desktop PCs GIDAS | Docker Desktop (WSL2) | `pcs/docker/` | `feat/docker-pcs-gidas` | 🛠️ Implementación ⚠️ PARCIAL (1/5) |
+| 10 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | 🔍 Exploración — alcance recomendado: progresivo por fases (config base → deploy NetBox → provisioning) |
 
 ## Leyenda de Estados SDD
 
@@ -77,23 +78,33 @@
 
 ---
 
-### Feature 3: Gestor CMDB
+### Feature 3: Gestor CMDB — NetBox
 
 - **Objetivo**: Implementar una CMDB (Configuration Management Database) para inventario de infraestructura
 - **Componentes**: NetBox 4.x (Docker Compose), PostgreSQL 15, Redis 7, scripts discovery (Proxmox, Mikrotik, LDAP)
-- **Estado SDD**: 🛠️ Implementación
-- **Tareas**: 14/14 completadas (apply)
-- **Tareas Completadas**: Deploy stack, scripts base, discovery scripts, documentación
+- **Estado SDD**: 📋 Planificado — SDD completo (exploration/proposal/design/specs), código **NO implementado** (`cmdb/` vacío, verificado 2026-08-05)
+- **Pendiente**: Implementar el stack según `openspec/changes/cmdb/design.md` (rama `feat/herramientas-pendientes`)
 
 ---
 
 ### Feature 4: Gestor ITSM — GLPI
 
 - **Objetivo**: Implementar un sistema ITSM (IT Service Management) para gestión de incidentes, cambios y problemas
-- **Componentes**: GLPI + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
-- **Estado SDD**: 🛠️ Implementación
-- **Tareas**: 18 tareas en 6 fases
-- **Tareas Completadas**: F1 (stack), F2 (post-deploy), F3 (backup/restore), F4 (integraciones), F5 (LDAP), F6 (verificación)
+- **Componentes**: GLPI 10.0.26 (imagen oficial `glpi/glpi:10.0`) + MariaDB + nginx en Docker Compose, scripts backup/restore/integraciones/LDAP
+- **Estado SDD**: ✅ **OPERATIVO** — deployado en CT 212 (192.168.1.47), DNS MikroTik, portal y API verificados E2E (ticket id=1). SDD completo (4 specs, 18 tareas). Actualizado 2026-08-06
+- **Tareas Completadas**:
+  - Migración a imagen oficial `glpi/glpi:10.0` (la imagen `diouxx/glpi` no existe)
+  - CT 212 Rocky 9 (2c/4G/20G), Docker CE + Compose, stack en `/opt/glpi`, 3 contenedores healthy
+  - DNS MikroTik `glpi.gidas.local → 192.168.1.47` + `/etc/hosts` CT 208 corregido
+  - HTTPS con cert autofirmado SAN DNS+IP, nginx 301 http→https
+  - API habilitada: App-Token (SOPS), 2 API clients por IP range, E2E verificado
+  - Alta en portal (`proxy: true`, G-Direccion/G-Coordinadores), reverse proxy 200
+  - Backup `backup.sh` + zstd probado (SUCCESS) + crons CT 212 (cron.php 5min, backup dom 03:00)
+  - Config core: `url_base`, `es_AR`, tz Buenos Aires, `enable_api=1`
+  - 7 bugs corregidos documentados en `docs/itsm/avance.md` e `openspec/changes/itsm/informe-cambios.md`
+- **Pendiente**: LDAP (decidir AD GDC01 vs FreeIPA — FreeIPA no existe en la LAN), SMTP (no hay servidor de correo), integraciones Redmine/GitLab (tokens PENDIENTE)
+- **Archivos**: `itsm/`, `secrets/glpi.yaml`, `docs/itsm/avance.md`
+- **Archivo SDD**: `openspec/changes/itsm/`
 
 ---
 
@@ -248,12 +259,26 @@
 
 ---
 
+### Feature 10: Automatización — Ansible
+
+- **Objetivo**: Automatización de la infraestructura (deploy de stacks, config drift, orquestación)
+- **Componentes**: Inventario YAML por grupos, ansible.cfg, playbooks de config base + deploy reproducible (NetBox como piloto), SOPS integrado
+- **Estado SDD**: 🔍 Exploración — exploration en `openspec/changes/ansible/exploration.md` (2026-08-06). Ansible core 2.16.16 ya instalado en host de trabajo
+- **Enfoque recomendado (progresivo por fases)**:
+  - **F1 Config base**: sync `/etc/hosts` (arregla drift real del CT 208), health checks de los 7 stacks, verificación de paquetes/utilidades, sync de crontabs — todo no-destructivo
+  - **F2 Deploy reproducible**: playbook de deploy de UN stack greenfield — NetBox (Feature 3) como piloto natural (`cmdb/` vacío, SDD listo)
+  - **F3 Provisioning Proxmox** (API) + evaluar MikroTik v6/Windows (probablemente fuera de alcance)
+- **Decisiones clave**: mantener SOPS+age (NO ansible-vault); no migrar los 7 stacks existentes de una (riesgo de regresión); Windows/AD fuera del alcance inicial
+- **Pendiente**: Proposal (`sdd-propose`) tras confirmar control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows
+
+---
+
 ## Pendientes y Especificaciones (consolidado 2026-08-28)
 
-> Este documento conserva TODA la información de las 9 features (Portal, LibreNMS,
-> Dominio gidas.frlp, cluster pve-gidas y Docker Desktop PCs). Los pendientes abiertos
-> se listan aquí para no perder nada; el detalle queda en sus respectivos
-> `openspec/changes/`.
+> Este documento conserva TODA la información de las 10 features (Portal, LibreNMS,
+> Dominio gidas.frlp, cluster pve-gidas, Docker Desktop PCs, GLPI, NetBox y Ansible).
+> Los pendientes abiertos se listan aquí para no perder nada; el detalle queda en los
+> respectivos `openspec/changes/` y en `docs/herramientas-pendientes.md`.
 
 - **Portal GIDAS (efecto SGM)**: verificación E2E con usuario AD real de grupo
   `G-Direccion`/`G-Coordinadores` logueado en el portal (infra 100% verificada por
@@ -265,9 +290,18 @@
   validación cruzada.
 - **Docker Desktop PCs**: habilitar virtualización en BIOS de .52/.53, instalar
   Docker en ellas, verificar .50 y habilitar acceso remoto en .30.
+- **GLPI (Feature 4)**: verificar LDAP (decidir AD GDC01 vs FreeIPA — FreeIPA no
+  existe en la LAN), SMTP (no hay servidor de correo), integraciones Redmine/GitLab
+  (tokens PENDIENTES). Detalle: `docs/itsm/avance.md` y `openspec/changes/itsm/`.
+- **NetBox (Feature 3, CMDB)**: implementar el stack NetBox 4.x según
+  `openspec/changes/cmdb/design.md` (`cmdb/` está vacío; solo existe el SDD). Pasa a
+  ser el piloto natural de Ansible F2.
+- **Ansible (Feature 10)**: escribir la `proposal` (`sdd-propose`) tras confirmar:
+  control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows.
+  Exploration: `openspec/changes/ansible/exploration.md`.
 
 ---
 
-*Última actualización: 2026-08-28* — Merge a `main`: se preservó la información de las
-9 features (Portal GIDAS con SGM-GIDAS, LibreNMS, dominio gidas.frlp, cluster pve-gidas
-y Docker Desktop PCs) sin perder avances de ninguna rama.
+*Última actualización: 2026-08-28* — Merge a `main` de la rama `feat/herramientas-pendientes`
+(herramientas pendientes: GLPI operativo, NetBox planificado, Ansible exploración) + conservación
+de las 10 features previas. Pendientes persistidos como especificación para continuar luego.
