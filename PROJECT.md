@@ -12,7 +12,8 @@
 | 6 | Portal de Acceso Unificado | Portal custom (FastAPI+LDAP) | `portal-gidas/` | `feat/portal-access-remoto` | ✅ Implementado |
 | 7 | Monitor de Red | LibreNMS | `librenms/` | — | 🛠️ Operativo con fixes |
 | 8 | Dominio gidas.frlp | Acceso Remoto + Portal | `site-tunnel-portal/` | `feat/dominio-gidas-frlp` + `fix/tunnel-monitor-url-dinamica` | 🛠️ Implementado — Tunnel + nginx + 3 tools + Fix falsos positivos |
-| 9 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | 🔍 Exploración — alcance recomendado: progresivo por fases (config base → deploy NetBox → provisioning) |
+| 9 | Docker Desktop PCs GIDAS | Docker Desktop (WSL2) | `pcs/docker/` | `feat/docker-pcs-gidas` | 🛠️ Implementación ⚠️ PARCIAL (1/5) |
+| 10 | Automatización | Ansible | `ansible/` | `feat/herramientas-pendientes` | 🔍 Exploración — alcance recomendado: progresivo por fases (config base → deploy NetBox → provisioning) |
 
 ## Leyenda de Estados SDD
 
@@ -107,20 +108,6 @@
 
 ---
 
-### Feature 9: Automatización — Ansible
-
-- **Objetivo**: Automatización de la infraestructura (deploy de stacks, config drift, orquestación)
-- **Componentes**: Inventario YAML por grupos, ansible.cfg, playbooks de config base + deploy reproducible (NetBox como piloto), SOPS integrado
-- **Estado SDD**: 🔍 Exploración — exploration en `openspec/changes/ansible/exploration.md` (2026-08-06). Ansible core 2.16.16 ya instalado en host de trabajo
-- **Enfoque recomendado (progresivo por fases)**:
-  - **F1 Config base**: sync `/etc/hosts` (arregla drift real del CT 208), health checks de los 7 stacks, verificación de paquetes/utilidades, sync de crontabs — todo no-destructivo
-  - **F2 Deploy reproducible**: playbook de deploy de UN stack greenfield — NetBox (Feature 3) como piloto natural (`cmdb/` vacío, SDD listo)
-  - **F3 Provisioning Proxmox** (API) + evaluar MikroTik v6/Windows (probablemente fuera de alcance)
-- **Decisiones clave**: mantener SOPS+age (NO ansible-vault); no migrar los 7 stacks existentes de una (riesgo de regresión); Windows/AD fuera del alcance inicial
-- **Pendiente**: Proposal (`sdd-propose`) tras confirmar control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows
-
----
-
 ### Feature 5: Identidad AD+FreeIPA — identity-dashboard
 
 - **Objetivo**: Herramienta unificada CLI + TUI para gestión de usuarios en Active Directory y FreeIPA
@@ -161,6 +148,11 @@
   - Grafana AD directo (LDAP configurado y verificado)
   - Proxmox realm LDAP (`gidas-ldap`, 17 usuarios sincronizados)
   - Authentik eliminado, Homer reemplazado, VM 207 destruida
+  - **Acceso a SGM-GIDAS desde el portal**: card → `/sgm-gidas/` (tunnel Cloudflare),
+    sin tocar la LAN (`sgm.gidas.local`). Segundo build del frontend (base `/sgm-gidas/`)
+    + contenedor `frontend_sgm` formalizado en el compose. Ver
+    `docs/runbooks/sgm-portal-tunnel-hotfix.md` y `docs/runbooks/sgm-despliegue-vm111.md`
+    (Cambio: `openspec/changes/sgm-acceso-portal/`). 2026-08-28
 - **Pendientes**:
   - Twingate resource para `portal.gidas.local` (acceso remoto)
   - Link en Drupal gidas.frlp.utn.edu.ar
@@ -239,4 +231,77 @@
 
 ---
 
-*Última actualización: 2026-07-30 (02:00)* — Fix #9: Monitor integral con 19 servicios + DOWNTIME/RESOLUCION
+### Feature 9: Docker Desktop en PCs del Dominio GIDAS
+
+- **Objetivo**: Instalar Docker Desktop (WSL2 backend) en las 5 PCs del dominio GDC01 (.30, .50, .51, .52, .53), con permisos de Domain Users
+- **Componentes**: Docker Desktop v29.7.2, WSL2 backend, GPO WinRM, scripts PowerShell/Bash
+- **Estado SDD**: 🛠️ Implementación ⚠️ PARCIAL — 1/5 completa
+- **Estado por PC**:
+  - .51 (GIDAS-002): ✅ Docker v27.5.1 + hello-world OK + Domain Users
+  - .50 (gidas-37710): ⚠️ Docker instalado, daemon no arranca (WSL2 kernel update falló)
+  - .52 (gidas-desktop-854): ❌ BLOCKED — virtualización deshabilitada en BIOS
+  - .53 (GIDAS-003): ❌ BLOCKED — virtualización deshabilitada en BIOS
+  - .30 (direccion): ❌ INACCESIBLE — sin SSH/WinRM
+- **Tareas Completadas**:
+  - Scripts de instalación idempotentes (`pcs/docker/install-docker.ps1`, `enable-winrm.ps1`, `deploy-docker.sh`)
+  - Runbook en español (`docs/runbooks/deploy-docker-pcs.md`)
+  - GPO `Enable-WinRM-ForManagement` creada en DC1-GIDAS
+  - WinRM habilitado en .51, .52, .53, .50
+  - Docker Desktop instalado y verificado en .51 (hello-world OK)
+  - Domain Users agregado a docker-users en .51 y .50
+- **Pendiente**:
+  - Habilitar BIOS virtualización en .52 y .53
+  - Instalar Docker en .52 y .53 tras habilitar BIOS
+  - Verificar estado de .50 (puede estar en Windows Update)
+  - Habilitar acceso remoto en .30
+- **Archivos**: `pcs/docker/`, `docs/runbooks/deploy-docker-pcs.md`
+- **Informe de cambios**: `openspec/changes/docker-pcs/informe-cambios.md`
+
+---
+
+### Feature 10: Automatización — Ansible
+
+- **Objetivo**: Automatización de la infraestructura (deploy de stacks, config drift, orquestación)
+- **Componentes**: Inventario YAML por grupos, ansible.cfg, playbooks de config base + deploy reproducible (NetBox como piloto), SOPS integrado
+- **Estado SDD**: 🔍 Exploración — exploration en `openspec/changes/ansible/exploration.md` (2026-08-06). Ansible core 2.16.16 ya instalado en host de trabajo
+- **Enfoque recomendado (progresivo por fases)**:
+  - **F1 Config base**: sync `/etc/hosts` (arregla drift real del CT 208), health checks de los 7 stacks, verificación de paquetes/utilidades, sync de crontabs — todo no-destructivo
+  - **F2 Deploy reproducible**: playbook de deploy de UN stack greenfield — NetBox (Feature 3) como piloto natural (`cmdb/` vacío, SDD listo)
+  - **F3 Provisioning Proxmox** (API) + evaluar MikroTik v6/Windows (probablemente fuera de alcance)
+- **Decisiones clave**: mantener SOPS+age (NO ansible-vault); no migrar los 7 stacks existentes de una (riesgo de regresión); Windows/AD fuera del alcance inicial
+- **Pendiente**: Proposal (`sdd-propose`) tras confirmar control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows
+
+---
+
+## Pendientes y Especificaciones (consolidado 2026-08-28)
+
+> Este documento conserva TODA la información de las 10 features (Portal, LibreNMS,
+> Dominio gidas.frlp, cluster pve-gidas, Docker Desktop PCs, GLPI, NetBox y Ansible).
+> Los pendientes abiertos se listan aquí para no perder nada; el detalle queda en los
+> respectivos `openspec/changes/` y en `docs/herramientas-pendientes.md`.
+
+- **Portal GIDAS (efecto SGM)**: verificación E2E con usuario AD real de grupo
+  `G-Direccion`/`G-Coordinadores` logueado en el portal (infra 100% verificada por
+  curl; falta probar el render de la card con login). Runbook:
+  `docs/runbooks/sgm-portal-tunnel-hotfix.md`.
+- **LibreNMS**: tabular pendientes Fase 8 (usuarios AD, dispositivos status=0,
+  SNMP traps/syslog, backup scheduleado, heartbeat) y merge de `feat/monitoreo-red`.
+- **Cluster pve-gidas**: merge de la rama `gitlab-gidas` una vez completada la
+  validación cruzada.
+- **Docker Desktop PCs**: habilitar virtualización en BIOS de .52/.53, instalar
+  Docker en ellas, verificar .50 y habilitar acceso remoto en .30.
+- **GLPI (Feature 4)**: verificar LDAP (decidir AD GDC01 vs FreeIPA — FreeIPA no
+  existe en la LAN), SMTP (no hay servidor de correo), integraciones Redmine/GitLab
+  (tokens PENDIENTES). Detalle: `docs/itsm/avance.md` y `openspec/changes/itsm/`.
+- **NetBox (Feature 3, CMDB)**: implementar el stack NetBox 4.x según
+  `openspec/changes/cmdb/design.md` (`cmdb/` está vacío; solo existe el SDD). Pasa a
+  ser el piloto natural de Ansible F2.
+- **Ansible (Feature 10)**: escribir la `proposal` (`sdd-propose`) tras confirmar:
+  control node (.107 vs CT dedicado), NetBox como piloto F2, y alcance MikroTik/Windows.
+  Exploration: `openspec/changes/ansible/exploration.md`.
+
+---
+
+*Última actualización: 2026-08-28* — Merge a `main` de la rama `feat/herramientas-pendientes`
+(herramientas pendientes: GLPI operativo, NetBox planificado, Ansible exploración) + conservación
+de las 10 features previas. Pendientes persistidos como especificación para continuar luego.
