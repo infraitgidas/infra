@@ -136,6 +136,11 @@
   - Grafana AD directo (LDAP configurado y verificado)
   - Proxmox realm LDAP (`gidas-ldap`, 17 usuarios sincronizados)
   - Authentik eliminado, Homer reemplazado, VM 207 destruida
+  - **Acceso a SGM-GIDAS desde el portal**: card → `/sgm-gidas/` (tunnel Cloudflare),
+    sin tocar la LAN (`sgm.gidas.local`). Segundo build del frontend (base `/sgm-gidas/`)
+    + contenedor `frontend_sgm` formalizado en el compose. Ver
+    `docs/runbooks/sgm-portal-tunnel-hotfix.md` y `docs/runbooks/sgm-despliegue-vm111.md`
+    (Cambio: `openspec/changes/sgm-acceso-portal/`). 2026-08-28
 - **Pendientes**:
   - Twingate resource para `portal.gidas.local` (acceso remoto)
   - Link en Drupal gidas.frlp.utn.edu.ar
@@ -214,4 +219,4 @@
 
 ---
 
-*Última actualización: 2026-07-30 (02:00)* — Fix #9: Monitor integral con 19 servicios + DOWNTIME/RESOLUCION
+*Última actualización: 2026-08-28 (10:30)* — Habilitación de SGM-GIDAS desde el Portal GIDAS (`/sgm-gidas/`, tunnel Cloudflare) sin tocar la LAN; formalización del servicio `frontend_sgm` en el compose.
